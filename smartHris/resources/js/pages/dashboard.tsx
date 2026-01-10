@@ -17,7 +17,7 @@ export default function Dashboard() {
                     </div>
                 ) : (
                     <div>
-                        <h1 className="text-black text-2xl font-bold">Selamat Datang, {auth.user.name}!</h1>
+                        <h1 className="text-black text-2xl font-bold"> </h1>
                     </div>
                 )}
             </div>
