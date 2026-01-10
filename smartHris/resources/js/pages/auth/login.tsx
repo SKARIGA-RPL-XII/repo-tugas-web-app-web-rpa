@@ -26,36 +26,53 @@ export default function Login({
         <AuthLayout>
             <Head title="Login" />
 
-            <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
+                <div className="login-layout">
                 {/* LEFT IMAGE */}
-                <div className="hidden md:block relative">
+                <div className="login-left">
                     <img
-                        src="/images/img_kantor.jpg"
+                        src="/images/img_login.jpg"
                         alt="Office"
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className="login-left-image"
                     />
-                    <div className="absolute inset-0 bg-green-900/40" />
+
+                    <div className="login-left-overlay" />
+
+                    {/* TEXT OVER IMAGE */}
+                    <div className="login-left-content">
+                        <p className="login-left-footer">
+                            Human Resource © 2026 All rights reserved.
+                        </p>
+                        <h2 className="login-left-title">
+                            Masuki Era Baru <br />
+                            Absensi Digital Karyawan
+                        </h2>
+
+                    </div>
                 </div>
 
+
+
                 {/* RIGHT FORM */}
-                <div className="flex items-center justify-center px-8">
-                    <div className="w-full max-w-[515px] flex flex-col gap-6">
-                       <img src="images/logos/logo_kantor.png" 
-                       alt="HRIS Logo"
-                       className='h-10 w-auto'
+                <div className="login-right">
+                    <div className="login-frame">
+                       {/* LOGO */}
+                        <img
+                            src="/images/logos/logo_kantor.png"
+                            alt="HRIS Logo"
+                            className="login-logo"
                         />
-                        <div>
-                            <p className="text-lg font-semibold text-gray-900">HRIS</p>
-                            <p className="text-xs text-gray-500">
-                                Human Resource Information System
-                            </p>
-                        </div>
+
 
                         {/* TITLE */}
-                        <h1 className="text-2xl font-semibold text-gray-900">
-                            Selamat Datang di <br /> Human Resource
+                        <h1 className="login-title">
+                            Selamat Datang di
                         </h1>
-                        <p className="mt-2 text-sm text-gray-500">
+                        <h2 className="login-title-main">
+                            Human Resource
+                        </h2>
+
+                        {/* SUBTITLE */}
+                        <p className="login-subtitle">
                             Sistem Absensi Digital yang Terintegrasi.
                         </p>
 
@@ -63,18 +80,18 @@ export default function Login({
                         <Form
                             {...store.form()}
                             resetOnSuccess={['password']}
-                            className="mt-8 flex flex-col gap-6"
+                            className="login-form"
                         >
                             {({ processing, errors }) => (
                                 <>
-                                    <div className='flex flex-col gap-2'>
+                                    <div className="login-field">
                                         <Label htmlFor="email">
                                             Username{' '}
                                             <span className="text-red-500">
                                                 *
                                             </span>
                                         </Label>
-                                        <Input
+                                        <Input className='input-username'
                                             id="email"
                                             name="email"
                                             placeholder="Masukkan Username"
@@ -83,21 +100,23 @@ export default function Login({
                                         <InputError message={errors.email} />
                                     </div>
 
-                                    <div className='flex flex-col gap-2'>
+                                    <div className="login-field-password">
                                         <Label htmlFor="password">
                                             Password{' '}
                                             <span className="text-red-500">
                                                 *
                                             </span>
                                         </Label>
-                                        <Input
+                                        <Input className='input-password'
                                             id="password"
                                             type="password"
                                             name="password"
                                             placeholder="Masukkan Password"
                                             tabIndex={2}
                                         />
-                                        <InputError message={errors.password} />
+                                        <InputError
+                                            message={errors.password}
+                                        />
                                     </div>
 
                                     <div className="flex items-center justify-between text-sm">
@@ -117,11 +136,9 @@ export default function Login({
                                                 Lupa Password?
                                             </TextLink>
                                         )}
-                                    </div>
-
-                                    <Button
+                                    </div>  <Button
                                         type="submit"
-                                        className="mt-4 w-full h-12 bg-green-900 hover:bg-green-800 text-white"
+                                        className="mt-4 h-12 w-full bg-green-900 text-white hover:bg-green-800"
                                         disabled={processing}
                                     >
                                         {processing && <Spinner />}
@@ -130,16 +147,6 @@ export default function Login({
                                 </>
                             )}
                         </Form>
-
-                        {canRegister && (
-                            <div className="mt-4 text-center text-sm text-muted-foreground">
-                                Belum punya akun?{' '}
-                                <TextLink href={register()}>
-                                    Daftar
-                                </TextLink>
-                            </div>
-                        )}
-
                         {status && (
                             <div className="mt-4 text-center text-sm font-medium text-green-600">
                                 {status}
