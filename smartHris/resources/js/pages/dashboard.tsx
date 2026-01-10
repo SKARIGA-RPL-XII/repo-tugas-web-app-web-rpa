@@ -1,10 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head} from '@inertiajs/react';
 
 export default function Dashboard() {
-    const { auth } = usePage<PageProps>().props;
-    const userRole = auth.user.role;
 
     const attendanceData = [
         { date: '1 Mei', value: 16 },
@@ -21,7 +18,6 @@ export default function Dashboard() {
         <AppLayout>
             <Head title="Dashboard" />
 
-            {/* Container: Menggunakan w-full dan px yang lebih besar agar tidak mepet layar */}
             <div className="min-h-screen w-full bg-gray-50 px-4 py-8 md:px-8 lg:px-12">
                 
                 <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -31,22 +27,18 @@ export default function Dashboard() {
                         </h1>
                         <p className="text-gray-500">Berikut adalah ringkasan aktivitas absensi karyawan Anda.</p>
                     </div>
-
-                    {/* Notification and Profile Wrapper */}
+                    
                     <div className="mt-4 md:mt-0 flex items-center space-x-4">
-                        {/* Notification Bell */}
                         <button className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-100 transition hover:bg-gray-50">
                             <svg className="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            {/* Red Dot Notification */}
                             <span className="absolute right-3.5 top-3.5 flex h-2.5 w-2.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                             </span>
                         </button>
 
-                        {/* Profile Pill */}
                         <button className="flex items-center space-x-3 rounded-full bg-white px-4 py-2 shadow-sm ring-1 ring-gray-100 transition hover:bg-gray-50">
                             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-gray-500">
                                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
@@ -61,9 +53,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Stats Cards: Menambah gap dan margin bottom */}
                 <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {/* Total Karyawan */}
                     <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
                         <div className="flex items-center space-x-4">
                             <div className="rounded-lg bg-blue-100 p-4">
@@ -78,7 +68,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Hadir Hari Ini */}
                     <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
                         <div className="flex items-center space-x-4">
                             <div className="rounded-lg bg-green-100 p-4">
@@ -93,7 +82,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Pengajuan Cuti */}
                     <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
                         <div className="flex items-center space-x-4">
                             <div className="rounded-lg bg-orange-100 p-4">
@@ -108,7 +96,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Sanksi Aktif */}
                     <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
                         <div className="flex items-center space-x-4">
                             <div className="rounded-lg bg-red-100 p-4">
@@ -124,9 +111,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Charts Section: Menambah gap antar chart */}
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                    {/* Rekap Absensi Mingguan */}
                     <div className="rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
                         <h2 className="mb-6 text-xl font-bold text-gray-900 text-center lg:text-left">
                             Rekap Absensi Mingguan
@@ -151,7 +136,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Status Kehadiran Karyawan */}
                     <div className="rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
                         <h2 className="mb-6 text-xl font-bold text-gray-900 text-center lg:text-left">
                             Status Kehadiran Karyawan
@@ -159,7 +143,6 @@ export default function Dashboard() {
                         <div className="flex items-center justify-center h-72">
                             <div className="relative">
                                 <svg width="220" height="220" viewBox="0 0 220 220">
-                                    {/* Donut chart segments */}
                                     <circle cx="110" cy="110" r="70" fill="none" stroke="#10b981" strokeWidth="40" 
                                             strokeDasharray="220 220" transform="rotate(-90 110 110)"/>
                                     <circle cx="110" cy="110" r="70" fill="none" stroke="#3b82f6" strokeWidth="40" 
@@ -172,17 +155,14 @@ export default function Dashboard() {
                                             strokeDasharray="44 220" strokeDashoffset="-308" transform="rotate(-90 110 110)"/>
                                     <circle cx="110" cy="110" r="70" fill="none" stroke="#f59e0b" strokeWidth="40" 
                                             strokeDasharray="33 220" strokeDashoffset="-352" transform="rotate(-90 110 110)"/>
-                                    
-                                    {/* Center circle */}
+
                                     <circle cx="110" cy="110" r="55" fill="#e0f2f1"/>
                                     
-                                    {/* Center text */}
                                     <text x="110" y="105" fontSize="14" fontWeight="600" fill="#000" textAnchor="middle">Tepat Waktu</text>
                                     <text x="110" y="125" fontSize="20" fontWeight="bold" fill="#000" textAnchor="middle">50%</text>
                                 </svg>
                             </div>
                             
-                            {/* Legend */}
                             <div className="ml-8 space-y-3">
                                 <LegendItem color="bg-green-500" label="Hadir" />
                                 <LegendItem color="bg-red-500" label="Alpha" />
@@ -198,7 +178,6 @@ export default function Dashboard() {
     );
 }
 
-// Komponen Kecil untuk Legend agar kode lebih bersih
 function LegendItem({ color, label }: { color: string, label: string }) {
     return (
         <div className="flex items-center space-x-2">
