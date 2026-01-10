@@ -14,7 +14,6 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
             <Sidebar />
 
             <main className="flex-1 overflow-y-auto p-6">
-                // resources/js/layouts/app-layout.tsx
                 {breadcrumbs && breadcrumbs.length > 0 && (
                     <div className="mb-4">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />

@@ -34,7 +34,6 @@ export default function Sidebar() {
                             <Link href="/dashboard">Dashboard</Link>
                         </Button>
 
-                        {/* Contoh menu berdasarkan Role untuk testing */}
                         {auth.user.role === 'admin' && (
                             <Button
                                 variant="ghost"
