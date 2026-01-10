@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { PageProps } from '@/types';
+import { Icon } from '@iconify/react';
 import { Link, usePage } from '@inertiajs/react';
 
 export default function Sidebar() {
@@ -9,7 +10,7 @@ export default function Sidebar() {
         'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors';
 
     return (
-        <aside className="flex h-screen w-64 flex-col border-r bg-[#0D4838] p-4 text-white">
+        <aside className="flex h-screen w-64 flex-col border-r bg-[#0D4838] p-4 text-white overflow-hidden">
             <div className="mb-8 flex justify-center px-2">
                 <img
                     src="/asset/fullputih.png"
@@ -27,16 +28,13 @@ export default function Sidebar() {
                                 asChild
                                 className={navButtonStyle}
                             >
-                                <Link href="/dashboard">Dashboard</Link>
-                            </Button>
-
-                            <Button
-                                variant="ghost"
-                                asChild
-                                className={navButtonStyle}
-                            >
-                                <Link href="/admin/settings">
-                                    Data Karyawan
+                                <Link href="/dashboard">
+                                    <Icon
+                                        icon="material-symbols:dashboard-rounded"
+                                        width="20"
+                                        height="20"
+                                    />
+                                    <span> Dashboard </span>
                                 </Link>
                             </Button>
 
@@ -46,18 +44,107 @@ export default function Sidebar() {
                                 className={navButtonStyle}
                             >
                                 <Link href="/admin/settings">
-                                    Absensi Karyawan
+                                    <Icon
+                                        icon="f7:person-2-fill"
+                                        width="56"
+                                        height="56"
+                                    />
+                                    <span>Data Karyawan</span>
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/admin/settings">
+                                    <Icon
+                                        icon="streamline:office-worker-remix"
+                                        width="14"
+                                        height="14"
+                                    />
+                                    <span> Absensi Karyawan</span>
                                 </Link>
                             </Button>
                         </>
                     ) : (
-                        <Button
-                            variant="ghost"
-                            asChild
-                            className={navButtonStyle}
-                        >
-                            <Link href="/dashboard">My Dashboard</Link>
-                        </Button>
+                        <>
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/dashboard">
+                                    <Icon
+                                        icon="solar:home-2-bold"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    <span>Home</span>
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/absen">
+                                    <Icon
+                                        icon="fluent:task-list-square-16-filled"
+                                        width="16"
+                                        height="16"
+                                    />
+                                    <span>Absen</span>
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/absen/riwayat">
+                                    <Icon
+                                        icon="mage:note-text-fill"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    <span>Riwayat Absen</span>
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/pelanggaran">
+                                    <Icon
+                                        icon="mingcute:warning-fill"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    <span>Pelanggaran</span>
+                                </Link>
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                asChild
+                                className={navButtonStyle}
+                            >
+                                <Link href="/cuti">
+                                    <Icon
+                                        icon="mage:star-moving-fill"
+                                        width="24"
+                                        height="24"
+                                    />
+                                    <span>Cuti</span>
+                                </Link>
+                            </Button>
+                        </>
                     )}
                 </nav>
             </div>
