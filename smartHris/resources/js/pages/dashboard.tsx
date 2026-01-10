@@ -12,14 +12,12 @@ export default function Dashboard() {
             
             <div className="p-4">
                 {userRole === 'admin' ? (
-                    <div className="bg-blue-100 p-6 rounded-xl border border-blue-200">
-                        <h1 className="text-2xl font-bold text-blue-800">Hello Admin, {auth.user.name}!</h1>
-                        <p className="text-blue-600">Ini adalah panel kendali manajemen HRIS.</p>
+                    <div>
+                        <h1 className="text-black text-2xl font-bold">Selamat Datang, {auth.user.name}!</h1>
                     </div>
                 ) : (
-                    <div className="bg-green-100 p-6 rounded-xl border border-green-200">
-                        <h1 className="text-2xl font-bold text-green-800">Selamat Datang, {auth.user.name}!</h1>
-                        <p className="text-green-600">Silahkan cek absensi dan jadwal kerja kamu hari ini.</p>
+                    <div>
+                        <h1 className="text-black text-2xl font-bold">Selamat Datang, {auth.user.name}!</h1>
                     </div>
                 )}
             </div>

@@ -66,7 +66,7 @@ export default function Sidebar() {
                 <div className="mt-auto pt-4">
                     <Button
                         variant="ghost"
-                        className={`${navButtonStyle} text-yellow-300 hover:text-red-100`}
+                        className={`${navButtonStyle} text-red-500 hover:text-red-300`}
                         asChild
                     >
                         <Link href="/logout" method="post" as="button">
