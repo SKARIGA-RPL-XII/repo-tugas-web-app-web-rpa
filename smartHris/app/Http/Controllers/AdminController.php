@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Gaji;
 use App\Models\JenisPelanggaran;
 use App\Models\Kalender;
+use App\Models\Karyawan;
+use App\Models\PelanggaranKaryawan;
 use App\Models\SuratPeringatan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -80,8 +82,82 @@ class AdminController extends Controller
     }
     public function pKaryawan()
     {
-        $pKaryawan = JenisPelanggaran::get();
-        return Inertia::render('jenis-pelanggaran', ['pKaryawan' => $pKaryawan]);
+        return Inertia::render('Admin/pelanggaran/index', [
+            'pelanggaran' => PelanggaranKaryawan::with([
+                'karyawan.user',
+                'jenis_pelanggaran'
+            ])->latest()->get()->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'karyawan_id' => $p->karyawan_id,
+                    'jenis_pelanggaran_id' => $p->jenis_pelanggaran_id,
+                    'tanggal' => $p->tanggal,
+                    'catatan' => $p->catatan,
+                    'karyawan' => [
+                        'nama' => $p->karyawan->user->name,
+                    ],
+                    'jenis_pelanggaran' => [
+                        'nama' => $p->jenis_pelanggaran->nama_pelanggaran,
+                    ],
+                ];
+            }),
+
+            'karyawan' => Karyawan::with('user')->get()->map(fn($k) => [
+                'id' => $k->id,
+                'nama' => $k->user->name,
+            ]),
+
+            'jenisPelanggaran' => JenisPelanggaran::get()->map(fn($j) => [
+                'id' => $j->id,
+                'nama' => $j->nama_pelanggaran,
+            ]),
+        ]);
+    }
+    public function pKaryawanStore(Request $request)
+    {
+        $request->validate([
+            'karyawan_id' => 'required|exists:karyawan,id',
+            'jenis_pelanggaran_id' => 'required|exists:jenis_pelanggaran,id',
+            'tanggal' => 'required|date',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $create = PelanggaranKaryawan::create([
+            'karyawan_id' => $request->karyawan_id,
+            'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
+            'tanggal' => $request->tanggal,
+            'catatan' => $request->catatan,
+        ]);
+        if ($create) {
+            return redirect()->back()->with('success', 'Pelanggaran berhasil ditambahkan');
+        }
+        dd($create);
+    }
+    public function pKaryawanUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'karyawan_id' => 'required|exists:karyawan,id',
+            'jenis_pelanggaran_id' => 'required|exists:jenis_pelanggaran,id',
+            'tanggal' => 'required|date',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $pelanggaran = PelanggaranKaryawan::findOrFail($id);
+
+        $pelanggaran->update([
+            'karyawan_id' => $request->karyawan_id,
+            'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
+            'tanggal' => $request->tanggal,
+            'catatan' => $request->catatan,
+        ]);
+
+        return redirect()->back()->with('success', 'Data pelanggaran berhasil diperbarui');
+    }
+    public function pKaryawanDestroy($id)
+    {
+        PelanggaranKaryawan::findOrFail($id)->delete();
+
+        return redirect()->back()->with('success', 'Data pelanggaran berhasil dihapus');
     }
     public function gaji()
     {
