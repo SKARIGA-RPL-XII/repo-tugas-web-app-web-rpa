@@ -3,10 +3,11 @@
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', fn () => Inertia::render('dashboard'))->name('home');
 
-Route::get('/dashboard', fn () => Inertia::render('dashboard'))
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::prefix('admin')->group(function () {

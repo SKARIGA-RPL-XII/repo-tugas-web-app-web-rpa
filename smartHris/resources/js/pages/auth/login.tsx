@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
+// import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
@@ -20,24 +20,22 @@ interface LoginProps {
 export default function Login({
     status,
     canResetPassword,
-    canRegister,
+    // canRegister,
 }: LoginProps) {
     return (
         <AuthLayout>
             <Head title="Login" />
 
                 <div className="login-layout">
-                {/* LEFT IMAGE */}
                 <div className="login-left">
                     <img
-                        src="/images/img_login.jpg"
+                        src="/images/img_bg.jpg"
                         alt="Office"
                         className="login-left-image"
                     />
 
                     <div className="login-left-overlay" />
 
-                    {/* TEXT OVER IMAGE */}
                     <div className="login-left-content">
                         <p className="login-left-footer">
                             Human Resource © 2026 All rights reserved.
@@ -50,12 +48,8 @@ export default function Login({
                     </div>
                 </div>
 
-
-
-                {/* RIGHT FORM */}
                 <div className="login-right">
                     <div className="login-frame">
-                       {/* LOGO */}
                         <img
                             src="/images/logos/logo_kantor.png"
                             alt="HRIS Logo"
@@ -63,7 +57,6 @@ export default function Login({
                         />
 
 
-                        {/* TITLE */}
                         <h1 className="login-title">
                             Selamat Datang di
                         </h1>
@@ -71,12 +64,10 @@ export default function Login({
                             Human Resource
                         </h2>
 
-                        {/* SUBTITLE */}
                         <p className="login-subtitle">
                             Sistem Absensi Digital yang Terintegrasi.
                         </p>
-
-                        {/* FORM */}
+                
                         <Form
                             {...store.form()}
                             resetOnSuccess={['password']}
