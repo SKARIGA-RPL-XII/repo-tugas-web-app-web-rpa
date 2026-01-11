@@ -1,36 +1,41 @@
 import { StatusModal } from '@/components/modal-status';
 import { Button } from '@/components/ui/button';
-import { PageProps } from '@/types';
 import { Icon } from '@iconify/react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Sidebar() {
-    const { auth } = usePage<PageProps>().props;
+    const page = usePage();
+    const auth = page.props.auth as any;
+    const url = page.url;
     const [openLogout, setOpenLogout] = useState(false);
+    const isActive = (path: string) => page.url.startsWith(path);
 
-   const isAdmin = auth.user?.role === 'admin';
-
-const sidebarConfig = isAdmin
-    ? {
-          bg: 'bg-[#0D4838]',
-          logo: '/asset/fullputih.png',
-          navStyle:
-              'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
-      }
-    : {
-          bg: 'bg-[#FFFFFF]', 
-          logo: '/asset/logo_hijau.png', // logo user (BEDA)
-          navStyle:
-            'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
-      };
+    const isAdmin = auth.user?.role === 'admin';
+    const sidebarConfig = isAdmin
+        ? {
+              bg: 'bg-[#0D4838]',
+              logo: '/asset/fullputih.png',
+              navStyle:
+                  'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
+              activeStyle: 'bg-[#0A3D2FB8] text-white',
+          }
+        : {
+              bg: 'bg-[#FFFFFF]',
+              logo: '/asset/logo_hijau.png',
+              navStyle:
+                  'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
+              activeStyle: 'bg-[#0D48381A] text-[#0D4838]',
+          };
 
     const handleLogout = () => {
         router.post('/logout');
     };
     return (
         <>
-            <aside className={`fixed top-0 left-0 z-40 flex h-screen w-64 flex-col overflow-hidden ${sidebarConfig.bg} p-4 text-white`}>
+            <aside
+                className={`fixed top-0 left-0 z-40 flex h-screen w-64 flex-col overflow-hidden ${sidebarConfig.bg} p-4 text-white`}
+            >
                 <div className="mb-8 flex justify-center px-2">
                     <img
                         src={sidebarConfig.logo}
@@ -46,24 +51,34 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/dashboard') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/dashboard">
+                                        {/*url nya jangan lupa diubah*/}
                                         <Icon
                                             icon="material-symbols:dashboard-rounded"
                                             width="20"
                                             height="20"
                                         />
-                                        <span> Dashboard </span>
+                                        <span>Dashboard</span>
                                     </Link>
                                 </Button>
 
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/admin/settings') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/admin/settings">
+                                        {/*url nya jangan lupa diubah*/}
                                         <Icon
                                             icon="f7:person-2-fill"
                                             width="56"
@@ -76,9 +91,15 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/admin/absensi_karyawan') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
-                                    <Link href="/admin/settings">
+                                    <Link href="/admin/absensi_karyawan">
+                                        {' '}
+                                        {/*url nya jangan lupa diubah*/}
                                         <Icon
                                             icon="streamline:office-worker-remix"
                                             width="14"
@@ -93,7 +114,11 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/dashboard') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/dashboard">
                                         <Icon
@@ -108,7 +133,11 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/absen') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/absen">
                                         <Icon
@@ -123,7 +152,11 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/absensi/riwayat') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/absen/riwayat">
                                         <Icon
@@ -138,7 +171,11 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/pelanggaran') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/pelanggaran">
                                         <Icon
@@ -153,7 +190,11 @@ const sidebarConfig = isAdmin
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={sidebarConfig.navStyle}
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/cuti') //url nya jangan lupa diubah
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
                                 >
                                     <Link href="/cuti">
                                         <Icon
@@ -173,7 +214,7 @@ const sidebarConfig = isAdmin
                     <div className="pt-4">
                         <Button
                             variant="ghost"
-                            className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-990"
+                            className="hover:text-red-990 w-full justify-start text-red-500 hover:bg-red-500/10"
                             onClick={() => setOpenLogout(true)}
                         >
                             Logout
