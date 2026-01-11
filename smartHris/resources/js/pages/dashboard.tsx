@@ -1,9 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, } from '@inertiajs/react';
 
 export default function Dashboard() {
-    const { auth } = usePage<PageProps>().props;
 
     const attendanceData = [
         { date: '1 Mei', value: 16 },
@@ -15,7 +13,6 @@ export default function Dashboard() {
         { date: '7 Mei', value: 28.5 },
     ];
 
-    const maxValue = 30; // Ditetapkan 30 sesuai skala di gambar
 
     return (
         <AppLayout>
@@ -134,7 +131,7 @@ export default function Dashboard() {
                     {/* Sanksi Aktif - PERSIS GAMBAR */}
                     <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm ring-1 ring-slate-100">
                         <div className="flex items-center space-x-5">
-                            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#FFF1F1]">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#FFF1F1]">
                                 <svg
                                     width="34"
                                     height="34"
@@ -176,7 +173,7 @@ export default function Dashboard() {
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     {/* Rekap Absensi Mingguan - PERSIS GAMBAR */}
-                    <div className="rounded-[24px] border border-slate-200 bg-white p-8 shadow-sm">
+                    <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
                         <h2 className="mb-10 text-xl font-bold text-[#1E293B]">
                             Rekap Absensi Mingguan
                         </h2>
@@ -303,9 +300,9 @@ export default function Dashboard() {
                         {/* Chart Legend */}
                         <div className="mt-6 flex items-center justify-center space-x-2">
                             <div className="flex items-center">
-                                <div className="h-[2px] w-3 bg-[#429375]"></div>
-                                <div className="mx-[1px] h-2 w-2 rounded-full border border-[#429375] bg-white"></div>
-                                <div className="h-[2px] w-3 bg-[#429375]"></div>
+                                <div className="h-0.5 w-3 bg-[#429375]"></div>
+                                <div className="mx-px h-2 w-2 rounded-full border border-[#429375] bg-white"></div>
+                                <div className="h-0.5 w-3 bg-[#429375]"></div>
                             </div>
                             <span className="text-sm font-medium text-[#64748B]">
                                 Mei 2024

@@ -6,8 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Karyawan extends Model
 {
-    protected $fillable = ['nama', 'jabatan', 'status'];
     protected $table = 'karyawan';
+    protected $fillable = [
+        'user_id',
+        'nip',
+        'jabatan',
+        'jenis_kelamin',
+        'tanggal_lahir',
+        'departemen',
+        'tanggal_masuk',
+        'alamat',
+    ];
 
     public function absensis()
     {
