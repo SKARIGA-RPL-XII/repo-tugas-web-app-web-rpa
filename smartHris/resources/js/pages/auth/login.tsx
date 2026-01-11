@@ -119,8 +119,8 @@ export default function Login({
                                         />
                                     </div>
 
-                                    <div className="flex items-center justify-between text-sm">
-                                        <label className="flex items-center gap-2">
+                                    <div className="login-field-remember">
+                                        <label className="button-remember">
                                             <Checkbox
                                                 id="remember"
                                                 name="remember"
@@ -131,14 +131,14 @@ export default function Login({
                                         {canResetPassword && (
                                             <TextLink
                                                 href={request()}
-                                                className="text-green-700"
+                                                className="button-lupa-password"
                                             >
                                                 Lupa Password?
                                             </TextLink>
                                         )}
                                     </div>  <Button
                                         type="submit"
-                                        className="mt-4 h-12 w-full bg-green-900 text-white hover:bg-green-800"
+                                        className="button-masuk"
                                         disabled={processing}
                                     >
                                         {processing && <Spinner />}
