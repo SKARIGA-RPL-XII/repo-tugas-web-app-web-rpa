@@ -1,13 +1,10 @@
-import { StatusModal } from '@/components/modal-status';
 import { Button } from '@/components/ui/button';
 import { PageProps } from '@/types';
 import { Icon } from '@iconify/react';
-import { Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function Sidebar() {
     const { auth } = usePage<PageProps>().props;
-    const [openLogout, setOpenLogout] = useState(false);
 
    const isAdmin = auth.user?.role === 'admin';
 
@@ -20,14 +17,11 @@ const sidebarConfig = isAdmin
       }
     : {
           bg: 'bg-[#FFFFFF]', 
-          logo: '/asset/logo_hijau.png', // logo user (BEDA)
+          logo: '/asset/logo_hijau.png',
           navStyle:
             'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
       };
 
-    const handleLogout = () => {
-        router.post('/logout');
-    };
     return (
         <>
             <aside className={`fixed top-0 left-0 z-40 flex h-screen w-64 flex-col overflow-hidden ${sidebarConfig.bg} p-4 text-white`}>
@@ -63,7 +57,7 @@ const sidebarConfig = isAdmin
                                     asChild
                                     className={sidebarConfig.navStyle}
                                 >
-                                    <Link href="/admin/settings">
+                                    <Link href="/admin/karyawan">
                                         <Icon
                                             icon="f7:person-2-fill"
                                             width="56"
@@ -168,28 +162,7 @@ const sidebarConfig = isAdmin
                         )}
                     </nav>
                 </div>
-
-                {auth.user && (
-                    <div className="pt-4">
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start text-red-500 hover:bg-red-500/10 hover:text-red-990"
-                            onClick={() => setOpenLogout(true)}
-                        >
-                            Logout
-                        </Button>
-                    </div>
-                )}
             </aside>
-
-            <StatusModal
-                isOpen={openLogout}
-                onClose={() => setOpenLogout(false)}
-                type="logout"
-                title="Konfirmasi Logout"
-                description="Apakah Anda yakin ingin keluar dari sistem?"
-                onConfirm={handleLogout}
-            />
         </>
     );
 }
