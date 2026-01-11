@@ -2,11 +2,25 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
 import { Link, usePage } from '@inertiajs/react';
 
+type AuthUser = {
+    id: number;
+    name: string;
+    role: 'admin' | 'user';
+};
+
+type AuthProps = {
+    user: AuthUser | null;
+};
+
+type PageProps = {
+    auth: AuthProps;
+};
+
+
 export default function Sidebar() {
-    const page = usePage();
-    const auth = page.props.auth as any;
-    const url = page.url;
-    const [openLogout, setOpenLogout] = useState(false);
+    const page = usePage<PageProps>();
+    const { auth } = page.props;
+
     const isActive = (path: string) => page.url.startsWith(path);
 
     const isAdmin = auth.user?.role === 'admin';
@@ -41,7 +55,7 @@ export default function Sidebar() {
 
                 <div className="flex-1">
                     <nav className="space-y-2">
-                        {auth.user.role === 'admin' ? (
+                        {isAdmin ? (
                             <>
                                 <Button
                                     variant="ghost"
@@ -204,18 +218,6 @@ export default function Sidebar() {
                         )}
                     </nav>
                 </div>
-
-                {auth.user && (
-                    <div className="pt-4">
-                        <Button
-                            variant="ghost"
-                            className="hover:text-red-990 w-full justify-start text-red-500 hover:bg-red-500/10"
-                            onClick={() => setOpenLogout(true)}
-                        >
-                            Logout
-                        </Button>
-                    </div>
-                )}
             </aside>
         </>
     );

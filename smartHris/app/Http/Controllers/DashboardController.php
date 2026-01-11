@@ -9,7 +9,6 @@ class DashboardController extends Controller
     public function index()
     {
         return Inertia::render('dashboard', [
-        'role' => 'user', 
 
         'stats' => [
             'total_karyawan' => 30,

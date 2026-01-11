@@ -30,39 +30,42 @@ type UserSummary = {
 }
 
 type PageProps = {
-  role?: 'admin' | 'user'
+  auth: {
+    user: {
+      id: number
+      name: string
+      email: string
+      role: 'admin' | 'user'
+    } | null
+  }
   stats?: Stats
   weeklyAttendance?: WeeklyAttendance[]
   attendanceStatus?: AttendanceStatus[]
   userSummary?: UserSummary
 }
 
-
-
 export default function Dashboard() {
   const {
-    role,
+    auth,
     stats,
     weeklyAttendance,
     attendanceStatus,
     userSummary,
   } = usePage<PageProps>().props
 
-  const currentRole = role ?? 'user'
+  const isAdmin = auth.user?.role === 'admin'
 
   return (
     <AppLayout>
       <Head title="Dashboard" />
 
-      {currentRole === 'admin' && (
+      {isAdmin ? (
         <AdminDashboard
           stats={stats}
           weeklyAttendance={weeklyAttendance}
           attendanceStatus={attendanceStatus}
         />
-      )}
-
-      {currentRole === 'user' && (
+      ) : (
         <UserDashboard summary={userSummary} />
       )}
     </AppLayout>
