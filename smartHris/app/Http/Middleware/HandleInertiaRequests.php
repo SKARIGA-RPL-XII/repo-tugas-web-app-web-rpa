@@ -46,7 +46,7 @@ public function share(Request $request): array
                 'id' => 1,
                 'name' => 'Test Admin',
                 'email' => 'admin@test.com',
-                'role' => 'admin', // Ganti jadi 'user' untuk tes tampilan user
+                'role' => 'user', // Ganti jadi 'user' untuk tes tampilan user
             ],
         ],
         // ...
