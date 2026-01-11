@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('kalender', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal')->unique();
+            $table->date('tanggal');
             $table->string('keterangan')->nullable();
-            $table->enum('jenis_hari', ['kerja', 'libur', 'cuti_bersama']);
+            $table->enum('jenis_hari', ['event', 'libur', 'cuti_bersama']);
             $table->timestamps();
         });
     }
