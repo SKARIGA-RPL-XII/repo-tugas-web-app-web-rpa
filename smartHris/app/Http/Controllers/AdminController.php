@@ -74,7 +74,7 @@ class AdminController extends Controller
     {
         $karyawan = Karyawan::with('user')->latest()->get();
 
-        // return Inertia::render('Admin/karyawan/index', [
+        // return Inertia:  :render('Admin/karyawan/index', [
         //     'karyawan' => $karyawan
         // ]);
         return $karyawan;
