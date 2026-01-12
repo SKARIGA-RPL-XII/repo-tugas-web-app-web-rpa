@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout'
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 
 import AdminDashboard from '@/components/admin/AdminDashboard'
 import UserDashboard from '@/components/user/UserDashboard'
@@ -44,16 +44,18 @@ type PageProps = {
   userSummary?: UserSummary
 }
 
-export default function Dashboard() {
+export default function Dashboard(props: PageProps) {
   const {
-    auth,
-    stats,
-    weeklyAttendance,
-    attendanceStatus,
-    userSummary,
-  } = usePage<PageProps>().props
+ auth,
+ stats,
+ weeklyAttendance,
+ attendanceStatus,
+ userSummary,
+ } = props;
 
   const isAdmin = auth.user?.role === 'admin'
+
+  console.log("Data dari Laravel:", props);
 
   return (
     <AppLayout>
