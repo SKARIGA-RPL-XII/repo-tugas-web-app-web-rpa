@@ -20,8 +20,12 @@ class PelanggaranKaryawan extends Model
         return $this->belongsTo(Karyawan::class);
     }
 
-    public function jenis_pelanggaran()
+    public function jenisPelanggaran()
     {
         return $this->belongsTo(JenisPelanggaran::class);
+    }
+    public function suratPeringatan()
+    {
+        return $this->hasMany(SuratPeringatan::class);
     }
 }
