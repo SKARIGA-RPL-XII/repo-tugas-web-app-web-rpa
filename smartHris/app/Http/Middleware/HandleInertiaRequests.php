@@ -36,20 +36,20 @@ class HandleInertiaRequests extends Middleware
      */
     // app/Http/Middleware/HandleInertiaRequests.php
 
-// app/Http/Middleware/HandleInertiaRequests.php
+    // app/Http/Middleware/HandleInertiaRequests.php
 
-public function share(Request $request): array
-{
-    return array_merge(parent::share($request), [
-        'auth' => [
-            'user' => [
-                'id' => 1,
-                'name' => 'Test Admin',
-                'email' => 'admin@test.com',
-                'role' => 'admin', // Ganti jadi 'user' untuk tes tampilan user
+    public function share(Request $request): array
+    {
+        return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $request->user()
+                    ? [
+                        'id' => $request->user()->id,
+                        'name' => $request->user()->name,
+                        'role' => $request->user()->role,
+                    ]
+                    : null,
             ],
-        ],
-        // ...
-    ]);
-}
+        ]);
+    }
 }

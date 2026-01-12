@@ -20,6 +20,9 @@ class AdminController extends Controller
 {
     public function index()
     {
+        // $karyawan = auth()->user()->role;
+        // return $karyawan;
+
         $today = Carbon::today();
 
         $totalKaryawan = Karyawan::count();
@@ -74,10 +77,10 @@ class AdminController extends Controller
     {
         $karyawan = Karyawan::with('user')->latest()->get();
 
-        // return Inertia::render('Admin/karyawan/index', [
-        //     'karyawan' => $karyawan
-        // ]);
-        return $karyawan;
+        return Inertia::render('Admin/karyawan/index', [
+            'karyawan' => $karyawan
+        ]);
+        // return $karyawan;
     }
 
     public function storeKaryawan(Request $request)
@@ -85,9 +88,7 @@ class AdminController extends Controller
         $request->validate([
             'nama'           => 'required|string|max:255',
             'email'          => 'required|email|unique:users,email',
-            'password'       => 'required|min:6',
 
-            'nip'            => 'required|unique:karyawan,nip',
             'jabatan'        => 'required|string',
             'jenis_kelamin'  => 'required|in:L,P',
             'tanggal_lahir'  => 'required|date',
@@ -99,16 +100,29 @@ class AdminController extends Controller
         DB::beginTransaction();
 
         try {
+            // 1️⃣ Buat user dulu (password sementara)
             $user = User::create([
                 'name'     => $request->nama,
                 'email'    => $request->email,
-                'password' => bcrypt($request->password),
+                'password' => bcrypt('temporary'), // akan diupdate
                 'role'     => 'user',
             ]);
 
+            // 2️⃣ Generate NIP: YYYYMMDD-IDUSER
+            $tanggalMasuk = \Carbon\Carbon::parse($request->tanggal_masuk)
+                ->format('Ymd');
+
+            $nip = $tanggalMasuk . $user->id;
+
+            // 3️⃣ Update password = NIP
+            $user->update([
+                'password' => bcrypt($nip),
+            ]);
+
+            // 4️⃣ Simpan karyawan
             Karyawan::create([
                 'user_id'        => $user->id,
-                'nip'            => $request->nip,
+                'nip'            => $nip,
                 'jabatan'        => $request->jabatan,
                 'jenis_kelamin'  => $request->jenis_kelamin,
                 'tanggal_lahir'  => $request->tanggal_lahir,
@@ -121,14 +135,12 @@ class AdminController extends Controller
 
             return redirect()
                 ->route('admin.karyawan')
-                ->with('success', 'Karyawan berhasil ditambahkan');
+                ->with('success', "Karyawan berhasil ditambahkan. Password awal: {$nip}");
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            dd($e->getMessage()); // DEBUG AMAN
-
             return back()
-                ->withErrors('Gagal menambahkan karyawan')
+                ->withErrors(['error' => $e->getMessage()])
                 ->withInput();
         }
     }

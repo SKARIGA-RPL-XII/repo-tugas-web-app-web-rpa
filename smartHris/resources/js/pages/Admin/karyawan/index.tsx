@@ -184,17 +184,6 @@ export default function Index({ karyawan }: { karyawan: Karyawan[] }) {
                             onChange={(e) => setData("email", e.target.value)}
                         />
 
-                        {!isEdit && (
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={data.password}
-                                onChange={(e) =>
-                                    setData("password", e.target.value)
-                                }
-                            />
-                        )}
-
                         <input
                             placeholder="NIP"
                             value={data.nip}

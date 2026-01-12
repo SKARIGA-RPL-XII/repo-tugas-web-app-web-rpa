@@ -16,7 +16,11 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function index() {}
+    public function index()
+    {
+        $karyawan = auth()->user()->karyawan;
+        return $karyawan;
+    }
     public function absen()
     {
         $karyawan = auth()->user()->karyawan;
