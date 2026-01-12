@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
     return (
-        <div className="h-screen w-full overflow-hidden bg-slate-50">
+        <div className="h-screen w-full overflow-hidden bg-[#E8F3F0]" >
             <Sidebar /> 
 
             <main className="ml-64 h-screen overflow-y-auto p-6">

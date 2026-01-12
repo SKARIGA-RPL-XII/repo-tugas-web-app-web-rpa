@@ -44,7 +44,7 @@ public function share(Request $request): array
         'auth' => [
             'user' => [
                 'id' => 1,
-                'name' => 'Test Admin',
+                'name' => ' ini patrick  ',
                 'email' => 'admin@test.com',
                 'role' => 'admin', // Ganti jadi 'user' untuk tes tampilan user
             ],
