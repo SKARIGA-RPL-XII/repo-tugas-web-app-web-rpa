@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('dashboard');
-})->name('home');
+// Route::get('/', function () {
+//     return Inertia::render('User/index');
+// })->name('home');
 
 Route::get('dashboard', function () {
     return Inertia::render('dashboard');
@@ -23,6 +24,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+
+Route::get('/absensi', [UserController::class, 'riwayat']);
+Route::post('/absensi', [UserController::class, 'store']);
+
+Route::get('/kalenderK', [UserController::class, 'index']);
+
+Route::get('/pelanggaranK', [UserController::class, 'index']);
+Route::post('/cutiK', [UserController::class, 'store']);
+Route::get('/cutiK', [UserController::class, 'index']);
+
+
+Route::get('/', [AdminController::class, 'index']);
 
 // KARYAWAN
 Route::get('/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');

@@ -18,6 +18,56 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
+    public function index()
+    {
+        $today = Carbon::today();
+
+        $totalKaryawan = Karyawan::count();
+        $hadirHariIni = Absensi::whereDate('tanggal', $today)->where('status', 'hadir')->count();
+        $pengajuanCuti = Cuti::where('status', 'pending')->count();
+        $sanksiAktif = SuratPeringatan::distinct('karyawan_id')->count('karyawan_id');
+
+        // ===== GRAFIK ABSENSI 7 HARI =====
+        $attendanceWeekly = Absensi::select(
+            DB::raw('DATE(tanggal) as date'),
+            DB::raw('COUNT(*) as total')
+        )
+            ->whereBetween('tanggal', [
+                Carbon::now()->subDays(6)->startOfDay(),
+                Carbon::now()->endOfDay()
+            ])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn($item) => [
+                'date'  => Carbon::parse($item->date)->format('d M'),
+                'value' => $item->total
+            ]);
+
+        $statusRaw = Absensi::select(
+            'status',
+            DB::raw('COUNT(*) as total')
+        )
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusAbsensi = [
+            'hadir' => $statusRaw['hadir'] ?? 0,
+            'alpha' => $statusRaw['alpha'] ?? 0,
+            'izin'  => $statusRaw['izin'] ?? 0,
+            'sakit' => $statusRaw['sakit'] ?? 0,
+            'cuti'  => $statusRaw['cuti'] ?? 0,
+        ];
+
+        return Inertia::render('Admin/index', [
+            'totalKaryawan'   => $totalKaryawan,
+            'hadirHariIni'    => $hadirHariIni,
+            'pengajuanCuti'   => $pengajuanCuti,
+            'sanksiAktif'     => $sanksiAktif,
+            'attendanceWeekly' => $attendanceWeekly,
+            'statusAbsensi'   => $statusAbsensi,
+        ]);
+    }
     /* ========= SABIL ========= */
     /* ========= KARYAWAN ========= */
     public function indexKaryawan()
