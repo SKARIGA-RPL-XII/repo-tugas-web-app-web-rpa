@@ -3,29 +3,29 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 
-// Route::get('/', function () {
-//     return Inertia::render('User/index');
-// })->name('home');
-Route::get('/', [DashboardController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return Inertia::render('User/index');
+})->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->name('dashboard');
+// Route::get('dashboard', function () {
+//     return Inertia::render('dashboard');
+// })->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
 
 Route::get('admin/karyawan', function () {
     return Inertia::render('admin/data-karyawan');
 })->name('karyawan');
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
 
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('dashboard', function () {
+//         return Inertia::render('dashboard');
+//     })->name('dashboard');
+// });
 
 Route::get('/absensi', [UserController::class, 'riwayat']);
 Route::post('/absensi', [UserController::class, 'store']);
