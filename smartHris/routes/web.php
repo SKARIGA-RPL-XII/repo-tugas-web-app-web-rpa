@@ -6,65 +6,63 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('User/index'))->name('home');
-    
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
+Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
-Route::prefix('user')->group(function () {
-    Route::get('/absensi', [UserController::class, 'riwayat']);
-    Route::post('/absensi', [UserController::class, 'store']);
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/kalender', [UserController::class, 'index']);
-    Route::get('/pelanggaran', [UserController::class, 'index']);
-    Route::get('/cuti', [UserController::class, 'index']);
-    Route::post('/cuti', [UserController::class, 'store']);
+Route::prefix('user')->name('user.')->controller(UserController::class)->group(function () {
+    // Absensi
+    Route::get('/absensi', 'riwayat')->name('absensi');
+    Route::post('/absensi', 'store')->name('absensi.store');
+
+    // Cuti
+    Route::get('/cuti', 'indexCuti')->name('cuti');
+    Route::post('/cuti', 'storeCuti')->name('cuti.store');
+
+    // Menu Lain
+    Route::get('/kalender', 'indexKalender')->name('kalender');
+    Route::get('/pelanggaran', 'indexPelanggaran')->name('pelanggaran');
 });
 
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->name('admin.')->controller(AdminController::class)->group(function () {
+        
+    // Karyawan
+    Route::get('/karyawan', 'indexKaryawan')->name('karyawan');
+    Route::post('/karyawan', 'storeKaryawan')->name('karyawan.store');
+    Route::put('/karyawan/{id}', 'updateKaryawan')->name('karyawan.update');
+    Route::delete('/karyawan/{id}', 'destroyKaryawan')->name('karyawan.destroy');
 
-    // DASHBOARD
-    Route::get('/dashboard', [AdminController::class, 'index'])
-        ->name('admin.dashboard');
+    // Absensi
+    Route::get('/absensi', 'indexAbsensi')->name('absensi');
+    Route::put('/absensi/{id}', 'updateAbsensi')->name('absensi.update');
+    Route::delete('/absensi/{id}', 'destroyAbsensi')->name('absensi.destroy');
 
-    // KARYAWAN
-    Route::get('/karyawan', [AdminController::class, 'indexKaryawan'])
-        ->name('admin.karyawan');
-    Route::post('/karyawan', [AdminController::class, 'storeKaryawan']);
-    Route::put('/karyawan/{id}', [AdminController::class, 'updateKaryawan']);
-    Route::delete('/karyawan/{id}', [AdminController::class, 'destroyKaryawan']);
+    // Cuti
+    Route::get('/cuti', 'indexCuti')->name('cuti');
+    Route::post('/cuti/{id}/approve', 'approveCuti')->name('cuti.approve');
+    Route::post('/cuti/{id}/reject', 'rejectCuti')->name('cuti.reject');
 
-    // ABSENSI
-    Route::get('/absensi', [AdminController::class, 'indexAbsensi'])
-        ->name('admin.absensi');
-    Route::put('/absensi/{id}', [AdminController::class, 'updateAbsensi']);
-    Route::delete('/absensi/{id}', [AdminController::class, 'destroyAbsensi']);
+    // Kalender & Event
+    Route::get('/kalender', 'kalender')->name('kalender');
+    Route::get('/kalender-event', 'event')->name('kalender.event');
+    Route::post('/kalender-event', 'eventStore')->name('kalender.event.store');
+    Route::put('/kalender-event/{id}', 'eventUpdate')->name('kalender.event.update');
+    Route::delete('/kalender-event/{id}', 'eventDestroy')->name('kalender.event.destroy');
 
-    // CUTI
-    Route::get('/cuti', [AdminController::class, 'indexCuti']);
-    Route::post('/cuti/{id}/approve', [AdminController::class, 'approveCuti']);
-    Route::post('/cuti/{id}/reject', [AdminController::class, 'rejectCuti']);
+    // Jenis Pelanggaran
+    Route::get('/jenis-pelanggaran', 'jPelanggaran')->name('jenis-pelanggaran');
+    Route::post('/jenis-pelanggaran', 'jPelanggaranStore')->name('jenis-pelanggaran.store');
+    Route::put('/jenis-pelanggaran/{id}', 'jPelanggaranUpdate')->name('jenis-pelanggaran.update');
+    Route::delete('/jenis-pelanggaran/{id}', 'jPelanggaranDestroy')->name('jenis-pelanggaran.destroy');
 
-    // KALENDER
-    Route::get('/kalender', [AdminController::class, 'kalender']);
-    Route::get('/kalender-event', [AdminController::class, 'event']);
-    Route::post('/kalender-event', [AdminController::class, 'eventStore']);
-    Route::put('/kalender-event/{id}', [AdminController::class, 'eventUpdate']);
-    Route::delete('/kalender-event/{id}', [AdminController::class, 'eventDestroy']);
-
-    // PELANGGARAN
-    Route::get('/jenis-pelanggaran', [AdminController::class, 'jPelanggaran']);
-    Route::post('/jenis-pelanggaran', [AdminController::class, 'jPelanggaranStore']);
-    Route::put('/jenis-pelanggaran/{id}', [AdminController::class, 'jPelanggaranUpdate']);
-    Route::delete('/jenis-pelanggaran/{id}', [AdminController::class, 'jPelanggaranDestroy']);
-
-    Route::get('/pelanggaran', [AdminController::class, 'pKaryawan']);
-    Route::post('/pelanggaran', [AdminController::class, 'pKaryawanStore']);
-    Route::put('/pelanggaran/{id}', [AdminController::class, 'pKaryawanUpdate']);
-    Route::delete('/pelanggaran/{id}', [AdminController::class, 'pKaryawanDestroy']);
+    // Pelanggaran User
+    Route::get('/pelanggaran', 'pKaryawan')->name('pelanggaran');
+    Route::post('/pelanggaran', 'pKaryawanStore')->name('pelanggaran.store');
+    Route::put('/pelanggaran/{id}', 'pKaryawanUpdate')->name('pelanggaran.update');
+    Route::delete('/pelanggaran/{id}', 'pKaryawanDestroy')->name('pelanggaran.destroy');
 
     // SP
-    Route::get('/sp', [AdminController::class, 'sp']);
-    Route::post('/sp', [AdminController::class, 'spStore']);
-    Route::delete('/sp/{id}', [AdminController::class, 'spDestroy']);
+    Route::get('/sp', 'sp')->name('sp');
+    Route::post('/sp', 'spStore')->name('sp.store');
+    Route::delete('/sp/{id}', 'spDestroy')->name('sp.destroy');
 });
