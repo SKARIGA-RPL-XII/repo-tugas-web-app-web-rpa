@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
+// import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
@@ -20,7 +20,7 @@ interface LoginProps {
 export default function Login({
     status,
     canResetPassword,
-    canRegister,
+    // canRegister,
 }: LoginProps) {
     return (
         <AuthLayout>
@@ -79,8 +79,7 @@ export default function Login({
                         <p className="text-base text-center text-gray-500 mb-8">
                             Sistem Absensi Digital yang Terintegrasi.
                         </p>
-
-                        {/* FORM */}
+                
                         <Form
                             {...store.form()}
                             resetOnSuccess={['password']}
