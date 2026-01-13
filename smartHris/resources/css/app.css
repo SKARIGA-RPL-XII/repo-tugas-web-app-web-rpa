@@ -254,175 +254,174 @@ body {
 /* =========================
    LOGIN FRAME 
 ========================= */
-.login-frame {
-    width: 515px;
-    height: 550px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    gap: 6px; /* dari 12px → 6px */
-}
-
-/* =========================
-   LOGIN LOGO
+/* ========================= 
+   LOGIN FRAME - ADJUSTED TO MATCH FIGMA
 ========================= */
-
-.login-logo {
-    width: 260px;      /* dari 300 */
-    height: fixed;      /* JANGAN fixed */
-    margin-top: 25px;
-
-}
-
-
-/* =========================
-   LOGIN TITLE
-========================= */
-
-.login-title {
-    width: 100%;
-   
-
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 28px;
-    margin-top: -35px;
-
-    line-height: 1.1; /* NORMAL */
-    text-align: center;
-}
-
-/* =========================
-   LOGIN TITLE MAIN
-========================= */
-
-.login-title-main {
-    width: 100%;
-    height: auto;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 38px;
-
-    line-height: 1.1;
-    margin-top: -5px; /* tarik ke atas */
-    text-align: center;
-}
-
-.login-frame {
-    width: 515px;
+.login-frame { 
+    width: 400px; /* dari 515px */
     height: auto; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-
-.login-subtitle {
-    font-size: 17px;
-    margin-top: 0; 
-    margin-bottom: 20px;
-    text-align: center;
-    color: gray;
-}
-/* =========================
-LOGIN FORM FIELD
-========================= */
-.login-field {
-    width: 515px;
-    margin-top: 0;
-    margin-bottom: 16px;
-    opacity: 1;
-
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    border-radius: 8px;
-}
-.input-username{
-    background: #F0F1F3;
-}
-.login-field-password {
-    width: 515px;
-    opacity: 1;
-
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    border-radius: 8px;
-}
-.input-password{
-    background: #F0F1F3;
-
-}
-.login-field-remember {
-    width: 515px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-top: 8px;   /* jarak halus */
-    margin-bottom: 16px;
-
-    opacity: 1;
-}
-
-
-/* kiri */
-.button-remember {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* kanan */
-.button-lupa-password {
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    color: #0D4838;
-;
-}
-
-.button-masuk {
-    width: 515px;
-
-    padding: 12px 24px 12px 16px;
-    border-radius: 8px;
-
-    display: flex;
-    align-items: center;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 0px; /* lebih rapat */
     justify-content: center;
-    gap: 8px;
+} 
 
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
+/* ========================= 
+   LOGIN LOGO 
+========================= */ 
+.login-logo { 
+    width: 180px; /* dari 260px - lebih kecil seperti figma */
+    height: auto;
+    margin-top: 0px;
+    margin-bottom: 16px;
+} 
 
-background: #0D4838;
-    color: #ffffff;
+/* ========================= 
+   LOGIN TITLE 
+========================= */ 
+.login-title { 
+    width: 100%; 
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 700; 
+    font-size: 24px; /* dari 28px */
+    margin-top: 0px; /* dari -35px */
+    margin-bottom: 0px;
+    line-height: 1.2;
+    text-align: center; 
+} 
 
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-}
+/* ========================= 
+   LOGIN TITLE MAIN 
+========================= */ 
+.login-title-main { 
+    width: 100%; 
+    height: auto; 
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 700; 
+    font-size: 32px; /* dari 38px */
+    line-height: 1.2; 
+    margin-top: 0px; /* dari -5px */
+    margin-bottom: 8px;
+    text-align: center; 
+} 
 
-.button-masuk:hover {
-    background: #0D4838;
-}
+.login-subtitle { 
+    font-size: 15px; /* dari 17px */
+    margin-top: 0;  
+    margin-bottom: 24px; /* dari 20px */
+    text-align: center; 
+    color: #6B7280; /* gray yang lebih pas */
+} 
 
-.button-masuk:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/* ========================= 
+   LOGIN FORM FIELD 
+========================= */ 
+.login-field { 
+    width: 400px; /* dari 515px */
+    margin-top: 0; 
+    margin-bottom: 16px; 
+    opacity: 1; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    border-radius: 8px; 
+} 
+
+.input-username,
+.input-password { 
+    background: #F3F4F6; /* sedikit lebih terang */
+    padding: 12px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 14px;
+} 
+
+.login-field-password { 
+    width: 400px; /* dari 515px */
+    opacity: 1; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    border-radius: 8px; 
+} 
+
+.login-field-remember { 
+    width: 400px; /* dari 515px */
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-top: 8px;
+    margin-bottom: 20px; /* dari 16px */
+    opacity: 1; 
+} 
+
+/* kiri */ 
+.button-remember { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 13px; /* dari 14px */
+    cursor: pointer; 
+    color: #374151;
+} 
+
+/* kanan */ 
+.button-lupa-password { 
+    font-size: 13px; /* dari 14px */
+    font-weight: 500; 
+    text-decoration: none; 
+    color: #0D4838; 
+} 
+
+.button-masuk { 
+    width: 400px; /* dari 515px */
+    padding: 14px 20px; /* dari 12px 24px 12px 16px */
+    border-radius: 8px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    font-family: 'Montserrat', sans-serif; 
+    font-weight: 600; 
+    font-size: 15px; /* dari 16px */
+    background: #0D4838; 
+    color: #ffffff; 
+    border: none; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease, opacity 0.2s ease; 
+} 
+
+.button-masuk:hover { 
+    background: #0a3529; /* sedikit lebih gelap saat hover */
+} 
+
+.button-masuk:disabled { 
+    opacity: 0.6; 
+    cursor: not-allowed; 
 }
 
 /* DESKTOP LARGE (1440px+) - Default styles already set above */
+
+/* LAPTOP/DESKTOP MEDIUM (1200px - 1440px) */
+@media (max-width: 1440px) {
+    .login-layout {
+        grid-template-columns: 550px 1fr;
+    }
+    
+    .login-left {
+        width: 480px;
+        height: 650px;
+    }
+    
+    .login-left-title {
+        font-size: 32px;
+    }
+    
+    .login-left-title::after {
+        width: 400px;
+    }
+}/* DESKTOP LARGE (1440px+) - Default styles already set above */
 
 /* LAPTOP/DESKTOP MEDIUM (1200px - 1440px) */
 @media (max-width: 1440px) {
