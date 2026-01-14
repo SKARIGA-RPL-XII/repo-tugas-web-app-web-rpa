@@ -72,13 +72,25 @@ class AdminController extends Controller
     /* ========= KARYAWAN ========= */
     public function indexKaryawan()
     {
-        $karyawan = Karyawan::with('user')->latest()->get();
+        $karyawan = Karyawan::with('user')->latest()->get()->map(function ($item) {
+            return [
+                'id'             => $item->id,
+                'nama'           => $item->user->name ?? '-',
+                'nip'            => $item->nip ?? '-',
+                'jabatan'        => $item->jabatan ?? '-',
+                'departemen'     => $item->departemen ?? '-',
+                'alamat'         => $item->alamat ?? '-',
+                'tanggal_masuk'  => $item->tanggal_masuk,
+                'tanggal_lahir'  => $item->tanggal_lahir,
+                'jenis_kelamin'  => $item->jenis_kelamin,
+            ];
+        });
 
-        // return Inertia:  :render('Admin/karyawan/index', [
-        //     'karyawan' => $karyawan
-        // ]);
-        return $karyawan;
+        return Inertia::render('Admin/karyawan/data-karyawan', [
+            'karyawan' => $karyawan
+        ]);
     }
+
 
     public function storeKaryawan(Request $request)
     {
