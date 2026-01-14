@@ -16,7 +16,7 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
-        $mockRole = 'user'; 
+        $mockRole = 'admin'; 
 
         return array_merge(parent::share($request), [
             'auth' => [
