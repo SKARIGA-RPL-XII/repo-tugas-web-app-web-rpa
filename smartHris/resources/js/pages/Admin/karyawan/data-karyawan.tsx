@@ -1,5 +1,5 @@
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
-import DynamicTable, { ColumnDef } from '@/components/DynamicTable';
+import ConfirmDeleteModal from '@/components/confirm-delete-modal';
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -11,7 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import SuccessModal from '@/components/SuccessModal';
+import SuccessModal from '@/components/success-modal';
 
 type Karyawan = {
     id: number;
