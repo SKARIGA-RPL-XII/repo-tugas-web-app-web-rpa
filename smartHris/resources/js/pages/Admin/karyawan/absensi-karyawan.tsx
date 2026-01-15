@@ -9,9 +9,11 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
+import { Icon } from '@iconify/react';
 import { Head, router } from '@inertiajs/react';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
+
 
 export type Absensi = {
     id: number;
@@ -33,7 +35,9 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(null);
+    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(
+        null,
+    );
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDeleteClick = (item: Absensi) => {
@@ -67,16 +71,13 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
         },
         {
             header: 'Karyawan',
-            render: (item) => (
-                <div className="flex flex-col gap-1">
-                    <span className="font-medium text-gray-900">
-                        {item.nama}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {item.jabatan}
-                    </span>
-                </div>
-            ),
+            accessorKey: 'nama',
+            className: 'font-medium text-gray-900',
+        },
+        {
+            header: 'Jabatan',
+            accessorKey: 'jabatan',
+            className: 'text-gray-700',
         },
         {
             header: 'Departemen',
@@ -84,97 +85,46 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
             className: 'text-gray-600',
         },
         {
-            header: 'Tanggal',
-            render: (item) =>
-                item.tanggal ? (
-                    <span className="text-sm text-gray-600">
-                        {new Date(item.tanggal).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                        })}
-                    </span>
-                ) : (
-                    '-'
-                ),
-        },
-        {
             header: 'Jam Absen',
             render: (item) => (
-                <div className="text-sm text-gray-600">
-                    <div>
-                        Masuk:{' '}
-                        <span className="font-medium text-gray-900">
-                            {item.jam_masuk ?? '-'}
-                        </span>
-                    </div>
-                    <div>
-                        Pulang:{' '}
-                        <span className="font-medium text-gray-900">
-                            {item.jam_pulang ?? '-'}
-                        </span>
-                    </div>
+                <div className="grid grid-cols-[60px_10px_1fr] gap-x-1 text-sm text-gray-600">
+                    <span>Masuk</span>
+                    <span>:</span>
+                    <span className="font-medium text-gray-900">
+                        {item.jam_masuk ?? '-'}
+                    </span>
+
+                    <span>Pulang</span>
+                    <span>:</span>
+                    <span className="font-medium text-gray-900">
+                        {item.jam_pulang ?? '-'}
+                    </span>
                 </div>
             ),
         },
         {
             header: 'Keterangan',
-            render: (item) => {
-                const keterangan = item.keterangan ?? '-';
-                const isLate = keterangan.includes('Terlambat');
-
-                return (
-                    <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium
-                            ${
-                                isLate
-                                    ? 'bg-red-100 text-red-700'
-                                    : keterangan === 'Tepat waktu'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-100 text-gray-600'
-                            }
-                        `}
-                    >
-                        {keterangan}
-                    </span>
-                );
-            },
+            accessorKey: 'keterangan',
+            className: 'text-sm text-gray-700',
         },
         {
             header: '',
             id: 'actions',
             className: 'w-10 px-0',
             render: (item) => (
-                <DropdownMenu>
+ <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900"
-                        >
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100">
+                            <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
-
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg"
-                    >
-                        <DropdownMenuItem
-                            onClick={() =>
-                                router.get(
-                                    `/admin/absensi/${item.id}/edit`
-                                )
-                            }
-                            className="gap-3 rounded-lg px-3 py-2.5"
-                        >
+                    <DropdownMenuContent align="end" className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+                        <DropdownMenuItem onClick={() => handleEdit(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Pencil className="h-4 w-4" />
                             <span className="font-medium">Edit</span>
                         </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                            onClick={() => handleDeleteClick(item)}
-                            className="gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50"
-                        >
+                        <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700">
                             <Trash2 className="h-4 w-4" />
                             <span className="font-medium">Delete</span>
                         </DropdownMenuItem>
@@ -198,7 +148,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
                         title="Data Absensi Karyawan"
                         data={absensi}
                         columns={columns}
-                        searchKeys={['nama', 'departemen']}
+                        searchKeys={['nama', 'jabatan', 'departemen']}
                     />
                 </div>
             </div>

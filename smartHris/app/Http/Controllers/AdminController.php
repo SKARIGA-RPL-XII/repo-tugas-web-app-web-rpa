@@ -215,24 +215,36 @@ public function indexAbsensi(Request $request)
         $query->whereDate('absensi.tanggal', $tanggal);
     }
 
-    $absensi = $query->get()->map(function ($item) {
-        $batasMasuk = Carbon::createFromTime(8, 30);
+$absensi = $query->get()->map(function ($item) {
+    $batasMasuk = Carbon::createFromTime(8, 30);
 
-        if ($item->jam_masuk) {
-            $jamMasuk = Carbon::parse($item->jam_masuk);
+    if ($item->jam_masuk) {
+        $jamMasuk = Carbon::parse($item->jam_masuk);
 
-            if ($jamMasuk->greaterThan($batasMasuk)) {
-                $selisih = $batasMasuk->diffInMinutes($jamMasuk);
-                $item->keterangan = "Terlambat {$selisih} menit";
+        if ($jamMasuk->greaterThan($batasMasuk)) {
+            $totalMenit = $batasMasuk->diffInMinutes($jamMasuk);
+
+            $jam   = intdiv($totalMenit, 60);
+            $menit = $totalMenit % 60;
+
+            if ($jam > 0) {
+                $item->keterangan =
+                    $menit > 0
+                        ? "Terlambat {$jam} jam {$menit} menit"
+                        : "Terlambat {$jam} jam";
             } else {
-                $item->keterangan = 'Tepat waktu';
+                $item->keterangan = "Terlambat {$menit} menit";
             }
         } else {
-            $item->keterangan = 'Tidak hadir';
+            $item->keterangan = 'Tepat waktu';
         }
+    } else {
+        $item->keterangan = 'Tidak hadir';
+    }
 
-        return $item;
-    });
+    return $item;
+});
+
 
     return Inertia::render('Admin/karyawan/absensi-karyawan', [
         'tanggal' => $tanggal,
