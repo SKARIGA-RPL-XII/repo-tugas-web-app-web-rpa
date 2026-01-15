@@ -1,5 +1,5 @@
-import WeeklyAttendanceChart from '@/components/WeeklyAttendanceChart'
-import AttendanceDonut from '@/components/AttendanceDonut'
+import WeeklyAttendanceChart from '@/components/weekly-attendance-chart'
+import AttendanceDonut from '@/components/attendance-donut'
 import AdminStats from './AdminStats'
 
 type Stats = {

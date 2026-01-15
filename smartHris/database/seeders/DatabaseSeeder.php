@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Karyawan;
 use App\Models\JenisPelanggaran;
@@ -9,57 +12,133 @@ use App\Models\PelanggaranKaryawan;
 use App\Models\SuratPeringatan;
 use App\Models\Absensi;
 use App\Models\Cuti;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
+        $password = Hash::make('password123');
+
         /* ================= USERS ================= */
+        
         $admin = User::create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'name' => 'Super Admin',
+            'email' => 'admin@smarthris.com',
+            'password' => $password,
             'role' => 'admin',
         ]);
 
         $user1 = User::create([
             'name' => 'Dhani Firdaus',
-            'email' => 'dhani@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'dhani@smarthris.com',
+            'password' => $password,
             'role' => 'user',
         ]);
 
         $user2 = User::create([
-            'name' => 'Ahmad Ramadhan',
-            'email' => 'ahmad@example.com',
-            'password' => Hash::make('password'),
+            'name' => 'Gilang Ramadhan',
+            'email' => 'gilang@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+        
+        $user3 = User::create([
+            'name' => 'Rafli Ahmad',
+            'email' => 'rafli@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+        
+        $user4 = User::create([
+            'name' => 'Nike Ardilla',
+            'email' => 'nike@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+
+        $user5 = User::create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+
+        $user6 = User::create([
+            'name' => 'Siti Aminah',
+            'email' => 'siti@smarthris.com',
+            'password' => $password,
             'role' => 'user',
         ]);
 
         /* ================= KARYAWAN ================= */
+
         $karyawan1 = Karyawan::create([
             'user_id' => $user1->id,
             'nip' => 'K001',
-            'jabatan' => 'Staff IT',
+            'jabatan' => 'Backend Developer',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2000-01-01',
+            'tanggal_lahir' => '2000-05-10',
             'departemen' => 'IT',
-            'tanggal_masuk' => '2022-01-01',
-            'alamat' => 'Jl. Contoh 1',
+            'tanggal_masuk' => '2022-01-10',
+            'alamat' => 'Jl. Merdeka No. 10, Jakarta',
         ]);
 
         $karyawan2 = Karyawan::create([
             'user_id' => $user2->id,
             'nip' => 'K002',
-            'jabatan' => 'Staff HR',
+            'jabatan' => 'Recruitment Staff',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2001-02-02',
-            'departemen' => 'HR',
-            'tanggal_masuk' => '2022-02-01',
-            'alamat' => 'Jl. Contoh 2',
+            'tanggal_lahir' => '1999-08-17',
+            'departemen' => 'HRD',
+            'tanggal_masuk' => '2022-03-01',
+            'alamat' => 'Jl. Sudirman No. 45, Bandung',
+        ]);
+        
+        $karyawan3 = Karyawan::create([
+            'user_id' => $user3->id,
+            'nip' => 'K003',
+            'jabatan' => 'Payroll Specialist',
+            'jenis_kelamin' => 'L',
+            'tanggal_lahir' => '1998-12-25',
+            'departemen' => 'Finance',
+            'tanggal_masuk' => '2021-06-15',
+            'alamat' => 'Jl. Diponegoro No. 12, Surabaya',
+        ]);
+
+        $karyawan4 = Karyawan::create([
+            'user_id' => $user4->id,
+            'nip' => 'K004',
+            'jabatan' => 'Social Media Specialist',
+            'jenis_kelamin' => 'P',
+            'tanggal_lahir' => '2001-02-14',
+            'departemen' => 'Marketing',
+            'tanggal_masuk' => '2023-01-05',
+            'alamat' => 'Jl. Anggrek No. 88, Malang',
+        ]);
+
+        $karyawan5 = Karyawan::create([
+            'user_id' => $user5->id,
+            'nip' => 'K005',
+            'jabatan' => 'General Affair',
+            'jenis_kelamin' => 'L',
+            'tanggal_lahir' => '1995-10-30',
+            'departemen' => 'Operasional',
+            'tanggal_masuk' => '2020-11-20',
+            'alamat' => 'Jl. Kenanga No. 5, Yogyakarta',
+        ]);
+
+        $karyawan6 = Karyawan::create([
+            'user_id' => $user6->id,
+            'nip' => 'K006',
+            'jabatan' => 'Legal Officer',
+            'jenis_kelamin' => 'P',
+            'tanggal_lahir' => '1997-04-21',
+            'departemen' => 'Legal',
+            'tanggal_masuk' => '2021-09-01',
+            'alamat' => 'Jl. Mawar Melati No. 99, Semarang',
         ]);
 
         /* ================= JENIS PELANGGARAN ================= */

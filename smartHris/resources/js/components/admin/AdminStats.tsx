@@ -1,4 +1,4 @@
-import StatCard from '@/components/StatCard'
+import StatCard from '@/components/stat-card'
 
 type Stats = {
   total_karyawan: number
