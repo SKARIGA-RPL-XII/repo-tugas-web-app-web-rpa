@@ -11,28 +11,28 @@ Route::get('/', function () {
 })->middleware('guest.redirect')->name('home');
 
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
-
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
 Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['role:admin'])->group(function () {
 
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');;
+        Route::get('/app/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');;
 
         Route::get('/app/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
-        Route::post('/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
-        Route::put('/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
-        Route::delete('/karyawan/{id}', [AdminController::class, 'destroyKaryawan'])->name('admin.karyawan.destroy');
+        Route::post('/app/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
+        Route::put('/app/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
+        Route::delete('/app/karyawan/{id}', [AdminController::class, 'destroyKaryawan'])->name('admin.karyawan.destroy');
 
         // ABSENSI
         Route::get('/app/absensi', [AdminController::class, 'indexAbsensi'])->name('admin.absensi');
-        Route::put('/absensi/{id}', [AdminController::class, 'updateAbsensi'])->name('admin.absensi.update');
-        Route::delete('/absensi/{id}', [AdminController::class, 'destroyAbsensi'])->name('admin.absensi.destroy');
+        Route::put('/app/absensi/{id}', [AdminController::class, 'updateAbsensi'])->name('admin.absensi.update');
+        Route::delete('/app/absensi/{id}', [AdminController::class, 'destroyAbsensi'])->name('admin.absensi.destroy');
 
         // CUTI
         Route::get('/app/cuti', [AdminController::class, 'indexCuti'])->name('admin.cuti');
-        Route::post('/cuti/{id}/approve', [AdminController::class, 'approveCuti'])->name('admin.cuti.approve');
-        Route::post('/cuti/{id}/reject', [AdminController::class, 'rejectCuti'])->name('admin.cuti.reject');
+        Route::post('/app/cuti/{id}/approve', [AdminController::class, 'approveCuti'])->name('admin.cuti.approve');
+        Route::post('/app/cuti/{id}/reject', [AdminController::class, 'rejectCuti'])->name('admin.cuti.reject');
 
         // KALENDER
         Route::get('/app/kalender', [AdminController::class, 'kalender'])->name('admin.kalender');
@@ -49,9 +49,9 @@ Route::middleware(['auth'])->group(function () {
 
         // PELANGGARAN
         Route::get('/app/pelanggaran', [AdminController::class, 'pKaryawan'])->name('admin.pelanggaran');
-        Route::post('/pelanggaran', [AdminController::class, 'pKaryawanStore'])->name('admin.pelanggaran.store');
-        Route::put('/pelanggaran/{id}', [AdminController::class, 'pKaryawanUpdate'])->name('admin.pelanggaran.update');
-        Route::delete('/pelanggaran/{id}', [AdminController::class, 'pKaryawanDestroy'])->name('admin.pelanggaran.destroy');
+        Route::post('/app/pelanggaran', [AdminController::class, 'pKaryawanStore'])->name('admin.pelanggaran.store');
+        Route::put('/app/pelanggaran/{id}', [AdminController::class, 'pKaryawanUpdate'])->name('admin.pelanggaran.update');
+        Route::delete('/app/pelanggaran/{id}', [AdminController::class, 'pKaryawanDestroy'])->name('admin.pelanggaran.destroy');
 
         // SP
         Route::get('/sp', [AdminController::class, 'sp'])->name('admin.sp');
@@ -60,12 +60,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:user'])->group(function () {
-        // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 
-        Route::get('/absensi', [UserController::class, 'riwayat']);
-        Route::post('/absensi', [UserController::class, 'store']);
-
-        Route::get('/kalender', [UserController::class, 'index']);
+        Route::get('/absensi', [UserController::class, 'absensi']);
+        Route::post('/absensi/masuk', [UserController::class, 'masukStore']);
+        Route::post('/absensi/pulang', [UserController::class, 'pulangStore']);
+        Route::get('/riwayat-absensi', [UserController::class, 'riwayat']);
 
         Route::get('/pelanggaran', [UserController::class, 'index']);
         Route::post('/cuti', [UserController::class, 'store']);

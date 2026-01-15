@@ -6,7 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Absensi extends Model
 {
-    protected $fillable = ['karyawan_id', 'tanggal', 'status'];
+    protected $fillable = [
+        'karyawan_id',
+        'tanggal',
+        'jam_masuk',
+        'jam_pulang',
+        'foto_masuk',
+        'foto_pulang',
+        'status',
+        'keterangan',
+    ];
     protected $table = 'absensi';
 
     public function karyawan()
@@ -14,4 +23,3 @@ class Absensi extends Model
         return $this->belongsTo(Karyawan::class);
     }
 }
-

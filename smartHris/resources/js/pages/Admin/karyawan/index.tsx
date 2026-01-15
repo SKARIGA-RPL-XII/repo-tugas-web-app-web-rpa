@@ -104,9 +104,9 @@ export default function Index({ karyawan }: { karyawan: Karyawan[] }) {
         }
 
         if (isEdit && data.id) {
-            router.put(`/karyawan/${data.id}`, data);
+            router.put(`/app/karyawan/${data.id}`, data);
         } else {
-            router.post("/karyawan", data);
+            router.post("/app/karyawan", data);
         }
 
         setShowModal(false);
@@ -115,7 +115,7 @@ export default function Index({ karyawan }: { karyawan: Karyawan[] }) {
 
     const handleDelete = (id: number) => {
         if (confirm("Hapus karyawan ini?")) {
-            router.delete(`/karyawan/${id}`);
+            router.delete(`/app/karyawan/${id}`);
         }
     };
 
@@ -182,12 +182,6 @@ export default function Index({ karyawan }: { karyawan: Karyawan[] }) {
                             placeholder="Email"
                             value={data.email}
                             onChange={(e) => setData("email", e.target.value)}
-                        />
-
-                        <input
-                            placeholder="NIP"
-                            value={data.nip}
-                            onChange={(e) => setData("nip", e.target.value)}
                         />
 
                         <input

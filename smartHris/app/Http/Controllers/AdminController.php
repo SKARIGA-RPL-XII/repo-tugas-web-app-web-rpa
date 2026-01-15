@@ -100,7 +100,6 @@ class AdminController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1️⃣ Buat user dulu (password sementara)
             $user = User::create([
                 'name'     => $request->nama,
                 'email'    => $request->email,
@@ -108,18 +107,15 @@ class AdminController extends Controller
                 'role'     => 'user',
             ]);
 
-            // 2️⃣ Generate NIP: YYYYMMDD-IDUSER
-            $tanggalMasuk = \Carbon\Carbon::parse($request->tanggal_masuk)
+            $tanggalMasuk = Carbon::parse($request->tanggal_masuk)
                 ->format('Ymd');
 
             $nip = $tanggalMasuk . $user->id;
 
-            // 3️⃣ Update password = NIP
             $user->update([
                 'password' => bcrypt($nip),
             ]);
 
-            // 4️⃣ Simpan karyawan
             Karyawan::create([
                 'user_id'        => $user->id,
                 'nip'            => $nip,
@@ -139,9 +135,7 @@ class AdminController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            return back()
-                ->withErrors(['error' => $e->getMessage()])
-                ->withInput();
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
     public function updateKaryawan(Request $request, $id)

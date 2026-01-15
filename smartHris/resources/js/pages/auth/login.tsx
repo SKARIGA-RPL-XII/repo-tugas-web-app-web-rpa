@@ -85,7 +85,8 @@ export default function Login({
                                         <Input className='input-username'
                                             id="email"
                                             name="email"
-                                            placeholder="Masukkan Email"
+                                            placeholder="Masukkan Email
+                                            "
                                             tabIndex={1}
                                         />
                                         <InputError message={errors.email} />
