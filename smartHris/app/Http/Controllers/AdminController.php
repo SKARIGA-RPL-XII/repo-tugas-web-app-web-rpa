@@ -86,7 +86,7 @@ class AdminController extends Controller
             ];
         });
 
-        return Inertia::render('Admin/karyawan/data-karyawan', [
+        return Inertia::render('Admin/karyawan/index', [
             'karyawan' => $karyawan
         ]);
     }
@@ -137,7 +137,7 @@ class AdminController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            dd($e->getMessage()); // DEBUG AMAN
+            dd($e->getMessage());
 
             return back()
                 ->withErrors('Gagal menambahkan karyawan')
