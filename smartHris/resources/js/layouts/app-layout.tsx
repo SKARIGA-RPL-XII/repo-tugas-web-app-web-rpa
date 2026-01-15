@@ -1,5 +1,5 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import Sidebar from '@/components/Sidebar';
+import Sidebar from '@/components/sidebar';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
 

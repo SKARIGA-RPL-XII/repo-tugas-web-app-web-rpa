@@ -47,7 +47,7 @@ export default function Login({
                         className="absolute w-full h-full object-cover"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+                    <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/60" />
 
                     <div className="absolute inset-0 flex flex-col justify-between p-8 text-white z-10">
                         <p className="text-sm opacity-90">
