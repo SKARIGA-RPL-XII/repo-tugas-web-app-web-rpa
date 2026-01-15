@@ -25,6 +25,7 @@ interface DynamicTableProps<T> {
     columns: ColumnDef<T>[];
     searchKeys?: (keyof T)[];
     onAddClick?: () => void;
+    addButtonLabel?: string;
 }
 
 function DynamicTable<T extends { id: string | number }>({
@@ -33,6 +34,7 @@ function DynamicTable<T extends { id: string | number }>({
     columns,
     searchKeys = [],
     onAddClick,
+    addButtonLabel = "Tambah Data",
 }: DynamicTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{
@@ -129,14 +131,15 @@ function DynamicTable<T extends { id: string | number }>({
                                 className="h-10 w-full rounded-lg border-gray-200 bg-white pl-10 focus:ring-1 focus:ring-emerald-500"
                             />
                         </div>
-
-                        <Button
-                            onClick={onAddClick}
-                            className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Tambah Karyawan
-                        </Button>
+                        {onAddClick && (
+                            <Button
+                                onClick={onAddClick}
+                                className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                {addButtonLabel}
+                            </Button>
+                        )}
                     </div>
                 </div>
             </CardHeader>
@@ -183,14 +186,14 @@ function DynamicTable<T extends { id: string | number }>({
                                             >
                                                 {col.render
                                                     ? col.render(
-                                                          item,
-                                                          startIndex + rowIdx,
-                                                      )
+                                                        item,
+                                                        startIndex + rowIdx,
+                                                    )
                                                     : col.accessorKey
-                                                      ? (item[
+                                                        ? (item[
                                                             col.accessorKey
                                                         ] as React.ReactNode)
-                                                      : null}
+                                                        : null}
                                             </td>
                                         ))}
                                     </tr>
@@ -244,7 +247,6 @@ function DynamicTable<T extends { id: string | number }>({
                             <ChevronLeft className="h-4 w-4" />
                         </button>
 
-                        {/* Tombol halaman */}
                         {Array.from(
                             { length: Math.min(totalPages, 5) },
                             (_, i) => {
@@ -261,11 +263,10 @@ function DynamicTable<T extends { id: string | number }>({
                                         onClick={() =>
                                             handlePageChange(pageNum)
                                         }
-                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
-                                            currentPage === pageNum
-                                                ? 'bg-emerald-50 text-emerald-600'
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                        }`}
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${currentPage === pageNum
+                                            ? 'bg-emerald-50 text-emerald-600'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
                                     >
                                         {pageNum}
                                     </button>
