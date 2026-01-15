@@ -81,15 +81,15 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/karyawan') // 1. Ubah pengecekan URL aktif di sini
+                                        isActive('/admin/karyawan')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/karyawan"> {/* 2. Ubah Link tujuan di sini */}
+                                    <Link href="/admin/karyawan"> 
                                         <Icon
-                                            icon="f7:person-2-fill" // Icon sudah oke
-                                            width="24"  // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
+                                            icon="f7:person-2-fill" 
+                                            width="24"  
                                             height="24"
                                         />
                                         <span>Data Karyawan</span>
@@ -100,12 +100,12 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/absensi_karyawan')
+                                        isActive('/admin/absensi')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/absensi_karyawan">
+                                    <Link href="/admin/absensi">
                                         {' '}
                                         <Icon
                                             icon="streamline:office-worker-remix"
