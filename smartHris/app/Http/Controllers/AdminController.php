@@ -194,18 +194,9 @@ public function indexAbsensi(Request $request)
 {
     $tanggal = $request->query('tanggal');
 
-    // Jika belum pilih tanggal
-    if (!$tanggal) {
-        return Inertia::render('Admin/karyawan/absensi-karyawan', [
-            'tanggal' => null,
-            'absensi' => [],
-        ]);
-    }
-
-    $absensi = Absensi::query()
+    $query = Absensi::query()
         ->join('karyawan', 'absensi.karyawan_id', '=', 'karyawan.id')
         ->join('users', 'karyawan.user_id', '=', 'users.id')
-        ->whereDate('absensi.tanggal', $tanggal)
         ->select(
             'absensi.id',
             'absensi.tanggal',
@@ -216,32 +207,39 @@ public function indexAbsensi(Request $request)
             'karyawan.jabatan',
             'karyawan.departemen'
         )
-        ->orderBy('absensi.jam_masuk')
-        ->get()
-        ->map(function ($item) {
-            $batasMasuk = Carbon::createFromTime(8, 30, 0);
+        ->orderBy('absensi.tanggal', 'desc')
+        ->orderBy('absensi.jam_masuk');
 
-            if ($item->jam_masuk) {
-                $jamMasuk = Carbon::parse($item->jam_masuk);
+    // 🔹 kalau ada filter tanggal → baru difilter
+    if ($tanggal) {
+        $query->whereDate('absensi.tanggal', $tanggal);
+    }
 
-                if ($jamMasuk->greaterThan($batasMasuk)) {
-                    $selisih = $batasMasuk->diffInMinutes($jamMasuk);
-                    $item->keterangan = "Terlambat {$selisih} menit";
-                } else {
-                    $item->keterangan = 'Tepat waktu';
-                }
+    $absensi = $query->get()->map(function ($item) {
+        $batasMasuk = Carbon::createFromTime(8, 30);
+
+        if ($item->jam_masuk) {
+            $jamMasuk = Carbon::parse($item->jam_masuk);
+
+            if ($jamMasuk->greaterThan($batasMasuk)) {
+                $selisih = $batasMasuk->diffInMinutes($jamMasuk);
+                $item->keterangan = "Terlambat {$selisih} menit";
             } else {
-                $item->keterangan = 'Tidak hadir';
+                $item->keterangan = 'Tepat waktu';
             }
+        } else {
+            $item->keterangan = 'Tidak hadir';
+        }
 
-            return $item;
-        });
+        return $item;
+    });
 
     return Inertia::render('Admin/karyawan/absensi-karyawan', [
         'tanggal' => $tanggal,
         'absensi' => $absensi,
     ]);
 }
+
     /* ========= CUTI ========= */
     public function indexCuti()
     {
