@@ -66,21 +66,18 @@ class DatabaseSeeder extends Seeder
         $jp1 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Terlambat Masuk',
             'tingkat' => 'ringan',
-            'potongan' => 0,
             'keterangan' => 'Terlambat masuk kerja',
         ]);
 
         $jp2 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Tidak Hadir Tanpa Keterangan',
             'tingkat' => 'sedang',
-            'potongan' => 50000,
             'keterangan' => 'Absen tanpa izin',
         ]);
 
         $jp3 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Melanggar Peraturan Berat',
             'tingkat' => 'berat',
-            'potongan' => 100000,
             'keterangan' => 'Melanggar aturan perusahaan',
         ]);
 
@@ -136,12 +133,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /* ================= CUTI ================= */
+        $tanggalMulai   = Carbon::parse('2026-01-15');
+        $tanggalSelesai = Carbon::parse('2026-01-17');
+
         Cuti::create([
-            'karyawan_id' => $karyawan1->id,
-            'tanggal_mulai' => '2026-01-15',
-            'tanggal_selesai' => '2026-01-17',
-            'alasan' => 'Keperluan keluarga',
-            'status' => 'pending',
+            'karyawan_id'     => $karyawan1->id,
+            'tanggal_mulai'   => $tanggalMulai,
+            'tanggal_selesai' => $tanggalSelesai,
+            'jumlah_hari'     => $tanggalMulai->diffInDays($tanggalSelesai) + 1,
+            'alasan'          => 'Keperluan keluarga',
+            'status'          => 'pending',
         ]);
     }
 }

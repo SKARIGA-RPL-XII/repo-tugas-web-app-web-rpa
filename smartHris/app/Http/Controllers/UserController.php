@@ -15,9 +15,8 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    private string $jamMasukAkhir = '09:00:00';
-    private string $jamPulangMulai = '16:00:00';
-
+    private string $jamMasukAkhir = '08:00:00';
+    private string $jamPulangMulai = '17:00:00';
     public function index()
     {
         $user = auth()->user();
@@ -27,27 +26,13 @@ class UserController extends Controller
         $bulanIni = Carbon::now()->month;
         $tahunIni = Carbon::now()->year;
 
-        $totalHariKerja = Absensi::where('karyawan_id', $karyawan->id)
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->count();
+        $totalHariKerja = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->count();
 
-        $jumlahHadir = Absensi::where('karyawan_id', $karyawan->id)
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->where('status', 'hadir')
-            ->count();
+        $jumlahHadir = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->where('status', 'hadir')->count();
 
-        $jumlahTerlambat = Absensi::where('karyawan_id', $karyawan->id)
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->whereNotNull('keterlambatan')
-            ->count();
+        $jumlahTerlambat = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->where('keterangan', 'like', '%Terlambat%')->count();
 
-        $jumlahCuti = Cuti::where('karyawan_id', $karyawan->id)
-            ->where('status', 'approved')
-            ->whereMonth('tanggal_mulai', $bulanIni)
-            ->count();
+        $jumlahCuti = Cuti::where('karyawan_id', $karyawan->id)->where('status', 'approved')->whereMonth('tanggal_mulai', $bulanIni)->count();
 
 
         $grafikKehadiran = Absensi::select(
@@ -65,13 +50,52 @@ class UserController extends Controller
                     'value' => $item->total,
                 ];
             });
-        $absenHariIni = Absensi::where('karyawan_id', $karyawan->id)
-            ->whereDate('tanggal', $today)
-            ->first();
+        $absenHariIni = Absensi::where('karyawan_id', $karyawan->id)->whereDate('tanggal', $today)->first();
         $jadwalKerja = [
             'datang' => '08:00',
             'pulang' => '17:00',
         ];
+        return response()->json([
+            'user' => [
+                'name' => $user->name,
+            ],
+
+            // CARD ATAS
+            'statistik' => [
+                'hadir' => [
+                    'total' => $jumlahHadir,
+                    'hariKerja' => $totalHariKerja,
+                ],
+                'terlambat' => [
+                    'total' => $jumlahTerlambat,
+                    'hariKerja' => $totalHariKerja,
+                ],
+                'cuti' => [
+                    'total' => $jumlahCuti,
+                    'hariKerja' => $totalHariKerja,
+                ],
+            ],
+
+            // GRAFIK
+            'grafikKehadiran' => $grafikKehadiran,
+
+            // ABSEN HARI INI
+            'absenHariIni' => $absenHariIni ? [
+                'status' => $absenHariIni->status,
+                'jamMasuk' => $absenHariIni->jam_masuk,
+                'jamPulang' => $absenHariIni->jam_pulang,
+                'keterlambatan' => $absenHariIni->keterlambatan,
+                'tanggal' => $today->translatedFormat('l, d F Y'),
+            ] : null,
+
+            // JADWAL
+            'jadwalKerja' => $jadwalKerja,
+
+            // KALENDER
+            'tanggalHariIni' => $today->translatedFormat('l, d F Y'),
+            'bulanAktif' => $today->translatedFormat('F Y'),
+            'tanggalAktif' => $today->day,
+        ]);
 
         return Inertia::render('User/index', [
             'user' => [
@@ -113,6 +137,24 @@ class UserController extends Controller
             'tanggalHariIni' => $today->translatedFormat('l, d F Y'),
             'bulanAktif' => $today->translatedFormat('F Y'),
             'tanggalAktif' => $today->day,
+        ]);
+    }
+    public function profileUpdate()
+    {
+        $karyawan = Karyawan::where('user_id', auth()->id())->firstOrFail();
+
+        $validated = $request->validate([
+            'nama'           => 'required|string|max:100',
+            'jenis_kelamin'  => 'required|in:Laki-laki,Perempuan',
+            'tanggal_lahir'  => 'required|date',
+            'alamat'         => 'nullable|string',
+            'departemen_id'  => 'required|exists:departemen,id',
+        ]);
+
+        $karyawan->update($validated);
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui'
         ]);
     }
     public function absensi()
@@ -381,7 +423,6 @@ class UserController extends Controller
             ]),
         ]);
     }
-
     public function cuti(Request $request)
     {
         $query = Cuti::query()
@@ -404,23 +445,29 @@ class UserController extends Controller
 
         return response()->json($cuti);
     }
-
     public function cutiStore(Request $request)
     {
         $request->validate([
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
-            'alasan' => 'required'
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'alasan'          => 'required|string',
         ]);
+
+        $tanggalMulai   = Carbon::parse($request->tanggal_mulai);
+        $tanggalSelesai = Carbon::parse($request->tanggal_selesai);
+
+        // HITUNG JUMLAH HARI (INKLUSIF)
+        $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
         Cuti::create([
-            'karyawan_id' => auth()->user()->karyawan->id,
-            'tanggal_mulai' => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'alasan' => $request->alasan,
-            'status' => 'pending'
+            'karyawan_id'    => auth()->user()->karyawan->id,
+            'tanggal_mulai'  => $tanggalMulai,
+            'tanggal_selesai' => $tanggalSelesai,
+            'jumlah_hari'    => $jumlahHari,
+            'alasan'         => $request->alasan,
+            'status'         => 'pending',
         ]);
 
-        return response()->json(['message' => 'Pengajuan cuti berhasil']);
+        return back()->with('success', 'Pengajuan cuti berhasil dikirim');
     }
 }

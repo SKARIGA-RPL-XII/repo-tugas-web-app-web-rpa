@@ -9,7 +9,9 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest.redirect')->name('home');
-
+Route::fallback(function () {
+    return redirect()->back();
+});
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
@@ -19,9 +21,11 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/app/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');;
 
+        //KARYAWAN
         Route::get('/app/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
         Route::post('/app/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
         Route::put('/app/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
+        Route::put('/app/karyawan/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.karyawan.reset-password');
         Route::delete('/app/karyawan/{id}', [AdminController::class, 'destroyKaryawan'])->name('admin.karyawan.destroy');
 
         // ABSENSI
@@ -68,12 +72,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/riwayat-absensi', [UserController::class, 'riwayat']);
 
         Route::get('/pelanggaran', [UserController::class, 'index']);
-        Route::post('/cuti', [UserController::class, 'store']);
-        Route::get('/cuti', [UserController::class, 'index']);
+        Route::get('/cuti', [UserController::class, 'cuti']);
+        Route::post('/cuti', [UserController::class, 'cutiStore']);
     });
 });
-
-
-// KARYAWAN
-
 require __DIR__ . '/settings.php';

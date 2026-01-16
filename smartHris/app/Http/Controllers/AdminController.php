@@ -20,9 +20,6 @@ class AdminController extends Controller
 {
     public function index()
     {
-        // $karyawan = auth()->user()->role;
-        // return $karyawan;
-
         $today = Carbon::today();
 
         $totalKaryawan = Karyawan::count();
@@ -180,6 +177,44 @@ class AdminController extends Controller
         });
 
         return back()->with('success', 'Karyawan dihapus');
+    }
+    public function resetPassword($id)
+    {
+        // Ambil user berdasarkan ID
+        $user = User::with('karyawan')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'message' => 'Tidak dapat mereset password sendiri'
+            ], 403);
+        }
+
+        if (!$user->karyawan) {
+            return response()->json([
+                'message' => 'User tidak memiliki data karyawan'
+            ], 422);
+        }
+
+        if (!$user->karyawan->nip) {
+            return response()->json([
+                'message' => 'NIP karyawan kosong'
+            ], 422);
+        }
+
+        $user->update([
+            'password' => bcrypt($user->karyawan->nip),
+
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil direset ke NIP'
+        ]);
     }
 
     /* ========= ABSENSI ========= */

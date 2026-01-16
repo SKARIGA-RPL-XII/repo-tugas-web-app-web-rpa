@@ -24,7 +24,6 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        // 🔀 MULTI ROLE REDIRECT
         return match ($user->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'user'  => redirect()->route('user.dashboard'),
