@@ -224,33 +224,42 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /* ================= CUTI ================= */
-        $tanggalMulai   = Carbon::parse('2026-01-15');
-        $tanggalSelesai = Carbon::parse('2026-01-17');
-
+        
+        $tglMulai1   = Carbon::parse('2026-01-15');
+        $tglSelesai1 = Carbon::parse('2026-01-17');
+        
         Cuti::create([
             'karyawan_id'     => $karyawan1->id,
-            'tanggal_mulai'   => $tanggalMulai,
-            'tanggal_selesai' => $tanggalSelesai,
-            'jumlah_hari'     => $tanggalMulai->diffInDays($tanggalSelesai) + 1,
+            'tanggal_mulai'   => $tglMulai1,
+            'tanggal_selesai' => $tglSelesai1,
+            'jumlah_hari'     => $tglMulai1->diffInDays($tglSelesai1) + 1,
             'alasan'          => 'Keperluan keluarga',
             'status'          => 'pending',
         ]);
 
         
-        Cuti::create([
-            'karyawan_id' => $karyawan2->id,
-            'tanggal_mulai' => '2026-01-20',
-            'tanggal_selesai' => '2026-01-20',
-            'alasan' => 'Mengurus SIM',
-            'status' => 'disetujui', 
-        ]);
+        $tglMulai2   = Carbon::parse('2026-01-20');
+        $tglSelesai2 = Carbon::parse('2026-01-20');
 
         Cuti::create([
-            'karyawan_id' => $karyawan3->id,
-            'tanggal_mulai' => '2026-01-25',
-            'tanggal_selesai' => '2026-01-28',
-            'alasan' => 'Ingin istirahat saja',
-            'status' => 'ditolak',
+            'karyawan_id'     => $karyawan2->id,
+            'tanggal_mulai'   => $tglMulai2,
+            'tanggal_selesai' => $tglSelesai2,
+            'jumlah_hari'     => $tglMulai2->diffInDays($tglSelesai2) + 1, 
+            'alasan'          => 'Mengurus SIM',
+            'status'          => 'disetujui', 
+        ]);
+
+        $tglMulai3   = Carbon::parse('2026-01-25');
+        $tglSelesai3 = Carbon::parse('2026-01-28');
+
+        Cuti::create([
+            'karyawan_id'     => $karyawan3->id,
+            'tanggal_mulai'   => $tglMulai3,
+            'tanggal_selesai' => $tglSelesai3,
+            'jumlah_hari'     => $tglMulai3->diffInDays($tglSelesai3) + 1, 
+            'alasan'          => 'Ingin istirahat saja',
+            'status'          => 'ditolak',
         ]);
     }
 }
