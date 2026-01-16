@@ -1,248 +1,232 @@
-import { useForm, router } from "@inertiajs/react";
-import { useState } from "react";
+import ConfirmDeleteModal from '@/components/confirm-delete-modal';
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
+import KaryawanFormModal from '@/components/karyawan-form-modal'; // Pastikan import ini benar (sesuai nama file)
+import SuccessModal from '@/components/success-modal';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router } from '@inertiajs/react';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
-/* =========================
-   TYPES
-========================= */
-interface User {
-    name: string;
-    email: string;
-}
-
-interface Karyawan {
+// Pastikan tipe data sama dengan yang ada di database/controller
+export type Karyawan = {
     id: number;
-    nip: string;
-    jabatan: string;
-    jenis_kelamin: string;
-    departemen: string;
-    tanggal_lahir: string;
-    tanggal_masuk: string;
-    alamat?: string;
-    user: User;
-}
-
-interface FormData {
-    id: number | null;
     nama: string;
-    email: string;
-    password: string;
     nip: string;
     jabatan: string;
-    jenis_kelamin: string;
     departemen: string;
-    tanggal_lahir: string;
-    tanggal_masuk: string;
     alamat: string;
-}
+    tanggal_masuk: string;
+    tanggal_lahir: string;
+    jenis_kelamin: string;
+};
 
-/* =========================
-   COMPONENT
-========================= */
-export default function Index({ karyawan }: { karyawan: Karyawan[] }) {
-    const today = new Date().toISOString().split("T")[0];
+type PageProps = {
+    karyawan: Karyawan[];
+};
 
-    const [showModal, setShowModal] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
+export default function DataKaryawan({ karyawan }: PageProps) {
 
-    const { data, setData, reset } = useForm<FormData>({
-        id: null,
-        nama: "",
-        email: "",
-        password: "",
-        nip: "",
-        jabatan: "",
-        jenis_kelamin: "L",
-        departemen: "",
-        tanggal_lahir: "",
-        tanggal_masuk: today,
-        alamat: "",
-    });
+    // --- State Success & Delete (Tetap Ada) ---
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    /* =========================
-       HANDLER
-    ========================= */
-    const openCreate = () => {
-        reset({
-            id: null,
-            nama: "",
-            email: "",
-            password: "",
-            nip: "",
-            jabatan: "",
-            jenis_kelamin: "L",
-            departemen: "",
-            tanggal_lahir: "",
-            tanggal_masuk: today,
-            alamat: "",
-        });
-        setIsEdit(false);
-        setShowModal(true);
+    // --- State Form Create/Edit (Tetap Ada) ---
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+    const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(null);
+
+    // --- State Warning Modal (SUDAH DIHAPUS) ---
+    // Karena logic warning sudah dipindah ke dalam component KaryawanFormModal
+
+    // Handler Buka Form Tambah
+    const handleAddClick = () => {
+        setFormMode('create');
+        setSelectedKaryawan(null);
+        setIsFormOpen(true);
     };
 
-    const openEdit = (k: Karyawan) => {
-        setIsEdit(true);
-        setData({
-            id: k.id,
-            nama: k.user.name,
-            email: k.user.email,
-            password: "",
-            nip: k.nip,
-            jabatan: k.jabatan,
-            jenis_kelamin: k.jenis_kelamin,
-            departemen: k.departemen,
-            tanggal_lahir: k.tanggal_lahir,
-            tanggal_masuk: k.tanggal_masuk,
-            alamat: k.alamat ?? "",
-        });
-        setShowModal(true);
+    // Handler Buka Form Edit
+    const handleEdit = (item: Karyawan) => {
+        setFormMode('edit');
+        setSelectedKaryawan(item);
+        setIsFormOpen(true);
     };
 
-    const submit = () => {
-        if (!data.nama || !data.email || !data.tanggal_lahir) {
-            alert("Mohon lengkapi data wajib");
-            return;
-        }
-
-        if (isEdit && data.id) {
-            router.put(`/app/karyawan/${data.id}`, data);
-        } else {
-            router.post("/app/karyawan", data);
-        }
-
-        setShowModal(false);
-        reset();
+    // Handler Sukses Simpan (Callback dari KaryawanFormModal)
+    const handleFormSuccess = (msg: string) => {
+        setSuccessMessage(msg);
+        setShowSuccessModal(true);
+        // Form otomatis tutup sendiri di dalam komponen modal
     };
 
-    const handleDelete = (id: number) => {
-        if (confirm("Hapus karyawan ini?")) {
-            router.delete(`/app/karyawan/${id}`);
+    // Handler Hapus
+    const handleDeleteClick = (item: Karyawan) => {
+        setKaryawanToDelete(item);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (karyawanToDelete) {
+            router.delete(`/admin/karyawan/${karyawanToDelete.id}`, {
+                onBefore: () => setIsDeleting(true),
+                onSuccess: () => {
+                    setIsDeleteModalOpen(false);
+                    setKaryawanToDelete(null);
+                    setSuccessMessage('Data karyawan berhasil dihapus.');
+                    setShowSuccessModal(true);
+                },
+                onFinish: () => setIsDeleting(false),
+                preserveScroll: true,
+            });
         }
     };
 
-    /* =========================
-       VIEW
-    ========================= */
+    // --- Definisi Kolom Tabel ---
+    const columns: ColumnDef<Karyawan>[] = [
+        {
+            header: 'No',
+            accessorKey: 'id',
+            sortable: true,
+            className: 'w-24 pl-8 text-center',
+            render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
+        },
+        {
+            header: 'Karyawan',
+            accessorKey: 'nama',
+            render: (item) => (
+                <div className="flex flex-col gap-1">
+                    <span className="font-medium text-gray-900">{item.nama}</span>
+                    <span className="text-xs text-gray-500">NIP: {item.nip}</span>
+                </div>
+            ),
+        },
+        {
+            header: 'Data Pribadi',
+            render: (item) => (
+                <div className="flex flex-col gap-1 text-sm text-gray-600">
+                    <span>
+                        {new Date(item.tanggal_lahir).toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'long', year: 'numeric',
+                        })}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {item.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: 'Jabatan',
+            accessorKey: 'jabatan',
+            className: 'font-medium text-gray-700',
+        },
+        {
+            header: 'Departemen',
+            accessorKey: 'departemen',
+            className: 'text-gray-600',
+        },
+        {
+            header: 'Tanggal Masuk',
+            accessorKey: 'tanggal_masuk',
+            render: (item) => (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                    {new Date(item.tanggal_masuk).toLocaleDateString('id-ID', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                    })}
+                </div>
+            ),
+        },
+        {
+            header: 'Alamat',
+            accessorKey: 'alamat',
+            render: (item) => (
+                <div className="flex max-w-62.5 gap-2 text-sm text-gray-600">
+                    <span className="line-clamp-2 leading-relaxed">{item.alamat}</span>
+                </div>
+            ),
+        },
+        {
+            header: '',
+            id: 'actions',
+            className: 'w-10 px-0',
+            render: (item) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-5 w-5" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+                        <DropdownMenuItem onClick={() => handleEdit(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
+                            <Pencil className="h-4 w-4" />
+                            <span className="font-medium">Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                            <span className="font-medium">Delete</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
+
     return (
-        <>
-            <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-                onClick={openCreate}
-            >
-                + Tambah Karyawan
-            </button>
-
-            <table border={1} cellPadding={8} className="mt-4 w-full">
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>NIP</th>
-                        <th>Jabatan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {karyawan.map((k) => (
-                        <tr key={k.id}>
-                            <td>{k.user.name}</td>
-                            <td>{k.nip}</td>
-                            <td>{k.jabatan}</td>
-                            <td className="space-x-2">
-                                <button
-                                    className="bg-yellow-500 text-white px-2 py-1 rounded"
-                                    onClick={() => openEdit(k)}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    className="bg-red-600 text-white px-2 py-1 rounded"
-                                    onClick={() => handleDelete(k.id)}
-                                >
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {showModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-                    <div className="bg-white p-6 w-96 rounded">
-                        <h3 className="mb-4 font-bold">
-                            {isEdit ? "Edit Karyawan" : "Tambah Karyawan"}
-                        </h3>
-
-                        <input
-                            placeholder="Nama"
-                            value={data.nama}
-                            onChange={(e) => setData("nama", e.target.value)}
-                        />
-
-                        <input
-                            placeholder="Email"
-                            value={data.email}
-                            onChange={(e) => setData("email", e.target.value)}
-                        />
-
-                        <input
-                            placeholder="Jabatan"
-                            value={data.jabatan}
-                            onChange={(e) =>
-                                setData("jabatan", e.target.value)
-                            }
-                        />
-
-                        <select
-                            value={data.jenis_kelamin}
-                            onChange={(e) =>
-                                setData("jenis_kelamin", e.target.value)
-                            }
-                        >
-                            <option value="L">Laki-laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
-
-                        <input
-                            placeholder="Departemen"
-                            value={data.departemen}
-                            onChange={(e) =>
-                                setData("departemen", e.target.value)
-                            }
-                        />
-
-                        <input
-                            type="date"
-                            value={data.tanggal_lahir}
-                            onChange={(e) =>
-                                setData("tanggal_lahir", e.target.value)
-                            }
-                        />
-
-                        <input
-                            type="date"
-                            value={data.tanggal_masuk}
-                            readOnly
-                        />
-
-                        <textarea
-                            placeholder="Alamat"
-                            value={data.alamat}
-                            onChange={(e) =>
-                                setData("alamat", e.target.value)
-                            }
-                        />
-
-                        <div className="mt-4 flex gap-2">
-                            <button onClick={() => setShowModal(false)}>
-                                Batal
-                            </button>
-                            <button onClick={submit}>
-                                Simpan
-                            </button>
+        <AppLayout>
+            <Head title="Data Karyawan" />
+            <div className="py-12">
+                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                                Data Karyawan
+                            </h2>
                         </div>
                     </div>
+
+                    <DynamicTable
+                        title="List Karyawan"
+                        data={karyawan}
+                        columns={columns}
+                        searchKeys={['nama', 'nip']}
+                        onAddClick={handleAddClick}
+                    />
                 </div>
-            )}
-        </>
+            </div>
+
+            <KaryawanFormModal
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                mode={formMode}
+                initialData={selectedKaryawan}
+                onSuccess={handleFormSuccess}
+            />
+
+            <ConfirmDeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                processing={isDeleting}
+                inputType="karyawan"
+            />
+
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Berhasil"
+                message={successMessage}
+            />
+        </AppLayout>
     );
 }

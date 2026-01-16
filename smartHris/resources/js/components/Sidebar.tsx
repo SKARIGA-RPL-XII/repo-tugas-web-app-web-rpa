@@ -77,16 +77,16 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/karyawan')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/karyawan') // 1. Ubah pengecekan URL aktif di sini
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
-                                    <Link href="/app/karyawan">
+                                    <Link href="/admin/karyawan"> {/* 2. Ubah Link tujuan di sini */}
                                         <Icon
-                                            icon="f7:person-2-fill"
-                                            width="56"
-                                            height="56"
+                                            icon="f7:person-2-fill" // Icon sudah oke
+                                            width="24"  // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
+                                            height="24"
                                         />
                                         <span>Data Karyawan</span>
                                     </Link>
@@ -95,9 +95,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/absensi_karyawan')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/app/absensi">
@@ -124,9 +124,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard') //url nya jangan lupa diubah
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/dashboard">
@@ -142,9 +142,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absen') //url nya jangan lupa diubah
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absen')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/absen">
@@ -160,9 +160,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi/riwayat') //url nya jangan lupa diubah
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi/riwayat')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/absen/riwayat">
@@ -178,9 +178,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/pelanggaran') //url nya jangan lupa diubah
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/pelanggaran')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/pelanggaran">
@@ -196,9 +196,9 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti') //url nya jangan lupa diubah
-                                        ? sidebarConfig.activeStyle
-                                        : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
                                         }`}
                                 >
                                     <Link href="/cuti">
