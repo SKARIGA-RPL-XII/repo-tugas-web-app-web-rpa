@@ -10,18 +10,22 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest.redirect')->name('home');
+
 Route::fallback(function () {
     return redirect()->back();
 });
+
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [MainController::class, 'index'])->name('dashboard');;
+    Route::get('/dashboard', [MainController::class, 'index'])->name('dashboard');
 
     Route::middleware(['role:admin'])->group(function () {
 
-        //KARYAWAN
+        Route::get('/app/dashboard', [MainController::class, 'index'])->name('admin.dashboard');
+
+        // KARYAWAN
         Route::get('/app/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
         Route::post('/app/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
         Route::put('/app/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
@@ -65,14 +69,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['role:user'])->group(function () {
 
-        Route::get('/absensi', [UserController::class, 'absensi']);
-        Route::post('/absensi/masuk', [UserController::class, 'masukStore']);
-        Route::post('/absensi/pulang', [UserController::class, 'pulangStore']);
-        Route::get('/riwayat-absensi', [UserController::class, 'riwayat']);
+        Route::get('/absensi', [UserController::class, 'absensi'])->name('user.absensi');
+        Route::post('/absensi/masuk', [UserController::class, 'masukStore'])->name('user.absensi.masuk');
+        Route::post('/absensi/pulang', [UserController::class, 'pulangStore'])->name('user.absensi.pulang');
+        Route::get('/riwayat-absensi', [UserController::class, 'riwayat'])->name('user.riwayat-absensi');
 
-        Route::get('/pelanggaran', [UserController::class, 'index']);
-        Route::get('/cuti', [UserController::class, 'cuti']);
-        Route::post('/cuti', [UserController::class, 'cutiStore']);
+        Route::get('/pelanggaran', [UserController::class, 'index'])->name('user.pelanggaran');
+        Route::get('/cuti', [UserController::class, 'cuti'])->name('user.cuti');
+        Route::post('/cuti', [UserController::class, 'cutiStore'])->name('user.cuti.store');
     });
 });
+
 require __DIR__ . '/settings.php';
