@@ -56,7 +56,7 @@ export default function AbsensiKaryawan({ absensi, tanggal }: PageProps) {
         setIsCalendarOpen(false);
         const formattedDate = format(date, 'yyyy-MM-dd');
 
-        router.get('/admin/absensi', {
+        router.get('/app/absensi', {
             tanggal: formattedDate
         }, {
             preserveState: true,
@@ -73,7 +73,7 @@ export default function AbsensiKaryawan({ absensi, tanggal }: PageProps) {
     const confirmDelete = () => {
         if (!selectedAbsensi) return;
 
-        router.delete(`/admin/absensi/${selectedAbsensi.id}`, {
+        router.delete(`/app/absensi/${selectedAbsensi.id}`, {
             onBefore: () => setIsDeleting(true),
             onSuccess: () => {
                 setIsDeleteModalOpen(false);

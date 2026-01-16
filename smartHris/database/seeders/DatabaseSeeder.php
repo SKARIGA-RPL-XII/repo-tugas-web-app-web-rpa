@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         /* ================= USERS ================= */
         
         $admin = User::create([
-            'name' => 'Super Admin',
+            'name' => 'Admin',
             'email' => 'admin@smarthris.com',
             'password' => $password,
             'role' => 'admin',

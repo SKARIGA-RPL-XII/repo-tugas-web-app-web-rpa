@@ -78,12 +78,12 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/karyawan')
+                                        isActive('/app/karyawan')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/karyawan"> 
+                                    <Link href="/app/karyawan"> 
                                         <Icon
                                             icon="f7:person-2-fill" 
                                             width="24"  
@@ -97,12 +97,12 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/absensi')
+                                        isActive('/app/absensi')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/absensi">
+                                    <Link href="/app/absensi">
                                         {' '}
                                         <Icon
                                             icon="streamline:office-worker-remix"
@@ -117,7 +117,7 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/absensi_karyawan')
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/absensi_karyawan')
                                         ? sidebarConfig.activeStyle
                                         : ''
                                         }`}

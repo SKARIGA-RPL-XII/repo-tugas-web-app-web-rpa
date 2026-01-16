@@ -66,7 +66,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const confirmDelete = () => {
         if (karyawanToDelete) {
-            router.delete(`/admin/karyawan/${karyawanToDelete.id}`, {
+            router.delete(`/app/karyawan/${karyawanToDelete.id}`, {
                 onBefore: () => setIsDeleting(true),
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
