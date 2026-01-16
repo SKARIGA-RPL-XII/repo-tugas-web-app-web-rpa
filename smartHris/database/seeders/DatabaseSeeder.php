@@ -198,29 +198,59 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /* ================= ABSENSI ================= */
-        foreach (range(0, 6) as $i) {
+        foreach (range(0, 9) as $i) {
+            $jamMasuk = ($i == 3 || $i == 7) ? '08:45:00' : '08:00:00';
+            
             Absensi::create([
                 'karyawan_id' => $karyawan1->id,
                 'tanggal' => Carbon::now()->subDays($i)->toDateString(),
-                'jam_masuk' => '08:00:00',
+                'jam_masuk' => $jamMasuk,
                 'jam_pulang' => '17:00:00',
+                'status' => 'hadir',
+            ]);
+        }
+
+        foreach (range(0, 4) as $i) {
+            Absensi::create([
+                'karyawan_id' => $karyawan2->id,
+                'tanggal' => Carbon::now()->subDays($i)->toDateString(),
+                'jam_masuk' => '07:55:00',
+                'jam_pulang' => '17:05:00',
                 'status' => 'hadir',
             ]);
         }
 
         Absensi::create([
             'karyawan_id' => $karyawan2->id,
-            'tanggal' => Carbon::now()->toDateString(),
+            'tanggal' => Carbon::now()->subDays(6)->toDateString(),
             'status' => 'alpha',
         ]);
 
-        /* ================= CUTI ================= */
+ /* ================= CUTI ================= */
+        
         Cuti::create([
             'karyawan_id' => $karyawan1->id,
-            'tanggal_mulai' => '2026-01-15',
-            'tanggal_selesai' => '2026-01-17',
-            'alasan' => 'Keperluan keluarga',
-            'status' => 'pending',
+            'tanggal_mulai' => '2026-02-01',
+            'tanggal_selesai' => '2026-02-03',
+            'alasan' => 'Liburan keluarga ke Bali',
+            'status' => 'pending', 
+        ]);
+
+        
+        Cuti::create([
+            'karyawan_id' => $karyawan2->id,
+            'tanggal_mulai' => '2026-01-20',
+            'tanggal_selesai' => '2026-01-20',
+            'alasan' => 'Mengurus SIM',
+            'status' => 'disetujui', 
+        ]);
+
+        Cuti::create([
+            'karyawan_id' => $karyawan3->id,
+            'tanggal_mulai' => '2026-01-25',
+            'tanggal_selesai' => '2026-01-28',
+            'alasan' => 'Ingin istirahat saja',
+            'status' => 'ditolak',
         ]);
     }
 }
