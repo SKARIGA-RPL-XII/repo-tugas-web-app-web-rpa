@@ -190,65 +190,66 @@ class AdminController extends Controller
 
     /* ========= ABSENSI ========= */
 
-    public function indexAbsensi(Request $request)
-    {
-        $tanggal = $request->query('tanggal');
+public function indexAbsensi(Request $request)
+{
+    $tanggal = $request->query('tanggal');
 
-        $query = Absensi::query()
-            ->join('karyawan', 'absensi.karyawan_id', '=', 'karyawan.id')
-            ->join('users', 'karyawan.user_id', '=', 'users.id')
-            ->select(
-                'absensi.id',
-                'absensi.tanggal',
-                'absensi.jam_masuk',
-                'absensi.jam_pulang',
-                'absensi.status',
-                'users.name as nama',
-                'karyawan.jabatan',
-                'karyawan.departemen'
-            )
-            ->orderBy('absensi.tanggal', 'desc')
-            ->orderBy('absensi.jam_masuk');
+    $query = Absensi::query()
+        ->join('karyawan', 'absensi.karyawan_id', '=', 'karyawan.id')
+        ->join('users', 'karyawan.user_id', '=', 'users.id')
+        ->select(
+            'absensi.id',
+            'absensi.tanggal',
+            'absensi.jam_masuk',
+            'absensi.jam_pulang',
+            'absensi.status',
+            'users.name as nama',
+            'karyawan.jabatan',
+            'karyawan.departemen'
+        )
+        ->orderBy('absensi.tanggal', 'desc')
+        ->orderBy('absensi.jam_masuk');
 
-        if ($tanggal) {
-            $query->whereDate('absensi.tanggal', $tanggal);
-        }
-$absensi = $query->get()->map(function ($item) {
-    $batasMasuk = Carbon::createFromTime(8, 30, 0); // pastikan detik = 0
+    if ($tanggal) {
+        $query->whereDate('absensi.tanggal', $tanggal);
+    }
 
-    if ($item->jam_masuk) {
-        // buang detik dari jam masuk
-        $jamMasuk = Carbon::parse($item->jam_masuk)->setSecond(0);
+    $absensi = $query->get()->map(function ($item) {
+        // batas masuk 08:30:00 (detik dinormalkan)
+        $batasMasuk = Carbon::createFromTime(8, 30, 0);
 
-        if ($jamMasuk->greaterThan($batasMasuk)) {
-            $selisihMenit = $batasMasuk->diffInMinutes($jamMasuk);
+        if ($item->jam_masuk) {
+            // buang detik supaya tidak ada menit pecahan
+            $jamMasuk = Carbon::parse($item->jam_masuk)->setSecond(0);
 
-            if ($selisihMenit < 60) {
-                $item->keterangan = "Terlambat {$selisihMenit} menit";
+            if ($jamMasuk->greaterThan($batasMasuk)) {
+                $totalMenit = $batasMasuk->diffInMinutes($jamMasuk);
+
+                if ($totalMenit < 60) {
+                    $item->keterangan = "Terlambat {$totalMenit} menit";
+                } else {
+                    $jam   = intdiv($totalMenit, 60);
+                    $menit = $totalMenit % 60;
+
+                    $item->keterangan = $menit > 0
+                        ? "Terlambat {$jam} jam {$menit} menit"
+                        : "Terlambat {$jam} jam";
+                }
             } else {
-                $jam = intdiv($selisihMenit, 60);
-                $menit = $selisihMenit % 60;
-
-                $item->keterangan = $menit > 0
-                    ? "Terlambat {$jam} jam {$menit} menit"
-                    : "Terlambat {$jam} jam";
+                $item->keterangan = 'Tepat waktu';
             }
         } else {
-            $item->keterangan = 'Tepat waktu';
+            $item->keterangan = 'Tidak hadir';
         }
-    } else {
-        $item->keterangan = 'Tidak hadir';
-    }
 
-    return $item;
-});
+        return $item;
+    });
 
-
-        return Inertia::render('Admin/karyawan/absensi-karyawan', [
-            'tanggal' => $tanggal,
-            'absensi' => $absensi,
-        ]);
-    }
+    return Inertia::render('Admin/karyawan/absensi-karyawan', [
+        'tanggal' => $tanggal,
+        'absensi' => $absensi,
+    ]);
+}
 
     /* ========= CUTI ========= */
     public function indexCuti()

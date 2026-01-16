@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 export type Absensi = {
@@ -33,9 +33,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(
-        null,
-    );
+    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDeleteClick = (item: Absensi) => {
@@ -75,7 +73,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
         {
             header: 'Jabatan',
             accessorKey: 'jabatan',
-            className: 'text-gray-600',
+            className: 'text-gray-700',
         },
         {
             header: 'Departemen',
@@ -85,7 +83,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
         {
             header: 'Jam Absen',
             render: (item) => (
-                <div className="grid grid-cols-[60px_10px_auto] gap-x-1 text-sm text-gray-700">
+                <div className="grid grid-cols-[60px_10px_1fr] gap-x-1 text-sm text-gray-600">
                     <span>Masuk</span>
                     <span>:</span>
                     <span className="font-medium text-gray-900">
@@ -104,9 +102,20 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
             header: 'Keterangan',
             render: (item) => {
                 const keterangan = item.keterangan ?? '-';
-                const isLate = keterangan.toLowerCase().includes('terlambat');
+                const isLate =
+                    keterangan.toLowerCase().includes('terlambat');
 
-                return <span>{keterangan}</span>;
+                return (
+                    <span
+                        className={`text-sm font-medium ${
+                            isLate
+                                ? 'text-red-600'
+                                : 'text-gray-700'
+                        }`}
+                    >
+                        {keterangan}
+                    </span>
+                );
             },
         },
         {
@@ -118,7 +127,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900"
+                            className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100"
                         >
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
@@ -163,7 +172,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
                         title="Data Absensi Karyawan"
                         data={absensi}
                         columns={columns}
-                        searchKeys={['nama', 'departemen']}
+                        searchKeys={['nama', 'jabatan', 'departemen']}
                     />
                 </div>
             </div>
@@ -185,6 +194,7 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
         </AppLayout>
     );
 }
+
 function handleEdit(item: Absensi): void {
-    throw new Error('Function not implemented.');
+    console.log('Edit absensi:', item);
 }
