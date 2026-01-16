@@ -194,7 +194,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 </div>
             </div>
 
-            <KaryawanFormModal 
+            <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 mode={formMode}
@@ -209,7 +209,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 processing={isDeleting}
                 inputType="karyawan"
             />
-            
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
