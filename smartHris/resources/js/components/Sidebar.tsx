@@ -16,7 +16,6 @@ type PageProps = {
     auth: AuthProps;
 };
 
-
 export default function Sidebar() {
     const page = usePage<PageProps>();
     const { auth } = page.props;
@@ -86,10 +85,12 @@ export default function Sidebar() {
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/karyawan"> {/* 2. Ubah Link tujuan di sini */}
+                                    <Link href="/admin/karyawan">
+                                        {' '}
+                                        {/* 2. Ubah Link tujuan di sini */}
                                         <Icon
                                             icon="f7:person-2-fill" // Icon sudah oke
-                                            width="24"  // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
+                                            width="24" // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
                                             height="24"
                                         />
                                         <span>Data Karyawan</span>
@@ -113,6 +114,25 @@ export default function Sidebar() {
                                             height="14"
                                         />
                                         <span> Absensi Karyawan</span>
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    asChild
+                                    className={`${sidebarConfig.navStyle} ${
+                                        isActive('/admin/cuti')
+                                            ? sidebarConfig.activeStyle
+                                            : ''
+                                    }`}
+                                >
+                                    <Link href="/admin/cuti">
+                                        <Icon
+                                            icon="mdi:circle"
+                                            width="20"
+                                            height="20"
+                                        />
+                                        <span>Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
                             </>

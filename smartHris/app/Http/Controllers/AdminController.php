@@ -209,22 +209,64 @@ class AdminController extends Controller
     }
 
     /* ========= CUTI ========= */
-    public function indexCuti()
-    {
-        return Cuti::with('karyawan')->get();
-    }
+public function indexCuti()
+{
+    $cutiData = Cuti::with('karyawan.user')
+        ->latest()
+        ->get()
+        ->map(function ($cuti) {
+            return [
+                'id' => $cuti->id,
 
-    public function approveCuti($id)
-    {
-        Cuti::findOrFail($id)->update(['status' => 'approved']);
-        return response()->json(['message' => 'Cuti disetujui']);
-    }
+                'karyawan_id' => $cuti->karyawan_id,
+                'karyawan_nama' => $cuti->karyawan->user->name ?? '-',
+                'karyawan_email' => $cuti->karyawan->user->email ?? '-',
+                'karyawan_nip' => $cuti->karyawan->nip ?? '-',
+                'karyawan_jabatan' => $cuti->karyawan->jabatan ?? '-',
 
-    public function rejectCuti($id)
-    {
-        Cuti::findOrFail($id)->update(['status' => 'rejected']);
-        return response()->json(['message' => 'Cuti ditolak']);
-    }
+                // 🔥 FIX SESUAI MODEL
+                'karyawan_departemen' => $cuti->karyawan->departemen ?? '-',
+
+                'tanggal_mulai' => $cuti->tanggal_mulai,
+                'tanggal_selesai' => $cuti->tanggal_selesai,
+                'jumlah_hari' => $cuti->jumlah_hari,
+                'jenis_cuti' => $cuti->jenis_cuti,
+                'alasan' => $cuti->alasan,
+
+                'status' => $cuti->status,
+                'keterangan' => $cuti->keterangan,
+
+                'created_at' => $cuti->created_at,
+                'updated_at' => $cuti->updated_at,
+            ];
+        });
+
+    // statistik (opsional tapi bagus)
+    $statistics = [
+        'total' => $cutiData->count(),
+        'pending' => $cutiData->where('status', 'pending')->count(),
+        'approved' => $cutiData->where('status', 'approved')->count(),
+        'rejected' => $cutiData->where('status', 'rejected')->count(),
+    ];
+
+    return Inertia::render('Admin/karyawan/CutiKaryawan', [
+        'cutiData' => $cutiData,
+        'statistics' => $statistics,
+    ]);
+}
+
+
+public function approveCuti($id)
+{
+    Cuti::findOrFail($id)->update(['status' => 'approved']);
+    return back()->with('success', 'Cuti berhasil disetujui');
+}
+
+public function rejectCuti($id)
+{
+    Cuti::findOrFail($id)->update(['status' => 'rejected']);
+    return back()->with('success', 'Cuti berhasil ditolak');
+}
 
 
     /* ========= DAUS ========= */

@@ -24,6 +24,8 @@ Route::prefix('user')->name('user.')->controller(UserController::class)->group(f
     Route::get('/pelanggaran', 'indexPelanggaran')->name('pelanggaran');
 });
 
+Route::get('/cuti', [AdminController::class, 'indexCuti'])->name('admin.cuti');
+
 Route::prefix('admin')->name('admin.')->controller(AdminController::class)->group(function () {
         
     // Karyawan
@@ -38,10 +40,11 @@ Route::prefix('admin')->name('admin.')->controller(AdminController::class)->grou
     Route::delete('/absensi/{id}', 'destroyAbsensi')->name('absensi.destroy');
 
     // Cuti
+    
     Route::get('/cuti', 'indexCuti')->name('cuti');
     Route::post('/cuti/{id}/approve', 'approveCuti')->name('cuti.approve');
     Route::post('/cuti/{id}/reject', 'rejectCuti')->name('cuti.reject');
-
+    
     // Kalender & Event
     Route::get('/kalender', 'kalender')->name('kalender');
     Route::get('/kalender-event', 'event')->name('kalender.event');
