@@ -11,9 +11,9 @@ import { request } from '@/routes/password';
 import { Head, useForm } from '@inertiajs/react';
 
 interface LoginProps {
-  status?: string
-  canResetPassword: boolean
-  canRegister: boolean
+    status?: string
+    canResetPassword: boolean
+    canRegister: boolean
 }
 
 export default function Login({

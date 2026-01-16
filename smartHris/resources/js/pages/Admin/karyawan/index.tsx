@@ -1,6 +1,6 @@
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
-import KaryawanFormModal from '@/components/karyawan-form-modal'; // Pastikan import ini benar (sesuai nama file)
+import KaryawanFormModal from '@/components/karyawan-form-modal';
 import SuccessModal from '@/components/success-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +14,6 @@ import { Head, router } from '@inertiajs/react';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-// Pastikan tipe data sama dengan yang ada di database/controller
 export type Karyawan = {
     id: number;
     nama: string;
@@ -33,43 +32,33 @@ type PageProps = {
 
 export default function DataKaryawan({ karyawan }: PageProps) {
     
-    // --- State Success & Delete (Tetap Ada) ---
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // --- State Form Create/Edit (Tetap Ada) ---
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
     const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(null);
 
-    // --- State Warning Modal (SUDAH DIHAPUS) ---
-    // Karena logic warning sudah dipindah ke dalam component KaryawanFormModal
-
-    // Handler Buka Form Tambah
     const handleAddClick = () => {
         setFormMode('create');
         setSelectedKaryawan(null);
         setIsFormOpen(true);
     };
 
-    // Handler Buka Form Edit
     const handleEdit = (item: Karyawan) => {
         setFormMode('edit');
         setSelectedKaryawan(item);
         setIsFormOpen(true);
     };
 
-    // Handler Sukses Simpan (Callback dari KaryawanFormModal)
     const handleFormSuccess = (msg: string) => {
         setSuccessMessage(msg);
         setShowSuccessModal(true);
-        // Form otomatis tutup sendiri di dalam komponen modal
     };
 
-    // Handler Hapus
     const handleDeleteClick = (item: Karyawan) => {
         setKaryawanToDelete(item);
         setIsDeleteModalOpen(true);
@@ -77,7 +66,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const confirmDelete = () => {
         if (karyawanToDelete) {
-            router.delete(`/admin/karyawan/${karyawanToDelete.id}`, {
+            router.delete(`/app/karyawan/${karyawanToDelete.id}`, {
                 onBefore: () => setIsDeleting(true),
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
@@ -91,7 +80,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
         }
     };
 
-    // --- Definisi Kolom Tabel ---
     const columns: ColumnDef<Karyawan>[] = [
         {
             header: 'No',
@@ -201,11 +189,12 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                         columns={columns}
                         searchKeys={['nama', 'nip']}
                         onAddClick={handleAddClick}
+                        addButtonLabel="Tambah Karyawan"
                     />
                 </div>
             </div>
 
-            <KaryawanFormModal 
+            <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 mode={formMode}
@@ -220,7 +209,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 processing={isDeleting}
                 inputType="karyawan"
             />
-            
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}

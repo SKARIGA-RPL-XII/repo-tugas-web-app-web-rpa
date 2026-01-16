@@ -113,9 +113,9 @@ export default function KaryawanFormModal({
         };
 
         if (mode === 'edit') {
-            put(`/admin/karyawan/${data.id}`, options);
+            put(`/app/karyawan/${data.id}`, options);
         } else {
-            post('/admin/karyawan', options);
+            post('/app/karyawan', options);
         }
     };
 
