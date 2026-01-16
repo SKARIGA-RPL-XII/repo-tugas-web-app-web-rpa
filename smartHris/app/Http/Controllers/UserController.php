@@ -139,7 +139,7 @@ class UserController extends Controller
             'tanggalAktif' => $today->day,
         ]);
     }
-    public function profileUpdate()
+    public function profileUpdate(Request $request)
     {
         $karyawan = Karyawan::where('user_id', auth()->id())->firstOrFail();
 
