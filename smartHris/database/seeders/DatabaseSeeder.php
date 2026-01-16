@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         /* ================= USERS ================= */
         
         $admin = User::create([
-            'name' => 'Super Admin',
+            'name' => 'Admin',
             'email' => 'admin@smarthris.com',
             'password' => $password,
             'role' => 'admin',
@@ -145,21 +145,18 @@ class DatabaseSeeder extends Seeder
         $jp1 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Terlambat Masuk',
             'tingkat' => 'ringan',
-            'potongan' => 0,
             'keterangan' => 'Terlambat masuk kerja',
         ]);
 
         $jp2 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Tidak Hadir Tanpa Keterangan',
             'tingkat' => 'sedang',
-            'potongan' => 50000,
             'keterangan' => 'Absen tanpa izin',
         ]);
 
         $jp3 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Melanggar Peraturan Berat',
             'tingkat' => 'berat',
-            'potongan' => 100000,
             'keterangan' => 'Melanggar aturan perusahaan',
         ]);
 
@@ -198,29 +195,71 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /* ================= ABSENSI ================= */
-        foreach (range(0, 6) as $i) {
+        foreach (range(0, 9) as $i) {
+            $jamMasuk = ($i == 3 || $i == 7) ? '08:45:00' : '08:00:00';
+            
             Absensi::create([
                 'karyawan_id' => $karyawan1->id,
                 'tanggal' => Carbon::now()->subDays($i)->toDateString(),
-                'jam_masuk' => '08:00:00',
+                'jam_masuk' => $jamMasuk,
                 'jam_pulang' => '17:00:00',
+                'status' => 'hadir',
+            ]);
+        }
+
+        foreach (range(0, 4) as $i) {
+            Absensi::create([
+                'karyawan_id' => $karyawan2->id,
+                'tanggal' => Carbon::now()->subDays($i)->toDateString(),
+                'jam_masuk' => '07:55:00',
+                'jam_pulang' => '17:05:00',
                 'status' => 'hadir',
             ]);
         }
 
         Absensi::create([
             'karyawan_id' => $karyawan2->id,
-            'tanggal' => Carbon::now()->toDateString(),
+            'tanggal' => Carbon::now()->subDays(6)->toDateString(),
             'status' => 'alpha',
         ]);
 
         /* ================= CUTI ================= */
+        
+        $tglMulai1   = Carbon::parse('2026-01-15');
+        $tglSelesai1 = Carbon::parse('2026-01-17');
+        
         Cuti::create([
-            'karyawan_id' => $karyawan1->id,
-            'tanggal_mulai' => '2026-01-15',
-            'tanggal_selesai' => '2026-01-17',
-            'alasan' => 'Keperluan keluarga',
-            'status' => 'pending',
+            'karyawan_id'     => $karyawan1->id,
+            'tanggal_mulai'   => $tglMulai1,
+            'tanggal_selesai' => $tglSelesai1,
+            'jumlah_hari'     => $tglMulai1->diffInDays($tglSelesai1) + 1,
+            'alasan'          => 'Keperluan keluarga',
+            'status'          => 'pending',
+        ]);
+
+        
+        $tglMulai2   = Carbon::parse('2026-01-20');
+        $tglSelesai2 = Carbon::parse('2026-01-20');
+
+        Cuti::create([
+            'karyawan_id'     => $karyawan2->id,
+            'tanggal_mulai'   => $tglMulai2,
+            'tanggal_selesai' => $tglSelesai2,
+            'jumlah_hari'     => $tglMulai2->diffInDays($tglSelesai2) + 1, 
+            'alasan'          => 'Mengurus SIM',
+            'status'          => 'disetujui', 
+        ]);
+
+        $tglMulai3   = Carbon::parse('2026-01-25');
+        $tglSelesai3 = Carbon::parse('2026-01-28');
+
+        Cuti::create([
+            'karyawan_id'     => $karyawan3->id,
+            'tanggal_mulai'   => $tglMulai3,
+            'tanggal_selesai' => $tglSelesai3,
+            'jumlah_hari'     => $tglMulai3->diffInDays($tglSelesai3) + 1, 
+            'alasan'          => 'Ingin istirahat saja',
+            'status'          => 'ditolak',
         ]);
     }
 }

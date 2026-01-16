@@ -16,6 +16,10 @@ interface DynamicTableProps<T> {
     data: T[];
     columns: ColumnDef<T>[];
     searchKeys?: (keyof T)[];
+
+    onAddClick?: () => void;
+    addButtonLabel?: string;
+
 }
 
 // ================= COMPONENT =================
@@ -24,6 +28,10 @@ function DynamicTable<T extends { id: string | number }>({
     data = [],
     columns,
     searchKeys = [],
+
+    onAddClick,
+    addButtonLabel = "Tambah Data",
+
 }: DynamicTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,18 +63,30 @@ function DynamicTable<T extends { id: string | number }>({
                     {title}
                 </h2>
 
+
                 {searchKeys.length > 0 && (
-                    <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            value={searchTerm}
-                            onChange={e => {
-                                setSearchTerm(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            placeholder="Search..."
-                            className="w-full h-9 pl-9 pr-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                        />
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="search"
+                                placeholder="Search..."
+                                value={searchTerm}
+                                onChange={e => {
+                                    setSearchTerm(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                        </div>
+                        {onAddClick && (
+                            <button
+                                onClick={onAddClick}
+                                className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
+                            >
+                                {addButtonLabel}
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -86,6 +106,7 @@ function DynamicTable<T extends { id: string | number }>({
                             ))}
                         </tr>
                     </thead>
+
 
                     <tbody className="divide-y divide-gray-100">
                         {paginatedData.length > 0 ? (
@@ -155,6 +176,7 @@ function DynamicTable<T extends { id: string | number }>({
                             <ChevronLeft className="w-4 h-4" />
                         </button>
 
+
                         {Array.from({ length: totalPages }).map((_, i) => {
                             const page = i + 1;
                             return (
@@ -171,6 +193,7 @@ function DynamicTable<T extends { id: string | number }>({
                                 </button>
                             );
                         })}
+
 
                         <button
                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
