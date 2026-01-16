@@ -40,7 +40,7 @@ class AdminController extends Controller
             ->orderBy('date')
             ->get()
             ->map(fn($item) => [
-                'date'  => Carbon::parse($item->date)->format('d M'),
+                'date' => Carbon::parse($item->date)->format('d M'),
                 'value' => $item->total
             ]);
 
@@ -54,18 +54,18 @@ class AdminController extends Controller
         $statusAbsensi = [
             'hadir' => $statusRaw['hadir'] ?? 0,
             'alpha' => $statusRaw['alpha'] ?? 0,
-            'izin'  => $statusRaw['izin'] ?? 0,
+            'izin' => $statusRaw['izin'] ?? 0,
             'sakit' => $statusRaw['sakit'] ?? 0,
-            'cuti'  => $statusRaw['cuti'] ?? 0,
+            'cuti' => $statusRaw['cuti'] ?? 0,
         ];
 
         return Inertia::render('Admin/index', [
-            'totalKaryawan'   => $totalKaryawan,
-            'hadirHariIni'    => $hadirHariIni,
-            'pengajuanCuti'   => $pengajuanCuti,
-            'sanksiAktif'     => $sanksiAktif,
+            'totalKaryawan' => $totalKaryawan,
+            'hadirHariIni' => $hadirHariIni,
+            'pengajuanCuti' => $pengajuanCuti,
+            'sanksiAktif' => $sanksiAktif,
             'attendanceWeekly' => $attendanceWeekly,
-            'statusAbsensi'   => $statusAbsensi,
+            'statusAbsensi' => $statusAbsensi,
         ]);
     }
     /* ========= SABIL ========= */
@@ -74,15 +74,15 @@ class AdminController extends Controller
     {
         $karyawan = Karyawan::with('user')->latest()->get()->map(function ($item) {
             return [
-                'id'             => $item->id,
-                'nama'           => $item->user->name ?? '-',
-                'nip'            => $item->nip ?? '-',
-                'jabatan'        => $item->jabatan ?? '-',
-                'departemen'     => $item->departemen ?? '-',
-                'alamat'         => $item->alamat ?? '-',
-                'tanggal_masuk'  => $item->tanggal_masuk,
-                'tanggal_lahir'  => $item->tanggal_lahir,
-                'jenis_kelamin'  => $item->jenis_kelamin,
+                'id' => $item->id,
+                'nama' => $item->user->name ?? '-',
+                'nip' => $item->nip ?? '-',
+                'jabatan' => $item->jabatan ?? '-',
+                'departemen' => $item->departemen ?? '-',
+                'alamat' => $item->alamat ?? '-',
+                'tanggal_masuk' => $item->tanggal_masuk,
+                'tanggal_lahir' => $item->tanggal_lahir,
+                'jenis_kelamin' => $item->jenis_kelamin,
             ];
         });
 
@@ -95,38 +95,38 @@ class AdminController extends Controller
     public function storeKaryawan(Request $request)
     {
         $request->validate([
-            'nama'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:users,email',
-            'password'       => 'required|min:6',
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
 
-            'nip'            => 'required|unique:karyawan,nip',
-            'jabatan'        => 'required|string',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'tanggal_lahir'  => 'required|date',
-            'departemen'     => 'required|string',
-            'tanggal_masuk'  => 'required|date',
-            'alamat'         => 'required|string',
+            'nip' => 'required|unique:karyawan,nip',
+            'jabatan' => 'required|string',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'required|date',
+            'departemen' => 'required|string',
+            'tanggal_masuk' => 'required|date',
+            'alamat' => 'required|string',
         ]);
 
         DB::beginTransaction();
 
         try {
             $user = User::create([
-                'name'     => $request->nama,
-                'email'    => $request->email,
+                'name' => $request->nama,
+                'email' => $request->email,
                 'password' => bcrypt($request->password),
-                'role'     => 'user',
+                'role' => 'user',
             ]);
 
             Karyawan::create([
-                'user_id'        => $user->id,
-                'nip'            => $request->nip,
-                'jabatan'        => $request->jabatan,
-                'jenis_kelamin'  => $request->jenis_kelamin,
-                'tanggal_lahir'  => $request->tanggal_lahir,
-                'departemen'     => $request->departemen,
-                'tanggal_masuk'  => $request->tanggal_masuk,
-                'alamat'         => $request->alamat,
+                'user_id' => $user->id,
+                'nip' => $request->nip,
+                'jabatan' => $request->jabatan,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'departemen' => $request->departemen,
+                'tanggal_masuk' => $request->tanggal_masuk,
+                'alamat' => $request->alamat,
             ]);
 
             DB::commit();
@@ -149,28 +149,28 @@ class AdminController extends Controller
         $karyawan = Karyawan::findOrFail($id);
 
         $request->validate([
-            'nama'           => 'required',
-            'email'          => 'required|email|unique:users,email,' . $karyawan->user_id,
-            'nip'            => 'required|unique:karyawan,nip,' . $id,
-            'jabatan'        => 'required',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'tanggal_lahir'  => 'required|date',
-            'departemen'     => 'required',
-            'alamat'         => 'required',
+            'nama' => 'required',
+            'email' => 'required|email|unique:users,email,' . $karyawan->user_id,
+            'nip' => 'required|unique:karyawan,nip,' . $id,
+            'jabatan' => 'required',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'required|date',
+            'departemen' => 'required',
+            'alamat' => 'required',
         ]);
 
         $karyawan->user->update([
-            'name'  => $request->nama,
+            'name' => $request->nama,
             'email' => $request->email,
         ]);
 
         $karyawan->update([
-            'nip'           => $request->nip,
-            'jabatan'       => $request->jabatan,
+            'nip' => $request->nip,
+            'jabatan' => $request->jabatan,
             'jenis_kelamin' => $request->jenis_kelamin,
             'tanggal_lahir' => $request->tanggal_lahir,
-            'departemen'    => $request->departemen,
-            'alamat'        => $request->alamat,
+            'departemen' => $request->departemen,
+            'alamat' => $request->alamat,
         ]);
 
         return back()->with('success', 'Karyawan diperbarui');
@@ -190,55 +190,65 @@ class AdminController extends Controller
 
     /* ========= ABSENSI ========= */
 
-public function indexAbsensi(Request $request)
-{
-    $tanggal = $request->query('tanggal');
+    public function indexAbsensi(Request $request)
+    {
+        $tanggal = $request->query('tanggal');
 
-    $query = Absensi::query()
-        ->join('karyawan', 'absensi.karyawan_id', '=', 'karyawan.id')
-        ->join('users', 'karyawan.user_id', '=', 'users.id')
-        ->select(
-            'absensi.id',
-            'absensi.tanggal',
-            'absensi.jam_masuk',
-            'absensi.jam_pulang',
-            'absensi.status',
-            'users.name as nama',
-            'karyawan.jabatan',
-            'karyawan.departemen'
-        )
-        ->orderBy('absensi.tanggal', 'desc')
-        ->orderBy('absensi.jam_masuk');
+        $query = Absensi::query()
+            ->join('karyawan', 'absensi.karyawan_id', '=', 'karyawan.id')
+            ->join('users', 'karyawan.user_id', '=', 'users.id')
+            ->select(
+                'absensi.id',
+                'absensi.tanggal',
+                'absensi.jam_masuk',
+                'absensi.jam_pulang',
+                'absensi.status',
+                'users.name as nama',
+                'karyawan.jabatan',
+                'karyawan.departemen'
+            )
+            ->orderBy('absensi.tanggal', 'desc')
+            ->orderBy('absensi.jam_masuk');
 
-    // 🔹 kalau ada filter tanggal → baru difilter
-    if ($tanggal) {
-        $query->whereDate('absensi.tanggal', $tanggal);
-    }
+        if ($tanggal) {
+            $query->whereDate('absensi.tanggal', $tanggal);
+        }
+$absensi = $query->get()->map(function ($item) {
+    $batasMasuk = Carbon::createFromTime(8, 30, 0); // pastikan detik = 0
 
-    $absensi = $query->get()->map(function ($item) {
-        $batasMasuk = Carbon::createFromTime(8, 30);
+    if ($item->jam_masuk) {
+        // buang detik dari jam masuk
+        $jamMasuk = Carbon::parse($item->jam_masuk)->setSecond(0);
 
-        if ($item->jam_masuk) {
-            $jamMasuk = Carbon::parse($item->jam_masuk);
+        if ($jamMasuk->greaterThan($batasMasuk)) {
+            $selisihMenit = $batasMasuk->diffInMinutes($jamMasuk);
 
-            if ($jamMasuk->greaterThan($batasMasuk)) {
-                $selisih = $batasMasuk->diffInMinutes($jamMasuk);
-                $item->keterangan = "Terlambat {$selisih} menit";
+            if ($selisihMenit < 60) {
+                $item->keterangan = "Terlambat {$selisihMenit} menit";
             } else {
-                $item->keterangan = 'Tepat waktu';
+                $jam = intdiv($selisihMenit, 60);
+                $menit = $selisihMenit % 60;
+
+                $item->keterangan = $menit > 0
+                    ? "Terlambat {$jam} jam {$menit} menit"
+                    : "Terlambat {$jam} jam";
             }
         } else {
-            $item->keterangan = 'Tidak hadir';
+            $item->keterangan = 'Tepat waktu';
         }
+    } else {
+        $item->keterangan = 'Tidak hadir';
+    }
 
-        return $item;
-    });
+    return $item;
+});
 
-    return Inertia::render('Admin/karyawan/absensi-karyawan', [
-        'tanggal' => $tanggal,
-        'absensi' => $absensi,
-    ]);
-}
+
+        return Inertia::render('Admin/karyawan/absensi-karyawan', [
+            'tanggal' => $tanggal,
+            'absensi' => $absensi,
+        ]);
+    }
 
     /* ========= CUTI ========= */
     public function indexCuti()
