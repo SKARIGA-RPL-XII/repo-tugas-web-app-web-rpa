@@ -77,12 +77,12 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/karyawan') // 1. Ubah pengecekan URL aktif di sini
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/karyawan') // 1. Ubah pengecekan URL aktif di sini
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
-                                    <Link href="/admin/karyawan"> {/* 2. Ubah Link tujuan di sini */}
+                                    <Link href="/app/karyawan"> {/* 2. Ubah Link tujuan di sini */}
                                         <Icon
                                             icon="f7:person-2-fill" // Icon sudah oke
                                             width="24"  // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
@@ -96,8 +96,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/admin/absensi_karyawan')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/app/absensi">
@@ -111,13 +111,26 @@ export default function Sidebar() {
                                     </Link>
                                 </Button>
                                 {/* jangan lupa di styling */}
-                                <Link
-                                    href="/logout"
-                                    method="post"
-                                    as="button"
+
+                                <Button
+                                    variant="ghost"
+                                    asChild
+                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/absensi_karyawan')
+                                        ? sidebarConfig.activeStyle
+                                        : ''
+                                        }`}
                                 >
-                                    Logout
-                                </Link>
+                                    <Link href="/logout" method="post">
+                                        {' '}
+                                        <Icon
+                                            icon="streamline:office-worker-remix"
+                                            width="14"
+                                            height="14"
+                                        />
+                                        <span>Logout</span>
+                                    </Link>
+                                </Button>
+
                             </>
                         ) : (
                             <>
@@ -125,8 +138,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/dashboard">
@@ -143,8 +156,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/absen')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/absen">
@@ -161,8 +174,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/absensi/riwayat')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/absen/riwayat">
@@ -179,8 +192,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/pelanggaran')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/pelanggaran">
@@ -197,8 +210,8 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/cuti')
-                                            ? sidebarConfig.activeStyle
-                                            : ''
+                                        ? sidebarConfig.activeStyle
+                                        : ''
                                         }`}
                                 >
                                     <Link href="/cuti">
@@ -210,6 +223,25 @@ export default function Sidebar() {
                                         <span>Cuti</span>
                                     </Link>
                                 </Button>
+                                {/* perbaiki button logout nanti */}
+                                <Button
+                                    variant="ghost"
+                                    asChild
+                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti')
+                                        ? sidebarConfig.activeStyle
+                                        : ''
+                                        }`}
+                                >
+                                    <Link href="/logout" method='post'>
+                                        <Icon
+                                            icon="mage:star-moving-fill"
+                                            width="24"
+                                            height="24"
+                                        />
+                                        <span>Logout</span>
+                                    </Link>
+                                </Button>
+
                             </>
                         )}
                     </nav>

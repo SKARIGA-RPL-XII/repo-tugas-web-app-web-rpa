@@ -23,12 +23,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         $user = auth()->user();
-
-        return match ($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'user'  => redirect()->route('user.dashboard'),
-            default => abort(403),
-        };
+        return redirect()->route('dashboard');
     }
 
     public function destroy(Request $request)

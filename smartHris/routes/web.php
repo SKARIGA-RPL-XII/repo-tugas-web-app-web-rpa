@@ -3,7 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,10 +17,9 @@ Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [MainController::class, 'index'])->name('dashboard');;
 
     Route::middleware(['role:admin'])->group(function () {
-
-        Route::get('/app/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');;
 
         //KARYAWAN
         Route::get('/app/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
@@ -65,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:user'])->group(function () {
-        Route::get('/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 
         Route::get('/absensi', [UserController::class, 'absensi']);
         Route::post('/absensi/masuk', [UserController::class, 'masukStore']);
