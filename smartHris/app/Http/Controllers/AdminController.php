@@ -250,6 +250,36 @@ public function indexAbsensi(Request $request)
         'absensi' => $absensi,
     ]);
 }
+public function updateAbsensi(Request $request, $id)
+{
+    $request->validate([
+        'jam_masuk' => 'required',
+        'jam_pulang' => 'required',
+        'terlambat' => 'nullable|numeric',
+        'lembur' => 'nullable|numeric',
+        'catatan' => 'nullable|string',
+    ]);
+
+    $absensi = Absensi::findOrFail($id);
+
+    $absensi->update([
+        'jam_masuk' => $request->jam_masuk,
+        'jam_pulang' => $request->jam_pulang,
+        'terlambat' => $request->terlambat ?? 0,
+        'lembur' => $request->lembur ?? 0,
+        'catatan' => $request->catatan,
+    ]);
+
+    return back()->with('success', 'Absensi berhasil diperbarui');
+}
+
+public function destroyAbsensi($id)
+{
+    Absensi::findOrFail($id)->delete();
+
+    return back()->with('success', 'Absensi berhasil dihapus');
+}
+
 
     /* ========= CUTI ========= */
     public function indexCuti()

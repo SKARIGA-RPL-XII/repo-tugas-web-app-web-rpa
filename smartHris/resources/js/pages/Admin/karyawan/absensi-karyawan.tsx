@@ -1,6 +1,12 @@
-import ConfirmDeleteModal from '@/components/confirm-delete-modal';
+import { useState } from 'react';
+import AppLayout from '@/layouts/app-layout';
+import { Head, router } from '@inertiajs/react';
+
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
+import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import SuccessModal from '@/components/success-modal';
+import AbsensiFormModal, { AbsensiData } from '@/components/absensi-form-modal';
+
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,10 +14,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
-import { Pencil, Trash2, MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
+
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 export type Absensi = {
     id: number;
@@ -30,11 +34,19 @@ type PageProps = {
 };
 
 export default function AbsensiKaryawan({ absensi }: PageProps) {
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(null);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleEdit = (item: Absensi) => {
+        setSelectedAbsensi(item);
+        setIsFormOpen(true);
+    };
 
     const handleDeleteClick = (item: Absensi) => {
         setSelectedAbsensi(item);
@@ -101,19 +113,12 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
         {
             header: 'Keterangan',
             render: (item) => {
-                const keterangan = item.keterangan ?? '-';
-                const isLate =
-                    keterangan.toLowerCase().includes('terlambat');
+                const ket = item.keterangan ?? '-';
+                const isLate = ket.toLowerCase().includes('terlambat');
 
                 return (
-                    <span
-                        className={`text-sm font-medium ${
-                            isLate
-                                ? 'text-red-600'
-                                : 'text-gray-700'
-                        }`}
-                    >
-                        {keterangan}
+                    <span>
+                        {ket}
                     </span>
                 );
             },
@@ -125,33 +130,51 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
             render: (item) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100"
-                        >
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100">
+
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg"
-                    >
-                        <DropdownMenuItem
-                            onClick={() => handleEdit(item)}
-                            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900"
-                        >
-                            <Pencil className="h-4 w-4" />
-                            <span className="font-medium">Edit</span>
-                        </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
 
-                        <DropdownMenuItem
-                            onClick={() => handleDeleteClick(item)}
-                            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="font-medium">Delete</span>
-                        </DropdownMenuItem>
+                       <DropdownMenuItem
+    onClick={() => handleEdit(item)}
+    className="
+        cursor-pointer
+        gap-3
+        rounded-lg
+        px-3
+        py-2.5
+        text-gray-600
+        focus:bg-gray-50
+        data-[highlighted]:bg-gray-50
+        data-[highlighted]:text-gray-600
+    "
+>
+    <Pencil className="h-4 w-4" />
+    <span className="font-medium">Edit</span>
+</DropdownMenuItem>
+
+
+                    <DropdownMenuItem
+    onClick={() => handleDeleteClick(item)}
+    className="
+        cursor-pointer
+        gap-3
+        rounded-lg
+        px-3
+        py-2.5
+        text-red-600
+        focus:bg-red-50
+        data-[highlighted]:bg-red-50
+        data-[highlighted]:text-red-600
+    "
+>
+    <Trash2 className="h-4 w-4" />
+    <span className="font-medium">Delete</span>
+</DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -177,6 +200,31 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
                 </div>
             </div>
 
+            <AbsensiFormModal
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                initialData={
+                    selectedAbsensi
+                        ? ({
+                              id: selectedAbsensi.id,
+                              nama_karyawan: selectedAbsensi.nama,
+                              jabatan: selectedAbsensi.jabatan,
+                              departemen: selectedAbsensi.departemen,
+                              tanggal: selectedAbsensi.tanggal,
+                              jam_masuk: selectedAbsensi.jam_masuk,
+                              jam_pulang: selectedAbsensi.jam_pulang,
+                              terlambat: 0,
+                              lembur: 0,
+                              catatan: null,
+                          } as AbsensiData)
+                        : null
+                }
+                onSuccess={(msg) => {
+                    setSuccessMessage(msg);
+                    setShowSuccessModal(true);
+                }}
+            />
+
             <ConfirmDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -193,8 +241,4 @@ export default function AbsensiKaryawan({ absensi }: PageProps) {
             />
         </AppLayout>
     );
-}
-
-function handleEdit(item: Absensi): void {
-    console.log('Edit absensi:', item);
 }
