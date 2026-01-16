@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfAuthenticated
@@ -15,9 +16,13 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check()) {
+        if (Auth::check()) {
+            
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
             // Redirect sesuai role
-            return match (auth()->user()->role) {
+            return match ($user->role) {
                 'admin' => redirect()->route('admin.dashboard'),
                 'user'  => redirect('/absensi'),
                 default => redirect('/'),
