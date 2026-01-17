@@ -58,7 +58,7 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard') //url nya jangan lupa diubah
+                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
                                         ? sidebarConfig.activeStyle
                                         : ''
                                         }`}
@@ -111,46 +111,25 @@ export default function Sidebar() {
                                         <span> Absensi Karyawan</span>
                                     </Link>
                                 </Button>
-                                {/* jangan lupa di styling */}
-
                                 <Button
                                     variant="ghost"
                                     asChild
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/cuti')
+                                        isActive('/app/cuti')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                <Link href="/admin/cuti">
-                                        <Icon
-                                            icon="mdi:circle"
-                                            width="20"
-                                            height="20"
-                                        />
-                                        <span>Data Cuti Karyawan</span>
-                                    </Link>
-                                </Button>
-
-                                <Button
-                                    variant="ghost"
-                                    asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/admin/logout')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
-                                >
-                                    <Link href="/logout" method="post">
+                                    <Link href="/app/cuti">
                                         {' '}
                                         <Icon
                                             icon="streamline:office-worker-remix"
                                             width="14"
                                             height="14"
                                         />
-                                        <span>Logout</span>
+                                        <span> Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
-
                             </>
                         ) : (
                             <>
@@ -243,7 +222,6 @@ export default function Sidebar() {
                                         <span>Cuti</span>
                                     </Link>
                                 </Button>
-                                {/* perbaiki button logout nanti */}
                                 <Button
                                     variant="ghost"
                                     asChild
