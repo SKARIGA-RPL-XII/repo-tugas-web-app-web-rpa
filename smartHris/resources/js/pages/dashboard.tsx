@@ -4,7 +4,7 @@ import { Head } from '@inertiajs/react'
 import AdminDashboard from '@/components/admin/AdminDashboard'
 import UserDashboard from '@/components/user/UserDashboard'
 
-type Stats = {
+type Stats = {  
   total_karyawan: number
   hadir_hari_ini: number
   pengajuan_cuti: number
