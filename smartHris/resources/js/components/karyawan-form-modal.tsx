@@ -102,6 +102,19 @@ export default function KaryawanFormModal({
 
     const handleSaveClick = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (
+            !data.nama ||
+            !data.jenis_kelamin ||
+            !data.tanggal_lahir ||
+            !data.jabatan ||
+            !data.departemen ||
+            !data.alamat
+        ) {
+            alert("Mohon lengkapi seluruh field bertanda bintang (*) sebelum menyimpan.");
+            return;
+        }
+
         setIsSaveWarningOpen(true);
     };
 
@@ -180,6 +193,7 @@ export default function KaryawanFormModal({
                             onChange={(e) => setData('nama', e.target.value)}
                             placeholder="Masukkan Nama Lengkap"
                             className="form-control"
+                            required
                         />
                         {errors.nama && (
                             <p className="mt-1 text-xs text-red-500">
@@ -196,6 +210,7 @@ export default function KaryawanFormModal({
                             <select
                                 className="form-select"
                                 value={data.jenis_kelamin}
+                                required
                                 onChange={(e) =>
                                     setData('jenis_kelamin', e.target.value)
                                 }
@@ -218,6 +233,7 @@ export default function KaryawanFormModal({
                         </Label>
                         <div className="relative">
                             <Input
+                                required
                                 id="tanggal_lahir"
                                 type="date"
                                 value={data.tanggal_lahir}
@@ -253,6 +269,7 @@ export default function KaryawanFormModal({
                         </Label>
                         <div className="form-select-wrapper">
                             <select
+                                required
                                 className="form-select"
                                 value={data.jabatan}
                                 onChange={(e) =>
@@ -273,13 +290,14 @@ export default function KaryawanFormModal({
                             </p>
                         )}
                     </div>
-                    
+
                     <div className="md:col-span-3">
                         <Label className={labelClass}>
                             Departemen <span className="text-red-500">*</span>
                         </Label>
                         <div className="form-select-wrapper">
                             <select
+                                required
                                 className="form-select"
                                 value={data.departemen}
                                 onChange={(e) =>
@@ -306,6 +324,7 @@ export default function KaryawanFormModal({
                             Alamat <span className="text-red-500">*</span>
                         </Label>
                         <Textarea
+                            required
                             value={data.alamat}
                             onChange={(e) => setData('alamat', e.target.value)}
                             placeholder="Masukkan Alamat Lengkap"
