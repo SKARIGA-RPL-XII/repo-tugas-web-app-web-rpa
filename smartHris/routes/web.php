@@ -7,6 +7,11 @@ use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+/*
+|--------------------------------------------------------------------------
+| GUEST
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest.redirect')->name('home');
@@ -25,7 +30,12 @@ Route::middleware(['auth'])->group(function () {
     // --- ADMIN ROUTES ---
     Route::middleware(['role:admin'])->group(function () {
 
-        Route::get('/app/dashboard', [MainController::class, 'index'])->name('admin.dashboard');
+        // ===================== KARYAWAN =====================
+        Route::get('/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
+        Route::post('/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
+        Route::put('/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
+        Route::put('/karyawan/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.karyawan.reset-password');
+        Route::delete('/karyawan/{id}', [AdminController::class, 'destroyKaryawan'])->name('admin.karyawan.destroy');
 
         // KARYAWAN
         Route::controller(AdminController::class)->group(function() {
