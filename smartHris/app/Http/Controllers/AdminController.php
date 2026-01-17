@@ -40,37 +40,37 @@ class AdminController extends Controller
             'karyawan' => $karyawan
         ]);
     }
+    
     public function storeKaryawan(Request $request)
     {
         $request->validate([
             'nama'           => 'required|string|max:255',
             'email'          => 'required|email|unique:users,email',
-
             'jabatan'        => 'required|string',
             'jenis_kelamin'  => 'required|in:L,P',
             'tanggal_lahir'  => 'required|date',
             'departemen'     => 'required|string',
-            'tanggal_masuk'  => 'required|date',
             'alamat'         => 'required|string',
         ]);
 
-        DB::beginTransaction();
+        DB::transaction(function () use ($request) {
 
-        try {
+            $lastKaryawan = Karyawan::where('nip', 'like', 'K%')
+                ->orderBy('nip', 'desc')
+                ->lockForUpdate()
+                ->first();
+
+            $lastNumber = $lastKaryawan
+                ? (int) substr($lastKaryawan->nip, 1)
+                : 0;
+
+            $nip = 'K' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
             $user = User::create([
                 'name'     => $request->nama,
                 'email'    => $request->email,
-                'password' => bcrypt('temporary'), // akan diupdate
-                'role'     => 'user',
-            ]);
-
-            $tanggalMasuk = Carbon::parse($request->tanggal_masuk)
-                ->format('Ymd');
-
-            $nip = $tanggalMasuk . $user->id;
-
-            $user->update([
                 'password' => bcrypt($nip),
+                'role'     => 'user',
             ]);
 
             Karyawan::create([
@@ -80,25 +80,16 @@ class AdminController extends Controller
                 'jenis_kelamin'  => $request->jenis_kelamin,
                 'tanggal_lahir'  => $request->tanggal_lahir,
                 'departemen'     => $request->departemen,
-                'tanggal_masuk'  => $request->tanggal_masuk,
                 'alamat'         => $request->alamat,
+                'tanggal_masuk'  => Carbon::now()->toDateString(),
             ]);
+        });
 
-            DB::commit();
-
-            return redirect()
-                ->route('admin.karyawan')
-                ->with('success', "Karyawan berhasil ditambahkan. Password awal: {$nip}");
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            dd($e->getMessage());
-
-            return back()
-                ->withErrors('Gagal menambahkan karyawan')
-                ->withInput();
-        }
+        return redirect()
+            ->route('admin.karyawan')
+            ->with('success', 'Karyawan berhasil ditambahkan');
     }
+
     public function updateKaryawan(Request $request, $id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -139,7 +130,9 @@ class AdminController extends Controller
             $karyawan->delete();
         });
 
-        return back()->with('success', 'Karyawan dihapus');
+        return redirect()
+            ->route('admin.karyawan')
+            ->with('success', 'Data karyawan berhasil dihapus');
     }
     public function resetPassword($id)
     {
@@ -152,7 +145,7 @@ class AdminController extends Controller
             ], 404);
         }
 
-        if ($user->id === auth()->id()) {
+        if ($user->id === auth()->id) {
             return response()->json([
                 'message' => 'Tidak dapat mereset password sendiri'
             ], 403);
