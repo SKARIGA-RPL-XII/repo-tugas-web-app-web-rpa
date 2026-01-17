@@ -58,7 +58,7 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard') //url nya jangan lupa diubah
+                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
                                         ? sidebarConfig.activeStyle
                                         : ''
                                         }`}
@@ -130,27 +130,6 @@ export default function Sidebar() {
                                         <span> Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
-                                {/* jangan lupa di styling */}
-
-                                <Button
-                                    variant="ghost"
-                                    asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/absensi_karyawan')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
-                                >
-                                    <Link href="/logout" method="post">
-                                        {' '}
-                                        <Icon
-                                            icon="streamline:office-worker-remix"
-                                            width="14"
-                                            height="14"
-                                        />
-                                        <span>Logout</span>
-                                    </Link>
-                                </Button>
-
                             </>
                         ) : (
                             <>
@@ -243,7 +222,6 @@ export default function Sidebar() {
                                         <span>Cuti</span>
                                     </Link>
                                 </Button>
-                                {/* perbaiki button logout nanti */}
                                 <Button
                                     variant="ghost"
                                     asChild
