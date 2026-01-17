@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('nama_pelanggaran');
             $table->enum('tingkat', ['ringan', 'sedang', 'berat']);
-            $table->decimal('potongan', 15, 2);
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });

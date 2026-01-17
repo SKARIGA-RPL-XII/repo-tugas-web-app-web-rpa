@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Karyawan;
 use App\Models\JenisPelanggaran;
@@ -9,78 +12,151 @@ use App\Models\PelanggaranKaryawan;
 use App\Models\SuratPeringatan;
 use App\Models\Absensi;
 use App\Models\Cuti;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
+        $password = Hash::make('password123');
+
         /* ================= USERS ================= */
+        
         $admin = User::create([
             'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'admin@smarthris.com',
+            'password' => $password,
             'role' => 'admin',
         ]);
 
         $user1 = User::create([
             'name' => 'Dhani Firdaus',
-            'email' => 'dhani@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'dhani@smarthris.com',
+            'password' => $password,
             'role' => 'user',
         ]);
 
         $user2 = User::create([
-            'name' => 'Ahmad Ramadhan',
-            'email' => 'ahmad@example.com',
-            'password' => Hash::make('password'),
+            'name' => 'Gilang Ramadhan',
+            'email' => 'gilang@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+        
+        $user3 = User::create([
+            'name' => 'Rafli Ahmad',
+            'email' => 'rafli@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+        
+        $user4 = User::create([
+            'name' => 'Nike Ardilla',
+            'email' => 'nike@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+
+        $user5 = User::create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi@smarthris.com',
+            'password' => $password,
+            'role' => 'user',
+        ]);
+
+        $user6 = User::create([
+            'name' => 'Siti Aminah',
+            'email' => 'siti@smarthris.com',
+            'password' => $password,
             'role' => 'user',
         ]);
 
         /* ================= KARYAWAN ================= */
+
         $karyawan1 = Karyawan::create([
             'user_id' => $user1->id,
             'nip' => 'K001',
-            'jabatan' => 'Staff IT',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2000-01-01',
+            'tanggal_lahir' => '2000-05-10',
             'departemen' => 'IT',
-            'tanggal_masuk' => '2022-01-01',
-            'alamat' => 'Jl. Contoh 1',
+            'tanggal_masuk' => '2022-01-10',
+            'alamat' => 'Jl. Merdeka No. 10, Jakarta',
         ]);
 
         $karyawan2 = Karyawan::create([
             'user_id' => $user2->id,
             'nip' => 'K002',
-            'jabatan' => 'Staff HR',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2001-02-02',
-            'departemen' => 'HR',
-            'tanggal_masuk' => '2022-02-01',
-            'alamat' => 'Jl. Contoh 2',
+            'tanggal_lahir' => '1999-08-17',
+            'departemen' => 'HRD',
+            'tanggal_masuk' => '2022-03-01',
+            'alamat' => 'Jl. Sudirman No. 45, Bandung',
+        ]);
+        
+        $karyawan3 = Karyawan::create([
+            'user_id' => $user3->id,
+            'nip' => 'K003',
+            'jabatan' => 'Admin',
+            'jenis_kelamin' => 'L',
+            'tanggal_lahir' => '1998-12-25',
+            'departemen' => 'Finance',
+            'tanggal_masuk' => '2021-06-15',
+            'alamat' => 'Jl. Diponegoro No. 12, Surabaya',
+        ]);
+
+        $karyawan4 = Karyawan::create([
+            'user_id' => $user4->id,
+            'nip' => 'K004',
+            'jabatan' => 'Staff',
+            'jenis_kelamin' => 'P',
+            'tanggal_lahir' => '2001-02-14',
+            'departemen' => 'Marketing',
+            'tanggal_masuk' => '2023-01-05',
+            'alamat' => 'Jl. Anggrek No. 88, Malang',
+        ]);
+
+        $karyawan5 = Karyawan::create([
+            'user_id' => $user5->id,
+            'nip' => 'K005',
+            'jabatan' => 'Supervisor',
+            'jenis_kelamin' => 'L',
+            'tanggal_lahir' => '1995-10-30',
+            'departemen' => 'Operasional',
+            'tanggal_masuk' => '2020-11-20',
+            'alamat' => 'Jl. Kenanga No. 5, Yogyakarta',
+        ]);
+
+        $karyawan6 = Karyawan::create([
+            'user_id' => $user6->id,
+            'nip' => 'K006',
+            'jabatan' => 'Staff',
+            'jenis_kelamin' => 'P',
+            'tanggal_lahir' => '1997-04-21',
+            'departemen' => 'HRD', 
+            'tanggal_masuk' => '2021-09-01',
+            'alamat' => 'Jl. Mawar Melati No. 99, Semarang',
         ]);
 
         /* ================= JENIS PELANGGARAN ================= */
         $jp1 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Terlambat Masuk',
             'tingkat' => 'ringan',
-            'potongan' => 0,
             'keterangan' => 'Terlambat masuk kerja',
         ]);
 
         $jp2 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Tidak Hadir Tanpa Keterangan',
             'tingkat' => 'sedang',
-            'potongan' => 50000,
             'keterangan' => 'Absen tanpa izin',
         ]);
 
         $jp3 = JenisPelanggaran::create([
             'nama_pelanggaran' => 'Melanggar Peraturan Berat',
             'tingkat' => 'berat',
-            'potongan' => 100000,
             'keterangan' => 'Melanggar aturan perusahaan',
         ]);
 
@@ -119,29 +195,71 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /* ================= ABSENSI ================= */
-        foreach (range(0, 6) as $i) {
+        foreach (range(0, 9) as $i) {
+            $jamMasuk = ($i == 3 || $i == 7) ? '08:45:00' : '08:00:00';
+            
             Absensi::create([
                 'karyawan_id' => $karyawan1->id,
                 'tanggal' => Carbon::now()->subDays($i)->toDateString(),
-                'jam_masuk' => '08:00:00',
+                'jam_masuk' => $jamMasuk,
                 'jam_pulang' => '17:00:00',
+                'status' => 'hadir',
+            ]);
+        }
+
+        foreach (range(0, 4) as $i) {
+            Absensi::create([
+                'karyawan_id' => $karyawan2->id,
+                'tanggal' => Carbon::now()->subDays($i)->toDateString(),
+                'jam_masuk' => '07:55:00',
+                'jam_pulang' => '17:05:00',
                 'status' => 'hadir',
             ]);
         }
 
         Absensi::create([
             'karyawan_id' => $karyawan2->id,
-            'tanggal' => Carbon::now()->toDateString(),
+            'tanggal' => Carbon::now()->subDays(6)->toDateString(),
             'status' => 'alpha',
         ]);
 
         /* ================= CUTI ================= */
+        
+        $tglMulai1   = Carbon::parse('2026-01-15');
+        $tglSelesai1 = Carbon::parse('2026-01-17');
+        
         Cuti::create([
-            'karyawan_id' => $karyawan1->id,
-            'tanggal_mulai' => '2026-01-15',
-            'tanggal_selesai' => '2026-01-17',
-            'alasan' => 'Keperluan keluarga',
-            'status' => 'pending',
+            'karyawan_id'     => $karyawan1->id,
+            'tanggal_mulai'   => $tglMulai1,
+            'tanggal_selesai' => $tglSelesai1,
+            'jumlah_hari'     => $tglMulai1->diffInDays($tglSelesai1) + 1,
+            'alasan'          => 'Keperluan keluarga',
+            'status'          => 'pending',
+        ]);
+
+        
+        $tglMulai2   = Carbon::parse('2026-01-20');
+        $tglSelesai2 = Carbon::parse('2026-01-20');
+
+        Cuti::create([
+            'karyawan_id'     => $karyawan2->id,
+            'tanggal_mulai'   => $tglMulai2,
+            'tanggal_selesai' => $tglSelesai2,
+            'jumlah_hari'     => $tglMulai2->diffInDays($tglSelesai2) + 1, 
+            'alasan'          => 'Mengurus SIM',
+            'status'          => 'disetujui', 
+        ]);
+
+        $tglMulai3   = Carbon::parse('2026-01-25');
+        $tglSelesai3 = Carbon::parse('2026-01-28');
+
+        Cuti::create([
+            'karyawan_id'     => $karyawan3->id,
+            'tanggal_mulai'   => $tglMulai3,
+            'tanggal_selesai' => $tglSelesai3,
+            'jumlah_hari'     => $tglMulai3->diffInDays($tglSelesai3) + 1, 
+            'alasan'          => 'Ingin istirahat saja',
+            'status'          => 'ditolak',
         ]);
     }
 }

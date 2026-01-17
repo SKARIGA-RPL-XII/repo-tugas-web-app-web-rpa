@@ -14,23 +14,21 @@ class HandleInertiaRequests extends Middleware
         return parent::version($request);
     }
 
+
+
+    // app/Http/Middleware/HandleInertiaRequests.php
+
     public function share(Request $request): array
     {
-        $mockRole = 'user'; 
-
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => [
-                    'id' => 1,
-                    'name' => 'Developer Test',
-                    'email' => 'dev@smarthris.com',
-                    'role' => $mockRole,
-                    'avatar' => 'https://ui-avatars.com/api/?name=Developer+Test', 
-                ],
-            ],
-            
-            'flash' => [
-                'message' => fn () => $request->session()->get('message'),
+                'user' => $request->user()
+                    ? [
+                        'id' => $request->user()->id,
+                        'name' => $request->user()->name,
+                        'role' => $request->user()->role,
+                    ]
+                    : null,
             ],
         ]);
     }

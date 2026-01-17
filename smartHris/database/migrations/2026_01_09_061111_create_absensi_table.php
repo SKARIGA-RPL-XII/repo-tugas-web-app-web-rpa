@@ -17,7 +17,10 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
             $table->time('jam_pulang')->nullable();
+            $table->string('foto_masuk')->nullable();
+            $table->string('foto_pulang')->nullable();
             $table->enum('status', ['hadir', 'cuti', 'sakit', 'alpha']);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
