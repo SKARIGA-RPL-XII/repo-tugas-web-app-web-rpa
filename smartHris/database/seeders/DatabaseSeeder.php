@@ -78,7 +78,7 @@ class DatabaseSeeder extends Seeder
         $karyawan1 = Karyawan::create([
             'user_id' => $user1->id,
             'nip' => 'K001',
-            'jabatan' => 'Backend Developer',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '2000-05-10',
             'departemen' => 'IT',
@@ -89,7 +89,7 @@ class DatabaseSeeder extends Seeder
         $karyawan2 = Karyawan::create([
             'user_id' => $user2->id,
             'nip' => 'K002',
-            'jabatan' => 'Recruitment Staff',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '1999-08-17',
             'departemen' => 'HRD',
@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
         $karyawan3 = Karyawan::create([
             'user_id' => $user3->id,
             'nip' => 'K003',
-            'jabatan' => 'Payroll Specialist',
+            'jabatan' => 'Admin',
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '1998-12-25',
             'departemen' => 'Finance',
@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
         $karyawan4 = Karyawan::create([
             'user_id' => $user4->id,
             'nip' => 'K004',
-            'jabatan' => 'Social Media Specialist',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'P',
             'tanggal_lahir' => '2001-02-14',
             'departemen' => 'Marketing',
@@ -122,7 +122,7 @@ class DatabaseSeeder extends Seeder
         $karyawan5 = Karyawan::create([
             'user_id' => $user5->id,
             'nip' => 'K005',
-            'jabatan' => 'General Affair',
+            'jabatan' => 'Supervisor',
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '1995-10-30',
             'departemen' => 'Operasional',
@@ -133,10 +133,10 @@ class DatabaseSeeder extends Seeder
         $karyawan6 = Karyawan::create([
             'user_id' => $user6->id,
             'nip' => 'K006',
-            'jabatan' => 'Legal Officer',
+            'jabatan' => 'Staff',
             'jenis_kelamin' => 'P',
             'tanggal_lahir' => '1997-04-21',
-            'departemen' => 'Legal',
+            'departemen' => 'HRD', 
             'tanggal_masuk' => '2021-09-01',
             'alamat' => 'Jl. Mawar Melati No. 99, Semarang',
         ]);
