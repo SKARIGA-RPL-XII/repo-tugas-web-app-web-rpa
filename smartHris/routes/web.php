@@ -15,42 +15,15 @@ Route::fallback(function () {
     return redirect()->back();
 });
 
-
-Route::get('/cuti', [AdminController::class, 'indexCuti'])->name('admin.cuti');
-
-Route::prefix('admin')->name('admin.')->controller(AdminController::class)->group(function () {
-        
-    // Karyawan
-    Route::get('/karyawan', 'indexKaryawan')->name('karyawan');
-    Route::post('/karyawan', 'storeKaryawan')->name('karyawan.store');
-    Route::put('/karyawan/{id}', 'updateKaryawan')->name('karyawan.update');
-    Route::delete('/karyawan/{id}', 'destroyKaryawan')->name('karyawan.destroy');
-
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
-
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [MainController::class, 'index'])->name('dashboard');
 
-
-    // Cuti
-    
-    Route::get('/cuti', 'indexCuti')->name('cuti');
-    Route::post('/cuti/{id}/approve', 'approveCuti')->name('cuti.approve');
-    Route::post('/cuti/{id}/reject', 'rejectCuti')->name('cuti.reject');
-    
-    // Kalender & Event
-    Route::get('/kalender', 'kalender')->name('kalender');
-    Route::get('/kalender-event', 'event')->name('kalender.event');
-    Route::post('/kalender-event', 'eventStore')->name('kalender.event.store');
-    Route::put('/kalender-event/{id}', 'eventUpdate')->name('kalender.event.update');
-    Route::delete('/kalender-event/{id}', 'eventDestroy')->name('kalender.event.destroy');
-
     Route::middleware(['role:admin'])->group(function () {
 
         Route::get('/app/dashboard', [MainController::class, 'index'])->name('admin.dashboard');
-
 
         // KARYAWAN
         Route::get('/app/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
@@ -105,7 +78,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cuti', [UserController::class, 'cuti'])->name('user.cuti');
         Route::post('/cuti', [UserController::class, 'cutiStore'])->name('user.cuti.store');
     });
-});
 });
 
 require __DIR__ . '/settings.php';

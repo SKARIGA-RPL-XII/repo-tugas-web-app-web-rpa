@@ -82,19 +82,10 @@ export default function Sidebar() {
                                             : ''
                                     }`}
                                 >
-<<<<<<< HEAD
-                                    <Link href="/admin/karyawan">
-                                        {' '}
-                                        {/* 2. Ubah Link tujuan di sini */}
-                                        <Icon
-                                            icon="f7:person-2-fill" // Icon sudah oke
-                                            width="24" // Biasanya width/height icon sidebar itu sekitar 20-24, 56 kegedean
-=======
                                     <Link href="/app/karyawan"> 
                                         <Icon
                                             icon="f7:person-2-fill" 
                                             width="24"  
->>>>>>> 2f1f50c65034437ac0f58fa82715dc4ffb30885a
                                             height="24"
                                         />
                                         <span>Data Karyawan</span>
@@ -120,31 +111,30 @@ export default function Sidebar() {
                                         <span> Absensi Karyawan</span>
                                     </Link>
                                 </Button>
-<<<<<<< HEAD
-=======
-                                {/* jangan lupa di styling */}
->>>>>>> 2f1f50c65034437ac0f58fa82715dc4ffb30885a
-
                                 <Button
                                     variant="ghost"
                                     asChild
-<<<<<<< HEAD
                                     className={`${sidebarConfig.navStyle} ${
-                                        isActive('/admin/cuti')
+                                        isActive('/app/cuti')
                                             ? sidebarConfig.activeStyle
                                             : ''
                                     }`}
                                 >
-                                    <Link href="/admin/cuti">
+                                    <Link href="/app/cuti">
+                                        {' '}
                                         <Icon
-                                            icon="mdi:circle"
-                                            width="20"
-                                            height="20"
+                                            icon="streamline:office-worker-remix"
+                                            width="14"
+                                            height="14"
                                         />
-                                        <span>Data Cuti Karyawan</span>
+                                        <span> Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
-=======
+                                {/* jangan lupa di styling */}
+
+                                <Button
+                                    variant="ghost"
+                                    asChild
                                     className={`${sidebarConfig.navStyle} ${isActive('/app/absensi_karyawan')
                                         ? sidebarConfig.activeStyle
                                         : ''
@@ -161,7 +151,6 @@ export default function Sidebar() {
                                     </Link>
                                 </Button>
 
->>>>>>> 2f1f50c65034437ac0f58fa82715dc4ffb30885a
                             </>
                         ) : (
                             <>
