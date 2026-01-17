@@ -279,7 +279,7 @@ public function indexCuti()
         'rejected' => $cutiData->where('status', 'rejected')->count(),
     ];
 
-    return Inertia::render('Admin/karyawan/CutiKaryawan', [
+    return Inertia::render('Admin/cuti/index', [
         'cutiData' => $cutiData,
         'statistics' => $statistics,
     ]);

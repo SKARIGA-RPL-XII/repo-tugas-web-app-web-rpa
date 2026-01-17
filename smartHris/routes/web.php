@@ -7,11 +7,6 @@ use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| GUEST
-|--------------------------------------------------------------------------
-*/
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest.redirect')->name('home');
