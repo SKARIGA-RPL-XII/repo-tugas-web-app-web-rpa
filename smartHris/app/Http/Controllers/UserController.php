@@ -211,8 +211,7 @@ class UserController extends Controller
 
         if ($request->filled('bulan')) {
             $bulan = Carbon::parse($request->bulan);
-            $query->whereMonth('tanggal', $bulan->month)
-                ->whereYear('tanggal', $bulan->year);
+            $query->whereMonth('tanggal', $bulan->month)->whereYear('tanggal', $bulan->year);
         }
 
         if ($request->filled('status')) {
@@ -225,8 +224,7 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('status', 'like', "%{$request->search}%")
-                    ->orWhere('keterangan', 'like', "%{$request->search}%");
+                $q->where('status', 'like', "%{$request->search}%")->orWhere('keterangan', 'like', "%{$request->search}%");
             });
         }
 

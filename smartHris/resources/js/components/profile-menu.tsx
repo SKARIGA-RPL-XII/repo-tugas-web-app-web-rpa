@@ -1,5 +1,5 @@
 import { ChevronDown, User, Moon, LogOut, Settings } from 'lucide-react'
-import { usePage, router } from '@inertiajs/react'
+import { usePage, router, Link } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
 
 type AuthUser = {
@@ -60,9 +60,8 @@ export default function ProfileMenu() {
                 </span>
 
                 <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${
-                        open ? 'rotate-180' : ''
-                    }`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''
+                        }`}
                 />
             </button>
 
@@ -77,12 +76,15 @@ export default function ProfileMenu() {
                         </span>
                     </div>
 
-                    
+
                     <div className="py-2">
-                        <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                        <Link
+                            href="/settings"
+                            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                        >
                             <Settings className="h-4 w-4" />
                             Profile Settings
-                        </button>
+                        </Link>
 
                         <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
                             <Moon className="h-4 w-4" />

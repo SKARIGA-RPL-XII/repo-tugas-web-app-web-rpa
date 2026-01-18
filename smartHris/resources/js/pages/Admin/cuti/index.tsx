@@ -34,7 +34,7 @@ export default function CutiKaryawan({ cutiData }: PageProps) {
     const handleAction = (id: number, action: 'approve' | 'reject') => {
         const message = action === 'approve' ? 'menyetujui' : 'menolak';
         if (confirm(`Apakah Anda yakin ingin ${message} pengajuan cuti ini?`)) {
-            router.post(`/admin/cuti/${id}/${action}`);
+            router.post(`/app/cuti/${id}/${action}`);
         }
     };
 

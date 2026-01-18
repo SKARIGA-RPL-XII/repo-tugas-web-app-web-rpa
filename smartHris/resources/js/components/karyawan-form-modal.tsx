@@ -61,7 +61,7 @@ export default function KaryawanFormModal({
     const [isSaveWarningOpen, setIsSaveWarningOpen] = useState(false);
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } =
+    const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm<KaryawanForm>({
             id: '',
             nama: '',
@@ -123,27 +123,31 @@ export default function KaryawanFormModal({
     };
 
     const executeSubmit = () => {
-        const options = {
-            onSuccess: () => {
-                onSuccess(
-                    mode === 'edit'
-                        ? 'Data karyawan berhasil diperbarui.'
-                        : 'Data karyawan berhasil disimpan.'
-                );
-                setIsSaveWarningOpen(false);
-                onClose();
-                reset();
-            },
-            preserveScroll: true,
-            onError: () => setIsSaveWarningOpen(false),
-        };
-
-        if (mode === 'edit') {
-            put(`/app/karyawan/${data.id}`, options);
-        } else {
-            post('/app/karyawan', options);
-        }
+        post(
+            mode === 'edit'
+                ? `/app/karyawan/${data.id}`
+                : '/app/karyawan',
+            {
+                data: {
+                    ...data,
+                    ...(mode === 'edit' && { _method: 'PUT' }),
+                },
+                preserveScroll: true,
+                onSuccess: () => {
+                    onSuccess(
+                        mode === 'edit'
+                            ? 'Data karyawan berhasil diperbarui.'
+                            : 'Data karyawan berhasil disimpan.'
+                    );
+                    setIsSaveWarningOpen(false);
+                    onClose();
+                    reset();
+                },
+                onError: () => setIsSaveWarningOpen(false),
+            }
+        );
     };
+
 
     const executeCancel = () => {
         setIsCancelWarningOpen(false);
@@ -170,7 +174,7 @@ export default function KaryawanFormModal({
                             NIP <span className="text-red-500">*</span>
                         </Label>
                         <Input
-                            disabled
+                            readOnly
                             value={
                                 mode === 'edit'
                                     ? initialData?.nip ?? '-'
@@ -202,7 +206,24 @@ export default function KaryawanFormModal({
                             </p>
                         )}
                     </div>
-
+                    <div className="md:col-span-3">
+                        <Label className={labelClass}>
+                            Email <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            type="email"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            placeholder="Email Karyawan"
+                            className="form-control"
+                            required
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.email}
+                            </p>
+                        )}
+                    </div>
                     <div className="md:col-span-3">
                         <Label className={labelClass}>
                             Email <span className="text-red-500">*</span>
