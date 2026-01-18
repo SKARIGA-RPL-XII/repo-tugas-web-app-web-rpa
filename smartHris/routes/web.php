@@ -41,36 +41,36 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/app/karyawan/{id}/reset-password', 'resetPassword')->name('admin.karyawan.reset-password');
             Route::delete('/app/karyawan/{id}', 'destroyKaryawan')->name('admin.karyawan.destroy');
 
-            // === ABSENSI ===
+            // ABSENSI (ADMIN VIEW)
             Route::get('/app/absensi', 'indexAbsensi')->name('admin.absensi');
             Route::put('/app/absensi/{id}', 'updateAbsensi')->name('admin.absensi.update');
             Route::delete('/app/absensi/{id}', 'destroyAbsensi')->name('admin.absensi.destroy');
 
-            // === CUTI ===
+            // CUTI (ADMIN VIEW)
             Route::get('/app/cuti', 'indexCuti')->name('admin.cuti');
             Route::post('/app/cuti/{id}/approve', 'approveCuti')->name('admin.cuti.approve');
             Route::post('/app/cuti/{id}/reject', 'rejectCuti')->name('admin.cuti.reject');
 
-            // === KALENDER & EVENT ===
+            // KALENDER & EVENT
             Route::get('/app/kalender', 'kalender')->name('admin.kalender');
             Route::get('/kalender-event', 'event')->name('admin.event');
             Route::post('/kalender-event', 'eventStore')->name('admin.event.store');
             Route::put('/kalender-event/{id}', 'eventUpdate')->name('admin.event.update');
             Route::delete('/kalender-event/{id}', 'eventDestroy')->name('admin.event.destroy');
 
-            // === JENIS PELANGGARAN ===
+            // JENIS PELANGGARAN
             Route::get('/jenis-pelanggaran', 'jPelanggaran')->name('jenis-pelanggaran');
             Route::post('/jenis-pelanggaran', 'jPelanggaranStore')->name('jenis-pelanggaran.store');
             Route::put('/jenis-pelanggaran/{id}', 'jPelanggaranUpdate')->name('jenis-pelanggaran.update');
             Route::delete('/jenis-pelanggaran/{id}', 'jPelanggaranDestroy')->name('jenis-pelanggaran.destroy');
 
-            // === PELANGGARAN KARYAWAN ===
+            // PELANGGARAN KARYAWAN
             Route::get('/app/pelanggaran', 'pKaryawan')->name('admin.pelanggaran');
             Route::post('/app/pelanggaran', 'pKaryawanStore')->name('admin.pelanggaran.store');
             Route::put('/app/pelanggaran/{id}', 'pKaryawanUpdate')->name('admin.pelanggaran.update');
             Route::delete('/app/pelanggaran/{id}', 'pKaryawanDestroy')->name('admin.pelanggaran.destroy');
 
-            // === SURAT PERINGATAN (SP) ===
+            // SURAT PERINGATAN (SP)
             Route::get('/sp', 'sp')->name('admin.sp');
             Route::post('/sp', 'spStore')->name('admin.sp.store');
             Route::delete('/sp/{id}', 'spDestroy')->name('admin.sp.destroy');

@@ -28,7 +28,7 @@ class AdminController extends Controller
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
-                'email'           => $item->user->email ?? '-',
+                'email'          => $item->user->email ?? '',
                 'nip'            => $item->nip ?? '-',
                 'jabatan'        => $item->jabatan ?? '-',
                 'departemen'     => $item->departemen ?? '-',
