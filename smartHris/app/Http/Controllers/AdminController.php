@@ -26,6 +26,7 @@ class AdminController extends Controller
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
+                'email'          => $item->user->email ?? '', // <--- INI PENTING!
                 'nip'            => $item->nip ?? '-',
                 'jabatan'        => $item->jabatan ?? '-',
                 'departemen'     => $item->departemen ?? '-',
@@ -130,9 +131,7 @@ class AdminController extends Controller
             $karyawan->delete();
         });
 
-        return redirect()
-            ->route('admin.karyawan')
-            ->with('success', 'Data karyawan berhasil dihapus');
+        return back()->with('success', 'Data karyawan berhasil dihapus');
     }
     public function resetPassword($id)
     {
@@ -195,7 +194,6 @@ public function indexAbsensi(Request $request)
         ->orderBy('absensi.tanggal', 'desc')
         ->orderBy('absensi.jam_masuk');
 
-    // 🔹 kalau ada filter tanggal → baru difilter
     if ($tanggal) {
         $query->whereDate('absensi.tanggal', $tanggal);
     }
@@ -254,7 +252,6 @@ public function indexCuti()
                 'karyawan_nip' => $cuti->karyawan->nip ?? '-',
                 'karyawan_jabatan' => $cuti->karyawan->jabatan ?? '-',
 
-                // 🔥 FIX SESUAI MODEL
                 'karyawan_departemen' => $cuti->karyawan->departemen ?? '-',
 
                 'tanggal_mulai' => $cuti->tanggal_mulai,
@@ -271,7 +268,6 @@ public function indexCuti()
             ];
         });
 
-    // statistik (opsional tapi bagus)
     $statistics = [
         'total' => $cutiData->count(),
         'pending' => $cutiData->where('status', 'pending')->count(),
