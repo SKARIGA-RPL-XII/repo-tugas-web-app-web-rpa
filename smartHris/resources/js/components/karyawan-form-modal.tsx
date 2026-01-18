@@ -91,7 +91,7 @@ export default function KaryawanFormModal({
         } else {
             reset();
         }
-    }, [isOpen, mode, initialData, clearErrors, setData, reset]); 
+    }, [isOpen, mode, initialData, clearErrors, setData, reset]);
 
     useEffect(() => {
         if (mode === 'create') {
@@ -153,7 +153,7 @@ export default function KaryawanFormModal({
 
     const labelClass =
         'text-sm font-bold text-gray-700 mb-2 block tracking-tight';
-    
+
     return (
         <>
             <ReusableFormModal
@@ -203,7 +203,6 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    {/* === FIELD EMAIL (PENTING) === */}
                     <div className="md:col-span-3">
                         <Label className={labelClass}>
                             Email <span className="text-red-500">*</span>
@@ -247,7 +246,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Tanggal Lahir <span className="text-red-500">*</span>
                         </Label>
@@ -283,7 +282,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Jabatan <span className="text-red-500">*</span>
                         </Label>
@@ -311,7 +310,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Departemen <span className="text-red-500">*</span>
                         </Label>

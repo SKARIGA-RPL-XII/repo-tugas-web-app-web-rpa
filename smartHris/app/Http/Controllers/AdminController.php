@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
@@ -26,7 +28,7 @@ class AdminController extends Controller
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
-                'email'          => $item->user->email ?? '', // <--- INI PENTING!
+                'email'          => $item->user->email ?? '',
                 'nip'            => $item->nip ?? '-',
                 'jabatan'        => $item->jabatan ?? '-',
                 'departemen'     => $item->departemen ?? '-',
@@ -135,41 +137,31 @@ class AdminController extends Controller
     }
     public function resetPassword($id)
     {
-        // Ambil user berdasarkan ID
         $user = User::with('karyawan')->find($id);
 
         if (!$user) {
-            return response()->json([
-                'message' => 'User tidak ditemukan'
-            ], 404);
+            throw ValidationException::withMessages([
+                'error' => 'User tidak ditemukan.'
+            ]);
         }
 
-        if ($user->id === auth()->id) {
-            return response()->json([
-                'message' => 'Tidak dapat mereset password sendiri'
-            ], 403);
+        if ($user->id === Auth::id()) {
+            throw ValidationException::withMessages([
+                'error' => 'Tidak dapat mereset password akun sendiri.'
+            ]);
         }
 
-        if (!$user->karyawan) {
-            return response()->json([
-                'message' => 'User tidak memiliki data karyawan'
-            ], 422);
-        }
-
-        if (!$user->karyawan->nip) {
-            return response()->json([
-                'message' => 'NIP karyawan kosong'
-            ], 422);
+        if (!$user->karyawan || !$user->karyawan->nip) {
+            throw ValidationException::withMessages([
+                'error' => 'Data karyawan atau NIP tidak valid.'
+            ]);
         }
 
         $user->update([
             'password' => bcrypt($user->karyawan->nip),
-
         ]);
 
-        return response()->json([
-            'message' => 'Password berhasil direset ke NIP'
-        ]);
+        return back()->with('success', 'Password berhasil direset ke NIP.');
     }
 
     /* ========= ABSENSI ========= */
