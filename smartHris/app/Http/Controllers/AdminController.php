@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Cuti;
-use App\Models\Gaji;
 use App\Models\JenisPelanggaran;
 use App\Models\Kalender;
 use App\Models\Karyawan;
@@ -18,56 +17,7 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
-    public function index()
-    {
-        $today = Carbon::today();
 
-        $totalKaryawan = Karyawan::count();
-        $hadirHariIni = Absensi::whereDate('tanggal', $today)->where('status', 'hadir')->count();
-        $pengajuanCuti = Cuti::where('status', 'pending')->count();
-        $sanksiAktif = SuratPeringatan::distinct('karyawan_id')->count('karyawan_id');
-
-        // ===== GRAFIK ABSENSI 7 HARI =====
-        $attendanceWeekly = Absensi::select(
-            DB::raw('DATE(tanggal) as date'),
-            DB::raw('COUNT(*) as total')
-        )
-            ->whereBetween('tanggal', [
-                Carbon::now()->subDays(6)->startOfDay(),
-                Carbon::now()->endOfDay()
-            ])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->map(fn($item) => [
-                'date' => Carbon::parse($item->date)->format('d M'),
-                'value' => $item->total
-            ]);
-
-        $statusRaw = Absensi::select(
-            'status',
-            DB::raw('COUNT(*) as total')
-        )
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        $statusAbsensi = [
-            'hadir' => $statusRaw['hadir'] ?? 0,
-            'alpha' => $statusRaw['alpha'] ?? 0,
-            'izin' => $statusRaw['izin'] ?? 0,
-            'sakit' => $statusRaw['sakit'] ?? 0,
-            'cuti' => $statusRaw['cuti'] ?? 0,
-        ];
-
-        return Inertia::render('Admin/index', [
-            'totalKaryawan' => $totalKaryawan,
-            'hadirHariIni' => $hadirHariIni,
-            'pengajuanCuti' => $pengajuanCuti,
-            'sanksiAktif' => $sanksiAktif,
-            'attendanceWeekly' => $attendanceWeekly,
-            'statusAbsensi' => $statusAbsensi,
-        ]);
-    }
     /* ========= SABIL ========= */
     /* ========= KARYAWAN ========= */
     public function indexKaryawan()
@@ -90,60 +40,56 @@ class AdminController extends Controller
             'karyawan' => $karyawan
         ]);
     }
-
-
+    
     public function storeKaryawan(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-
-            'nip' => 'required|unique:karyawan,nip',
-            'jabatan' => 'required|string',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tanggal_lahir' => 'required|date',
-            'departemen' => 'required|string',
-            'tanggal_masuk' => 'required|date',
-            'alamat' => 'required|string',
+            'nama'           => 'required|string|max:255',
+            'email'          => 'required|email|unique:users,email',
+            'jabatan'        => 'required|string',
+            'jenis_kelamin'  => 'required|in:L,P',
+            'tanggal_lahir'  => 'required|date',
+            'departemen'     => 'required|string',
+            'alamat'         => 'required|string',
         ]);
 
-        DB::beginTransaction();
+        DB::transaction(function () use ($request) {
 
-        try {
+            $lastKaryawan = Karyawan::where('nip', 'like', 'K%')
+                ->orderBy('nip', 'desc')
+                ->lockForUpdate()
+                ->first();
+
+            $lastNumber = $lastKaryawan
+                ? (int) substr($lastKaryawan->nip, 1)
+                : 0;
+
+            $nip = 'K' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
             $user = User::create([
-                'name' => $request->nama,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'role' => 'user',
+                'name'     => $request->nama,
+                'email'    => $request->email,
+                'password' => bcrypt($nip),
+                'role'     => 'user',
             ]);
 
             Karyawan::create([
-                'user_id' => $user->id,
-                'nip' => $request->nip,
-                'jabatan' => $request->jabatan,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'departemen' => $request->departemen,
-                'tanggal_masuk' => $request->tanggal_masuk,
-                'alamat' => $request->alamat,
+                'user_id'        => $user->id,
+                'nip'            => $nip,
+                'jabatan'        => $request->jabatan,
+                'jenis_kelamin'  => $request->jenis_kelamin,
+                'tanggal_lahir'  => $request->tanggal_lahir,
+                'departemen'     => $request->departemen,
+                'alamat'         => $request->alamat,
+                'tanggal_masuk'  => Carbon::now()->toDateString(),
             ]);
+        });
 
-            DB::commit();
-
-            return redirect()
-                ->route('admin.karyawan')
-                ->with('success', 'Karyawan berhasil ditambahkan');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            dd($e->getMessage());
-
-            return back()
-                ->withErrors('Gagal menambahkan karyawan')
-                ->withInput();
-        }
+        return redirect()
+            ->route('admin.karyawan')
+            ->with('success', 'Karyawan berhasil ditambahkan');
     }
+
     public function updateKaryawan(Request $request, $id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -175,7 +121,6 @@ class AdminController extends Controller
 
         return back()->with('success', 'Karyawan diperbarui');
     }
-
     public function destroyKaryawan($id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -185,7 +130,47 @@ class AdminController extends Controller
             $karyawan->delete();
         });
 
-        return back()->with('success', 'Karyawan dihapus');
+        return redirect()
+            ->route('admin.karyawan')
+            ->with('success', 'Data karyawan berhasil dihapus');
+    }
+    public function resetPassword($id)
+    {
+        // Ambil user berdasarkan ID
+        $user = User::with('karyawan')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        if ($user->id === auth()->id) {
+            return response()->json([
+                'message' => 'Tidak dapat mereset password sendiri'
+            ], 403);
+        }
+
+        if (!$user->karyawan) {
+            return response()->json([
+                'message' => 'User tidak memiliki data karyawan'
+            ], 422);
+        }
+
+        if (!$user->karyawan->nip) {
+            return response()->json([
+                'message' => 'NIP karyawan kosong'
+            ], 422);
+        }
+
+        $user->update([
+            'password' => bcrypt($user->karyawan->nip),
+
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil direset ke NIP'
+        ]);
     }
 
     /* ========= ABSENSI ========= */
@@ -282,23 +267,69 @@ public function destroyAbsensi($id)
 
 
     /* ========= CUTI ========= */
-    public function indexCuti()
-    {
-        return Cuti::with('karyawan')->get();
-    }
 
-    public function approveCuti($id)
-    {
-        Cuti::findOrFail($id)->update(['status' => 'approved']);
-        return response()->json(['message' => 'Cuti disetujui']);
-    }
+public function indexCuti()
+{
+    $cutiData = Cuti::with('karyawan.user')
+        ->latest()
+        ->get()
+        ->map(function ($cuti) {
+            return [
+                'id' => $cuti->id,
 
-    public function rejectCuti($id)
-    {
-        Cuti::findOrFail($id)->update(['status' => 'rejected']);
-        return response()->json(['message' => 'Cuti ditolak']);
-    }
+                'karyawan_id' => $cuti->karyawan_id,
+                'karyawan_nama' => $cuti->karyawan->user->name ?? '-',
+                'karyawan_email' => $cuti->karyawan->user->email ?? '-',
+                'karyawan_nip' => $cuti->karyawan->nip ?? '-',
+                'karyawan_jabatan' => $cuti->karyawan->jabatan ?? '-',
 
+                // 🔥 FIX SESUAI MODEL
+                'karyawan_departemen' => $cuti->karyawan->departemen ?? '-',
+
+                'tanggal_mulai' => $cuti->tanggal_mulai,
+                'tanggal_selesai' => $cuti->tanggal_selesai,
+                'jumlah_hari' => $cuti->jumlah_hari,
+                'jenis_cuti' => $cuti->jenis_cuti,
+                'alasan' => $cuti->alasan,
+
+                'status' => $cuti->status,
+                'keterangan' => $cuti->keterangan,
+
+                'created_at' => $cuti->created_at,
+                'updated_at' => $cuti->updated_at,
+            ];
+        });
+
+    // statistik (opsional tapi bagus)
+    $statistics = [
+        'total' => $cutiData->count(),
+        'pending' => $cutiData->where('status', 'pending')->count(),
+        'approved' => $cutiData->where('status', 'approved')->count(),
+        'rejected' => $cutiData->where('status', 'rejected')->count(),
+    ];
+
+    return Inertia::render('Admin/cuti/index', [
+        'cutiData' => $cutiData,
+        'statistics' => $statistics,
+    ]);
+}
+
+
+public function approveCuti($id)
+{
+    Cuti::findOrFail($id)->update(['status' => 'approved']);
+    return back()->with('success', 'Cuti berhasil disetujui');
+}
+
+public function rejectCuti($id)
+{
+    Cuti::findOrFail($id)->update(['status' => 'rejected']);
+    return back()->with('success', 'Cuti berhasil ditolak');
+}
+
+
+
+    
 
     /* ========= DAUS ========= */
     /* ========= KALENDER + EVENT ========= */
@@ -307,7 +338,6 @@ public function destroyAbsensi($id)
         $kalender = Kalender::get();
         return Inertia::render('Admin/kalender/index', ['kalender' => $kalender]);
     }
-
     public function event()
     {
         $kalender = Kalender::orderBy('tanggal')->get();
@@ -380,7 +410,6 @@ public function destroyAbsensi($id)
 
         return back()->with('success', 'Jenis pelanggaran berhasil ditambahkan');
     }
-
     public function jPelanggaranUpdate(Request $request, $id)
     {
         $request->validate([
@@ -394,7 +423,6 @@ public function destroyAbsensi($id)
 
         return back()->with('success', 'Data berhasil diupdate');
     }
-
     public function jPelanggaranDestroy($id)
     {
         JenisPelanggaran::findOrFail($id)->delete();
@@ -523,11 +551,5 @@ public function destroyAbsensi($id)
     {
         SuratPeringatan::findOrFail($id)->delete();
         return back()->with('success', 'Surat Pernyataan dihapus');
-    }
-
-    public function gaji()
-    {
-        $gaji = Gaji::get();
-        return Inertia::render('gaji', ['gaji' => $gaji]);
     }
 }

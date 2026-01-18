@@ -35,9 +35,9 @@ export default function Pelanggaran({
         }
 
         if (isEdit && form.id) {
-            router.put(`/pelanggaran/${form.id}`, form);
+            router.put(`/app/pelanggaran/${form.id}`, form);
         } else {
-            router.post("/pelanggaran", form);
+            router.post("/app/pelanggaran", form);
         }
 
         setShowModal(false);
@@ -58,7 +58,7 @@ export default function Pelanggaran({
 
     const handleDelete = (id: number) => {
         if (confirm("Yakin hapus data ini?")) {
-            router.delete(`/pelanggaran/${id}`);
+            router.delete(`/app/pelanggaran/${id}`);
         }
     };
 

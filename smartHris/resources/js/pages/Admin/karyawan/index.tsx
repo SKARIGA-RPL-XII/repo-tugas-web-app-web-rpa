@@ -18,11 +18,12 @@ export type Karyawan = {
     id: number;
     nama: string;
     nip: string;
+    email: string;
     jabatan: string;
     departemen: string;
     alamat: string;
-    tanggal_masuk: string;
     tanggal_lahir: string;
+    tanggal_masuk: string;
     jenis_kelamin: string;
 };
 
@@ -31,7 +32,7 @@ type PageProps = {
 };
 
 export default function DataKaryawan({ karyawan }: PageProps) {
-    
+
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -41,6 +42,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
     const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(null);
+
 
     const handleAddClick = () => {
         setFormMode('create');
@@ -65,21 +67,19 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     };
 
     const confirmDelete = () => {
-        if (karyawanToDelete) {
-            router.delete(`/admin/karyawan/${karyawanToDelete.id}`, {
+        if (karyawanToDelete && karyawanToDelete.id) {
+            router.visit(`/app/karyawan/${karyawanToDelete.id}`, {
+                method: 'delete',
                 onBefore: () => setIsDeleting(true),
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
                     setKaryawanToDelete(null);
-                    setSuccessMessage('Data karyawan berhasil dihapus.');
-                    setShowSuccessModal(true);
                 },
                 onFinish: () => setIsDeleting(false),
                 preserveScroll: true,
             });
         }
     };
-
     const columns: ColumnDef<Karyawan>[] = [
         {
             header: 'No',
@@ -194,7 +194,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 </div>
             </div>
 
-            <KaryawanFormModal 
+            <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 mode={formMode}
@@ -209,7 +209,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 processing={isDeleting}
                 inputType="karyawan"
             />
-            
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}

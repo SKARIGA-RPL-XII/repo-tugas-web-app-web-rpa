@@ -72,7 +72,7 @@ export default function AbsensiFormModal({
                 reset();
             }
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData, clearErrors, setData, reset]);
 
     const handleSaveClick = (e: React.FormEvent) => {
         e.preventDefault(); 
@@ -96,7 +96,7 @@ export default function AbsensiFormModal({
         };
 
         if (data.id) {
-            put(`/admin/absensi/${data.id}`, options);
+            put(`/app/absensi/${data.id}`, options);
         }
     };
 
