@@ -17,14 +17,14 @@ class RedirectIfAuthenticated
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            
+
             /** @var \App\Models\User $user */
             $user = Auth::user();
 
             // Redirect sesuai role
             return match ($user->role) {
-                'admin' => redirect()->route('admin.dashboard'),
-                'user'  => redirect('/absensi'),
+                'admin' => redirect()->route('dashboard'),
+                'user'  => redirect()->route('dashboard'),
                 default => redirect('/'),
             };
         }
