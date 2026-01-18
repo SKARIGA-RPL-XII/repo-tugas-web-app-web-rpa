@@ -130,7 +130,16 @@ class AdminController extends Controller
     }
     public function resetPassword($id)
     {
-        $user = User::with('karyawan')->find($id);
+        // Find Karyawan by ID, then get related User
+        $karyawan = Karyawan::find($id);
+
+        if (!$karyawan) {
+            throw ValidationException::withMessages([
+                'error' => 'Data karyawan tidak ditemukan.'
+            ]);
+        }
+
+        $user = $karyawan->user;
 
         if (!$user) {
             throw ValidationException::withMessages([
@@ -144,17 +153,27 @@ class AdminController extends Controller
             ]);
         }
 
-        if (!$user->karyawan || !$user->karyawan->nip) {
+        if (!$karyawan->nip) {
             throw ValidationException::withMessages([
-                'error' => 'Data karyawan atau NIP tidak valid.'
+                'error' => 'NIP karyawan tidak valid.'
             ]);
         }
 
-        $user->update([
-            'password' => bcrypt($user->karyawan->nip),
-        ]);
+        try {
+            $user->update([
+                'password' => bcrypt($karyawan->nip),
+            ]);
 
-        return back()->with('success', 'Password berhasil direset ke NIP.');
+            return response()->json([
+                'message' => 'Password berhasil direset ke NIP.',
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mereset password: ' . $e->getMessage(),
+                'error' => 'Gagal mereset password: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /* ========= ABSENSI ========= */

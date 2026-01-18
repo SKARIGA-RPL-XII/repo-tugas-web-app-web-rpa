@@ -16,14 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        // $middleware->web(append: [
-        //     HandleAppearance::class,
-        //     HandleInertiaRequests::class,
-        //     AddLinkHeadersForPreloadedAssets::class,
-        // ]);
-        // $middleware->alias([
-        //     'role' => RoleMiddleware::class,
-        // ]);
+        $middleware->web(append: [
+            HandleAppearance::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
+        ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'guest.redirect' => \App\Http\Middleware\RedirectIfAuthenticated::class,

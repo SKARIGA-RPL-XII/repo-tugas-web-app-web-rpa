@@ -128,10 +128,6 @@ export default function KaryawanFormModal({
                 ? `/app/karyawan/${data.id}`
                 : '/app/karyawan',
             {
-                data: {
-                    ...data,
-                    ...(mode === 'edit' && { _method: 'PUT' }),
-                },
                 preserveScroll: true,
                 onSuccess: () => {
                     onSuccess(
