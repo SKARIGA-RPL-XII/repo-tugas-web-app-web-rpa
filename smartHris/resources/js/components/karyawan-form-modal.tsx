@@ -207,24 +207,6 @@ export default function KaryawanFormModal({
                             Email <span className="text-red-500">*</span>
                         </Label>
                         <Input
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="Email Karyawan"
-                            className="form-control"
-                            required
-                        />
-                        {errors.email && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.email}
-                            </p>
-                        )}
-                    </div>
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>
-                            Email <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             placeholder="Masukkan Email"
