@@ -166,20 +166,17 @@ class AdminController extends Controller
         }
 
         try {
-            // Update Password
             $user->update([
                 'password' => bcrypt($karyawan->nip),
             ]);
 
             Log::info("Password reset successfully for user ID: " . $user->id);
             
-            // PERBAIKAN: Gunakan redirect()->back() agar Inertia trigger onSuccess
             return redirect()->back()->with('success', 'Password berhasil direset ke NIP.');
 
         } catch (\Exception $e) {
             Log::error("Error resetting password: " . $e->getMessage());
 
-            // PERBAIKAN: Throw ValidationException agar Inertia trigger onError
             throw ValidationException::withMessages([
                 'error' => 'Gagal mereset password: ' . $e->getMessage()
             ]);

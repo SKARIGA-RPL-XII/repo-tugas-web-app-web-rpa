@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X } from "lucide-react"; // Menggunakan ikon X
+import { X } from "lucide-react";
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface FailureModalProps {

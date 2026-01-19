@@ -298,7 +298,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 </div>
             </div>
 
-            {/* Modal Form Tambah/Edit */}
             <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
@@ -307,7 +306,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 onSuccess={handleFormSuccess}
             />
 
-            {/* Modal Confirm Delete */}
             <ConfirmDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -316,7 +314,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 inputType="karyawan"
             />
 
-            {/* Modal Warning Reset Password */}
             <WarningModal
                 isOpen={isResetWarningOpen}
                 onClose={() => setIsResetWarningOpen(false)}
@@ -327,8 +324,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
-
-            {/* Modal Success */}
+            
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
@@ -336,7 +332,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 message={successMessage}
             />
 
-            {/* Modal Failure (BARU) */}
             <FailureModal
                 isOpen={showFailureModal}
                 onClose={() => setShowFailureModal(false)}
