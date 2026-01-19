@@ -1,83 +1,172 @@
-import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
+import KaryawanFormModal from '@/components/karyawan-form-modal';
+// Import Modal Pelanggaran
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal'; 
+import ConfirmDeleteModal from '@/components/confirm-delete-modal';
+import WarningModal from '@/components/warning-modal';
+import SuccessModal from '@/components/success-modal';
+import FailureModal from '@/components/failure-modal';
 
-import AppLayout from '@/layouts/app-layout'
-import DynamicTable, { ColumnDef } from '@/components/dynamic-table'
-import ConfirmDeleteModal from '@/components/confirm-delete-modal'
-import SuccessModal from '@/components/success-modal'
-import PelanggaranFormModal from '@/components/pelanggaran-form-modal'
-
-import { Button } from '@/components/ui/button'
+import AppLayout from '@/layouts/app-layout';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
+import { Head, router } from '@inertiajs/react';
+import { Key, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
-type Pelanggaran = {
-    id: number
-    tanggal: string
-    catatan?: string
-    karyawan?: {
-        nama: string
-        nip?: string
-        jabatan?: string
-        departemen?: string
-    }
-    jenis_pelanggaran?: {
-        nama: string
-    }
-}
+export type Karyawan = {
+    id: number;
+    nama: string;
+    nip: string;
+    email: string;
+    jabatan: string;
+    departemen: string;
+    alamat: string;
+    tanggal_lahir: string;
+    tanggal_masuk: string;
+    jenis_kelamin: string;
+    is_password_default?: boolean;
+};
 
 type PageProps = {
-    pelanggaran: Pelanggaran[]
-    karyawan: any[]
-    jenisPelanggaran: any[]
-}
+    karyawan: Karyawan[];
+    // Tambahkan prop ini dari Controller
+    jenisPelanggaranList: { id: number; nama_pelanggaran: string }[];
+};
 
-export default function SanksiKaryawan({
-    pelanggaran,
-    karyawan,
-    jenisPelanggaran
-}: PageProps) {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selected, setSelected] = useState<Pelanggaran | null>(null)
+// Destructure jenisPelanggaranList di sini
+export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: PageProps) {
 
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-    const [isDeleting, setIsDeleting] = useState(false)
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [successTitle, setSuccessTitle] = useState('Berhasil');
+
+    const [showFailureModal, setShowFailureModal] = useState(false);
+    const [failureMessage, setFailureMessage] = useState('');
+    const [failureTitle, setFailureTitle] = useState('Gagal');
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [showSuccessModal, setShowSuccessModal] = useState(false)
     const [successMessage, setSuccessMessage] = useState('')
 
-    const handleEdit = (item: Pelanggaran) => {
-        setSelected(item)
-        setIsFormOpen(true)
-    }
+    const [isResetWarningOpen, setIsResetWarningOpen] = useState(false);
+    const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
+    const [isResetting, setIsResetting] = useState(false);
 
-    const handleDeleteClick = (item: Pelanggaran) => {
-        setSelected(item)
-        setIsDeleteModalOpen(true)
-    }
+    // --- STATE UNTUK POPUP PELANGGARAN ---
+    const [isSanksiModalOpen, setIsSanksiModalOpen] = useState(false);
+    const [karyawanForSanksi, setKaryawanForSanksi] = useState<Karyawan | null>(null);
+
+    // --- LOGIKA BUKA POPUP SANKSI ---
+    const handleAddSanksi = (item: Karyawan) => {
+        setKaryawanForSanksi(item);
+        setIsSanksiModalOpen(true);
+    };
+
+    const handleAddClick = () => {
+        setFormMode('create');
+        setSelectedKaryawan(null);
+        setIsFormOpen(true);
+    };
+
+    const handleEdit = (item: Karyawan) => {
+        setFormMode('edit');
+        setSelectedKaryawan(item);
+        setIsFormOpen(true);
+    };
+
+    const handleFormSuccess = (msg: string) => {
+        setSuccessTitle('Berhasil');
+        setSuccessMessage(msg);
+        setShowSuccessModal(true);
+    };
+
+    const handleDeleteClick = (item: Karyawan) => {
+        setKaryawanToDelete(item);
+        setIsDeleteModalOpen(true);
+    };
 
     const confirmDelete = () => {
-        if (!selected) return
+        if (karyawanToDelete && karyawanToDelete.id) {
+            router.delete(`/app/karyawan/${karyawanToDelete.id}`, {
+                onBefore: () => setIsDeleting(true),
+                onSuccess: () => {
+                    setIsDeleteModalOpen(false);
+                    setKaryawanToDelete(null);
+                    setSuccessTitle('Dihapus');
+                    setSuccessMessage('Data karyawan berhasil dihapus.');
+                    setShowSuccessModal(true);
+                },
+                onError: (errors) => {
+                    setIsDeleteModalOpen(false);
+                    setFailureTitle('Gagal Menghapus');
+                    setFailureMessage(Object.values(errors).flat().join(', ') || 'Gagal menghapus data.');
+                    setShowFailureModal(true);
+                },
+                onFinish: () => setIsDeleting(false),
+                preserveScroll: true,
+            });
+        }
+    };
 
-        router.delete(`/app/pelanggaran/${selected.id}`, {
-            onBefore: () => setIsDeleting(true),
-            onSuccess: () => {
-                setIsDeleteModalOpen(false)
-                setSelected(null)
-                setSuccessMessage('Data sanksi berhasil dihapus.')
-                setShowSuccessModal(true)
-            },
-            onFinish: () => setIsDeleting(false),
-            preserveScroll: true
-        })
-    }
+    const handleResetPasswordClick = (item: Karyawan) => {
+        if (item.is_password_default) {
+            setFailureTitle('Info');
+            setFailureMessage('Password karyawan ini sudah dalam kondisi default (NIP).');
+            setShowFailureModal(true);
+            return;
+        }
+        setKaryawanToReset(item);
+        setIsResetWarningOpen(true);
+    };
 
-    const columns: ColumnDef<Pelanggaran>[] = [
+    const executeResetPassword = () => {
+        if (karyawanToReset && karyawanToReset.id) {
+            router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
+                onBefore: () => setIsResetting(true),
+                onSuccess: (page) => {
+                    console.log('Success response:', page);
+                    setIsResetWarningOpen(false);
+                    setKaryawanToReset(null);
+
+                    // Tampilkan Modal Sukses
+                    setSuccessTitle('Berhasil');
+                    setSuccessMessage('Password karyawan berhasil direset ke NIP.');
+                    setShowSuccessModal(true);
+
+                    // Refresh halaman otomatis
+                    setTimeout(() => {
+                        router.visit(window.location.pathname);
+                    }, 1500);
+                },
+                onError: (errors) => {
+                    console.error('Error response:', errors);
+                    setIsResetWarningOpen(false);
+
+                    // Ambil pesan error dari response
+                    const pesanError = errors.error || errors.message || (typeof errors === 'object' ? Object.values(errors).flat().join(', ') : "Terjadi kesalahan saat mereset password.");
+
+                    // Tampilkan Modal Gagal
+                    setFailureTitle('Gagal Reset');
+                    setFailureMessage(pesanError);
+                    setShowFailureModal(true);
+                },
+                onFinish: () => {
+                    console.log('Finish reset password');
+                    setIsResetting(false);
+                },
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const columns: ColumnDef<Karyawan>[] = [
         {
             header: 'No',
             className: 'w-24 pl-8 text-center',
@@ -149,27 +238,31 @@ export default function SanksiKaryawan({
                         </Button>
                     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg"
-                    >
-                        <DropdownMenuItem
-                            onClick={() => handleEdit(item)}
-                            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5
-                            text-gray-600 focus:bg-gray-50 focus:text-gray-900"
-                        >
+                    <DropdownMenuContent align="end" className="w-48 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+
+                        <DropdownMenuItem onClick={() => handleEdit(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Pencil className="h-4 w-4" />
-                            <span className="font-medium">Edit</span>
+                            <span className="font-medium">Edit Karyawan</span>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem
-                            onClick={() => handleDeleteClick(item)}
-                            className="cursor-pointer gap-3 rounded-lg px-3 py-2.5
-                            text-red-600 focus:bg-red-50 focus:text-red-700"
-                        >
+                        <DropdownMenuItem onClick={() => handleResetPasswordClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900" disabled={item.is_password_default}>
+                            <Key className="h-4 w-4" />
+                            <span className="font-medium">
+                                {item.is_password_default ? 'Password sudah default' : 'Reset Password'}
+                            </span>
+                        </DropdownMenuItem>
+
+                        {/* TOMBOL ACTION TAMBAH SANKSI YANG SUDAH AKTIF */}
+                        <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
+                            <Plus className="h-4 w-4" />
+                            <span className="font-medium">Tambah Sanksi</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700">
                             <Trash2 className="h-4 w-4" />
                             <span className="font-medium">Delete</span>
                         </DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
@@ -212,7 +305,18 @@ export default function SanksiKaryawan({
                 jenisPelanggaran={jenisPelanggaran}
             />
 
-            {/* MODAL DELETE */}
+            {/* --- MODAL PELANGGARAN DIRENDER DI SINI --- */}
+            <PelanggaranFormModal
+                isOpen={isSanksiModalOpen}
+                onClose={() => {
+                    setIsSanksiModalOpen(false);
+                    setKaryawanForSanksi(null);
+                }}
+                karyawanList={karyawan} 
+                jenisPelanggaranList={jenisPelanggaranList}
+                defaultKaryawanId={karyawanForSanksi?.id}
+            />
+
             <ConfirmDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -221,12 +325,29 @@ export default function SanksiKaryawan({
                 inputType="pelanggaran"
             />
 
-            {/* MODAL SUCCESS */}
+            <WarningModal
+                isOpen={isResetWarningOpen}
+                onClose={() => setIsResetWarningOpen(false)}
+                onConfirm={executeResetPassword}
+                isLoading={isResetting}
+                title="Reset Password?"
+                message="Password karyawan akan direset ke password default sistem. Apakah Anda yakin ingin mereset password karyawan ini?"
+                confirmLabel="Konfirmasi"
+                cancelLabel="Batal"
+            />
+            
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
-                title="Berhasil"
+                title={successTitle}
                 message={successMessage}
+            />
+
+            <FailureModal
+                isOpen={showFailureModal}
+                onClose={() => setShowFailureModal(false)}
+                title={failureTitle}
+                message={failureMessage}
             />
         </AppLayout>
     )

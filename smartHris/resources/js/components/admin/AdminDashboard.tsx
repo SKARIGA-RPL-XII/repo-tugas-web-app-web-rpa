@@ -3,10 +3,6 @@ import AttendanceDonut from '@/components/attendance-donut'
 import AdminStats from './AdminStats'
 import ProfileMenu from '@/components/profile-menu';
 
-
-
-
-
 type Stats = { 
   total_karyawan: number
   hadir_hari_ini: number
@@ -50,7 +46,7 @@ export default function AdminDashboard({
 
 return (
   <div className="min-h-screen bg-[#EAF5F1]">
-    
+      
     {/* HEADER */}
     <div className="w-full">
       <div className="mx-auto max-w-7xl px-6 py-6">

@@ -1,172 +1,149 @@
-import { router } from '@inertiajs/react'
-import { useEffect, useState } from 'react'
+import React, { useEffect } from 'react';
+import { useForm } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import InputError from '@/components/input-error';
 
-import { Button } from '@/components/ui/button'
-
-type FormData = {
-    karyawan_id: string
-    jenis_pelanggaran_id: string
-    tanggal: string
-    catatan: string
+interface Props {
+    isOpen: boolean;
+    onClose: () => void;
+    // List karyawan untuk dropdown (opsional jika dibuka dari tabel karyawan)
+    karyawanList?: { id: number; nama: string; nip: string }[]; 
+    jenisPelanggaranList: { id: number; nama_pelanggaran: string }[];
+    // ID karyawan yang dipilih dari tombol aksi
+    defaultKaryawanId?: number | null; 
 }
 
-type Props = {
-    isOpen: boolean
-    onClose: () => void
-    data?: any
-    karyawan?: any[]
-    jenisPelanggaran?: any[]
-}
-
-export default function PelanggaranFormModal({
-    isOpen,
-    onClose,
-    data,
-    karyawan = [],
-    jenisPelanggaran = []
+export default function PelanggaranFormModal({ 
+    isOpen, 
+    onClose, 
+    karyawanList = [], 
+    jenisPelanggaranList = [], 
+    defaultKaryawanId 
 }: Props) {
-    const [form, setForm] = useState<FormData>({
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         karyawan_id: '',
         jenis_pelanggaran_id: '',
-        tanggal: '',
-        catatan: ''
-    })
-
-    const isEdit = Boolean(data)
+        tanggal: new Date().toISOString().split('T')[0], // Default hari ini
+        catatan: '', // Sesuaikan dengan controller (catatan/keterangan)
+    });
 
     useEffect(() => {
-        if (data) {
-            setForm({
-                karyawan_id: String(data.karyawan_id ?? ''),
-                jenis_pelanggaran_id: String(data.jenis_pelanggaran_id ?? ''),
-                tanggal: data.tanggal ?? '',
-                catatan: data.catatan ?? ''
-            })
-        }
-    }, [data])
-
-    if (!isOpen) return null
-
-    const submit = () => {
-        if (!form.karyawan_id || !form.jenis_pelanggaran_id || !form.tanggal) {
-            alert('Lengkapi data wajib')
-            return
-        }
-
-        if (isEdit) {
-            router.put(`/app/pelanggaran/${data.id}`, form, {
-                preserveScroll: true
-            })
+        if (isOpen) {
+            // Jika dibuka dari tombol "Tambah Sanksi" di baris karyawan tertentu
+            if (defaultKaryawanId) {
+                setData('karyawan_id', defaultKaryawanId.toString());
+            }
         } else {
-            router.post('/app/pelanggaran', form, {
-                preserveScroll: true
-            })
+            // Reset form saat modal ditutup
+            reset();
+            clearErrors();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, defaultKaryawanId]); 
 
-        onClose()
-    }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Gunakan URL manual sesuai route di web.php
+        post('/admin/pelanggaran', {
+            onSuccess: () => {
+                reset();
+                onClose();
+            },
+        });
+    };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-                <h2 className="mb-6 text-lg font-bold text-gray-900">
-                    {isEdit ? 'Edit Pelanggaran' : 'Tambah Pelanggaran'}
-                </h2>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-125">
+                <DialogHeader>
+                    <DialogTitle>Tambah Sanksi / Pelanggaran</DialogTitle>
+                </DialogHeader>
 
-                {/* Karyawan */}
-                <div className="mb-4">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                        Karyawan
-                    </label>
-                    <select
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#114F38] focus:outline-none"
-                        value={form.karyawan_id}
-                        onChange={(e) =>
-                            setForm({ ...form, karyawan_id: e.target.value })
-                        }
-                    >
-                        <option value="">Pilih Karyawan</option>
-                        {karyawan.map((k) => (
-                            <option key={k.id} value={k.id}>
-                                {k.nama}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Input Karyawan (Readonly jika dipilih dari tabel) */}
+                    <div className="space-y-2">
+                        <Label htmlFor="karyawan">Nama Karyawan</Label>
+                        <select
+                            id="karyawan"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={data.karyawan_id}
+                            onChange={(e) => setData('karyawan_id', e.target.value)}
+                            // Disable jika sudah ada default ID agar tidak salah pilih orang
+                            disabled={!!defaultKaryawanId} 
+                        >
+                            <option value="">-- Pilih Karyawan --</option>
+                            {karyawanList.map((k) => (
+                                <option key={k.id} value={k.id}>
+                                    {k.nama} ({k.nip})
+                                </option>
+                            ))}
+                        </select>
+                        <InputError message={errors.karyawan_id} />
+                    </div>
 
-                {/* Jenis Pelanggaran */}
-                <div className="mb-4">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                        Jenis Pelanggaran
-                    </label>
-                    <select
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#114F38] focus:outline-none"
-                        value={form.jenis_pelanggaran_id}
-                        onChange={(e) =>
-                            setForm({
-                                ...form,
-                                jenis_pelanggaran_id: e.target.value
-                            })
-                        }
-                    >
-                        <option value="">Pilih Jenis</option>
-                        {jenisPelanggaran.map((j) => (
-                            <option key={j.id} value={j.id}>
-                                {j.nama}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                    {/* Jenis Pelanggaran */}
+                    <div className="space-y-2">
+                        <Label htmlFor="jenis">Jenis Pelanggaran</Label>
+                        <select
+                            id="jenis"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={data.jenis_pelanggaran_id}
+                            onChange={(e) => setData('jenis_pelanggaran_id', e.target.value)}
+                        >
+                            <option value="">-- Pilih Jenis Pelanggaran --</option>
+                            {jenisPelanggaranList.map((jp) => (
+                                <option key={jp.id} value={jp.id}>
+                                    {jp.nama_pelanggaran}
+                                </option>
+                            ))}
+                        </select>
+                        <InputError message={errors.jenis_pelanggaran_id} />
+                    </div>
 
-                {/* Tanggal */}
-                <div className="mb-4">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                        Tanggal
-                    </label>
-                    <input
-                        type="date"
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#114F38] focus:outline-none"
-                        value={form.tanggal}
-                        onChange={(e) =>
-                            setForm({ ...form, tanggal: e.target.value })
-                        }
-                    />
-                </div>
+                    {/* Tanggal */}
+                    <div className="space-y-2">
+                        <Label htmlFor="tanggal">Tanggal Kejadian</Label>
+                        <Input
+                            id="tanggal"
+                            type="date"
+                            value={data.tanggal}
+                            onChange={(e) => setData('tanggal', e.target.value)}
+                        />
+                        <InputError message={errors.tanggal} />
+                    </div>
 
-                {/* Catatan */}
-                <div className="mb-6">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
-                        Catatan
-                    </label>
-                    <textarea
-                        rows={3}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#114F38] focus:outline-none"
-                        placeholder="Catatan tambahan (opsional)"
-                        value={form.catatan}
-                        onChange={(e) =>
-                            setForm({ ...form, catatan: e.target.value })
-                        }
-                    />
-                </div>
+                    {/* Catatan */}
+                    <div className="space-y-2">
+                        <Label htmlFor="catatan">Catatan / Keterangan</Label>
+                        <Textarea
+                            id="catatan"
+                            placeholder="Kronologi atau detail tambahan..."
+                            value={data.catatan}
+                            onChange={(e) => setData('catatan', e.target.value)}
+                        />
+                        <InputError message={errors.catatan} />
+                    </div>
 
-                {/* Action */}
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={onClose}
-                        className="border-gray-200 text-gray-700"
-                    >
-                        Batal
-                    </Button>
-
-                    <Button
-                        onClick={submit}
-                        className="bg-[#114F38] hover:bg-[#0d3f2d]"
-                    >
-                        Simpan
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={onClose}>
+                            Batal
+                        </Button>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Menyimpan...' : 'Simpan'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
 }

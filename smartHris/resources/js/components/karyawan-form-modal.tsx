@@ -61,7 +61,7 @@ export default function KaryawanFormModal({
     const [isSaveWarningOpen, setIsSaveWarningOpen] = useState(false);
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } =
+    const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm<KaryawanForm>({
             id: '',
             nama: '',
@@ -75,7 +75,6 @@ export default function KaryawanFormModal({
 
     useEffect(() => {
         if (!isOpen) return;
-
         clearErrors();
 
         if (mode === 'edit' && initialData) {
@@ -87,7 +86,7 @@ export default function KaryawanFormModal({
                 jabatan: initialData.jabatan,
                 departemen: initialData.departemen,
                 alamat: initialData.alamat,
-                email: initialData.email,
+                email: initialData.email || '',
             });
         } else {
             reset();
@@ -109,7 +108,8 @@ export default function KaryawanFormModal({
             !data.tanggal_lahir ||
             !data.jabatan ||
             !data.departemen ||
-            !data.alamat
+            !data.alamat ||
+            !data.email
         ) {
             alert("Mohon lengkapi seluruh field bertanda bintang (*) sebelum menyimpan.");
             return;
@@ -123,27 +123,27 @@ export default function KaryawanFormModal({
     };
 
     const executeSubmit = () => {
-        const options = {
-            onSuccess: () => {
-                onSuccess(
-                    mode === 'edit'
-                        ? 'Data karyawan berhasil diperbarui.'
-                        : 'Data karyawan berhasil disimpan.'
-                );
-                setIsSaveWarningOpen(false);
-                onClose();
-                reset();
-            },
-            preserveScroll: true,
-            onError: () => setIsSaveWarningOpen(false),
-        };
-
-        if (mode === 'edit') {
-            put(`/app/karyawan/${data.id}`, options);
-        } else {
-            post('/app/karyawan', options);
-        }
+        post(
+            mode === 'edit'
+                ? `/app/karyawan/${data.id}`
+                : '/app/karyawan',
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    onSuccess(
+                        mode === 'edit'
+                            ? 'Data karyawan berhasil diperbarui.'
+                            : 'Data karyawan berhasil disimpan.'
+                    );
+                    setIsSaveWarningOpen(false);
+                    onClose();
+                    reset();
+                },
+                onError: () => setIsSaveWarningOpen(false),
+            }
+        );
     };
+
 
     const executeCancel = () => {
         setIsCancelWarningOpen(false);
@@ -153,6 +153,7 @@ export default function KaryawanFormModal({
 
     const labelClass =
         'text-sm font-bold text-gray-700 mb-2 block tracking-tight';
+
     return (
         <>
             <ReusableFormModal
@@ -169,7 +170,7 @@ export default function KaryawanFormModal({
                             NIP <span className="text-red-500">*</span>
                         </Label>
                         <Input
-                            disabled
+                            readOnly
                             value={
                                 mode === 'edit'
                                     ? initialData?.nip ?? '-'
@@ -201,6 +202,23 @@ export default function KaryawanFormModal({
                             </p>
                         )}
                     </div>
+                    <div className="md:col-span-3">
+                        <Label className={labelClass}>
+                            Email <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            placeholder="Masukkan Email"
+                            className="form-control"
+                            required
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.email}
+                            </p>
+                        )}
+                    </div>
 
                     <div className="md:col-span-3">
                         <Label className={labelClass}>
@@ -227,7 +245,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Tanggal Lahir <span className="text-red-500">*</span>
                         </Label>
@@ -263,7 +281,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Jabatan <span className="text-red-500">*</span>
                         </Label>
@@ -291,7 +309,7 @@ export default function KaryawanFormModal({
                         )}
                     </div>
 
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-2">
                         <Label className={labelClass}>
                             Departemen <span className="text-red-500">*</span>
                         </Label>
@@ -360,5 +378,4 @@ export default function KaryawanFormModal({
             />
         </>
     );
-
 }
