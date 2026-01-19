@@ -27,7 +27,7 @@ class AdminController extends Controller
     {
         $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
             $isPasswordDefault = $item->user && password_verify($item->nip, $item->user->password);
-            
+
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
@@ -136,9 +136,9 @@ class AdminController extends Controller
     public function resetPassword($id)
     {
         Log::info("Reset password called for karyawan ID: $id");
-        
+
         $karyawan = Karyawan::find($id);
-        
+
         if (!$karyawan) {
             throw ValidationException::withMessages([
                 'error' => 'Data karyawan tidak ditemukan.'
@@ -168,13 +168,12 @@ class AdminController extends Controller
 
         try {
             $user->update([
-                'password' => bcrypt($karyawan->nip),
+                'password' => bcrypt($karyawan->tanggal_lahir),
             ]);
 
             Log::info("Password reset successfully for user ID: " . $user->id);
-            
-            return redirect()->back()->with('success', 'Password berhasil direset ke NIP.');
 
+            return redirect()->back()->with('success', 'Password berhasil direset ke Tanggal Lahir.');
         } catch (\Exception $e) {
             Log::error("Error resetting password: " . $e->getMessage());
 
