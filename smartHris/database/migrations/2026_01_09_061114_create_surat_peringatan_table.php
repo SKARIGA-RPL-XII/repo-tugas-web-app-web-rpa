@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('pelanggaran_karyawan_id')->constrained('pelanggaran_karyawan')->cascadeOnDelete();
             $table->foreignId('karyawan_id')->constrained('karyawan')->cascadeOnDelete();
             $table->string('nomor_sp');
-            $table->enum('jenis_sp', ['SP1', 'SP2', 'SP3']);
+            $table->enum('jenis_sp', ['Teguran', 'SP1', 'SP2', 'SP3']);
             $table->text('isi_pernyataan');
             $table->date('tanggal_terbit');
 
