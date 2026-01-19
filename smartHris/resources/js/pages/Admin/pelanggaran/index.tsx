@@ -77,7 +77,28 @@ const COLUMNS_JENIS: ColumnDef<JenisPelanggaran>[] = [
   { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
   { header: 'Nama Pelanggaran', render: i => i.nama_pelanggaran },
   { header: 'Tingkat', render: i => i.tingkat },
-  { header: 'Keterangan', render: i => i.keterangan ?? '-' }
+  { header: 'Keterangan', render: i => i.keterangan ?? '-' },
+  {
+    header: '',
+    className: 'w-12',
+    render: () => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>
+            <Pencil className="mr-2 h-4 w-4" /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-red-600">
+            <Trash2 className="mr-2 h-4 w-4" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }
 ]
 
 /* ================= PAGE ================= */
