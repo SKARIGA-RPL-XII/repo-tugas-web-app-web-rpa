@@ -25,23 +25,30 @@ class AdminController extends Controller
     /* ========= KARYAWAN ========= */
     public function indexKaryawan()
     {
-        $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
-            $isPasswordDefault = $item->user && password_verify($item->tanggal_lahir, $item->user->password);
+        $karyawan = Karyawan::with(['user:id,name,email,password'])
+            ->select('id', 'user_id', 'nip', 'jabatan', 'departemen', 'alamat', 'tanggal_masuk', 'tanggal_lahir', 'jenis_kelamin')
+            ->orderBy('nip', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $isPasswordDefault = false;
+                if ($item->user && $item->user->password) {
+                    $isPasswordDefault = password_verify($item->tanggal_lahir, $item->user->password);
+                }
 
-            return [
-                'id'             => $item->id,
-                'nama'           => $item->user->name ?? '-',
-                'email'          => $item->user->email ?? '',
-                'nip'            => $item->nip ?? '-',
-                'jabatan'        => $item->jabatan ?? '-',
-                'departemen'     => $item->departemen ?? '-',
-                'alamat'         => $item->alamat ?? '-',
-                'tanggal_masuk'  => $item->tanggal_masuk,
-                'tanggal_lahir'  => $item->tanggal_lahir,
-                'jenis_kelamin'  => $item->jenis_kelamin,
-                'is_password_default' => $isPasswordDefault,
-            ];
-        });
+                return [
+                    'id'             => $item->id,
+                    'nama'           => $item->user->name ?? '-',
+                    'email'          => $item->user->email ?? '',
+                    'nip'            => $item->nip ?? '-',
+                    'jabatan'        => $item->jabatan ?? '-',
+                    'departemen'     => $item->departemen ?? '-',
+                    'alamat'         => $item->alamat ?? '-',
+                    'tanggal_masuk'  => $item->tanggal_masuk,
+                    'tanggal_lahir'  => $item->tanggal_lahir,
+                    'jenis_kelamin'  => $item->jenis_kelamin,
+                    'is_password_default' => $isPasswordDefault,
+                ];
+            });
 
         return Inertia::render('Admin/karyawan/index', [
             'karyawan' => $karyawan,

@@ -128,8 +128,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
         if (karyawanToReset && karyawanToReset.id) {
             router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
                 onBefore: () => setIsResetting(true),
-                onSuccess: (page) => {
-                    console.log('Success response:', page);
+                onSuccess: () => {
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
@@ -151,7 +150,6 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     setShowFailureModal(true);
                 },
                 onFinish: () => {
-                    console.log('Finish reset password');
                     setIsResetting(false);
                 },
                 preserveScroll: true,
@@ -165,6 +163,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
             accessorKey: 'id',
             sortable: true,
             className: 'w-24 pl-8 text-center',
+            hidden: 'mobile',
             render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
         },
         {
@@ -191,16 +190,19 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     </span>
                 </div>
             ),
+            hidden: 'mobile',
         },
         {
             header: 'Jabatan',
             accessorKey: 'jabatan',
             className: 'font-medium text-gray-700',
+            hidden: 'tablet',
         },
         {
             header: 'Departemen',
             accessorKey: 'departemen',
             className: 'text-gray-600',
+            hidden: 'tablet',
         },
         {
             header: 'Tanggal Masuk',
@@ -212,6 +214,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     })}
                 </div>
             ),
+            hidden: 'mobile',
         },
         {
             header: 'Alamat',
@@ -221,6 +224,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     <span className="line-clamp-2 leading-relaxed">{item.alamat}</span>
                 </div>
             ),
+            hidden: 'tablet',
         },
         {
             header: '',
@@ -268,11 +272,11 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     return (
         <AppLayout>
             <Head title="Data Karyawan" />
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+            <div className="py-6 sm:py-12">
+                <div className="mx-auto w-full max-w-7xl space-y-4 px-4 sm:space-y-6 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                            <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
                                 Data Karyawan
                             </h2>
                         </div>
