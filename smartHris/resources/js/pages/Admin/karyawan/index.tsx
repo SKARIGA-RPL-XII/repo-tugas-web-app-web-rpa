@@ -1,9 +1,11 @@
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import KaryawanFormModal from '@/components/karyawan-form-modal';
+// Import Modal Pelanggaran
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal'; 
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import WarningModal from '@/components/warning-modal';
 import SuccessModal from '@/components/success-modal';
-import FailureModal from '@/components/failure-modal'; // Import Modal Gagal
+import FailureModal from '@/components/failure-modal';
 
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -33,16 +35,17 @@ export type Karyawan = {
 
 type PageProps = {
     karyawan: Karyawan[];
+    // Tambahkan prop ini dari Controller
+    jenisPelanggaranList: { id: number; nama_pelanggaran: string }[];
 };
 
-export default function DataKaryawan({ karyawan }: PageProps) {
+// Destructure jenisPelanggaranList di sini
+export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: PageProps) {
 
-    // State untuk Success Modal
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [successTitle, setSuccessTitle] = useState('Berhasil');
 
-    // State untuk Failure Modal (BARU)
     const [showFailureModal, setShowFailureModal] = useState(false);
     const [failureMessage, setFailureMessage] = useState('');
     const [failureTitle, setFailureTitle] = useState('Gagal');
@@ -59,9 +62,14 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
     const [isResetting, setIsResetting] = useState(false);
 
+    // --- STATE UNTUK POPUP PELANGGARAN ---
+    const [isSanksiModalOpen, setIsSanksiModalOpen] = useState(false);
+    const [karyawanForSanksi, setKaryawanForSanksi] = useState<Karyawan | null>(null);
 
+    // --- LOGIKA BUKA POPUP SANKSI ---
     const handleAddSanksi = (item: Karyawan) => {
-        alert(`Fitur Tambah Sanksi untuk ${item.nama} belum dipasang.`);
+        setKaryawanForSanksi(item);
+        setIsSanksiModalOpen(true);
     };
 
     const handleAddClick = () => {
@@ -100,7 +108,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 },
                 onError: (errors) => {
                     setIsDeleteModalOpen(false);
-                    // Menampilkan modal gagal jika delete error
                     setFailureTitle('Gagal Menghapus');
                     setFailureMessage(Object.values(errors).flat().join(', ') || 'Gagal menghapus data.');
                     setShowFailureModal(true);
@@ -113,7 +120,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const handleResetPasswordClick = (item: Karyawan) => {
         if (item.is_password_default) {
-            // Kita bisa gunakan modal failure juga di sini daripada alert biasa agar konsisten
             setFailureTitle('Info');
             setFailureMessage('Password karyawan ini sudah dalam kondisi default (NIP).');
             setShowFailureModal(true);
@@ -126,10 +132,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     const executeResetPassword = () => {
         if (karyawanToReset && karyawanToReset.id) {
             router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
-                onBefore: () => {
-                    setIsResetting(true);
-                },
-
+                onBefore: () => setIsResetting(true),
                 onSuccess: (page) => {
                     console.log('Success response:', page);
                     setIsResetWarningOpen(false);
@@ -145,7 +148,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                         router.visit(window.location.pathname);
                     }, 1500);
                 },
-
                 onError: (errors) => {
                     console.error('Error response:', errors);
                     setIsResetWarningOpen(false);
@@ -158,7 +160,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                     setFailureMessage(pesanError);
                     setShowFailureModal(true);
                 },
-
                 onFinish: () => {
                     console.log('Finish reset password');
                     setIsResetting(false);
@@ -258,6 +259,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                             </span>
                         </DropdownMenuItem>
 
+                        {/* TOMBOL ACTION TAMBAH SANKSI YANG SUDAH AKTIF */}
                         <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Plus className="h-4 w-4" />
                             <span className="font-medium">Tambah Sanksi</span>
@@ -304,6 +306,18 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 mode={formMode}
                 initialData={selectedKaryawan}
                 onSuccess={handleFormSuccess}
+            />
+
+            {/* --- MODAL PELANGGARAN DIRENDER DI SINI --- */}
+            <PelanggaranFormModal
+                isOpen={isSanksiModalOpen}
+                onClose={() => {
+                    setIsSanksiModalOpen(false);
+                    setKaryawanForSanksi(null);
+                }}
+                karyawanList={karyawan} 
+                jenisPelanggaranList={jenisPelanggaranList}
+                defaultKaryawanId={karyawanForSanksi?.id}
             />
 
             <ConfirmDeleteModal

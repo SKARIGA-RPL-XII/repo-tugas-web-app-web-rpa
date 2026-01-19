@@ -21,7 +21,7 @@ const SuccessModal = ({
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 4000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);
