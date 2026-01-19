@@ -1,6 +1,8 @@
 import { Head } from '@inertiajs/react'
 import { useState, useMemo } from 'react'
 import { MoreHorizontal, Trash2, Pencil, Plus, Search } from 'lucide-react'
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal'
+
 
 import AppLayout from '@/layouts/app-layout'
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table'
@@ -14,7 +16,6 @@ import {
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 
-/* ================= TYPES ================= */
 
 type Pelanggaran = {
   id: number
@@ -41,7 +42,6 @@ type Props = {
   jenisPelanggaran: JenisPelanggaran[]
 }
 
-/* ================= COLUMNS (DI LUAR COMPONENT!) ================= */
 
 const COLUMNS_SANKSI: ColumnDef<Pelanggaran>[] = [
   { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
@@ -109,8 +109,18 @@ export default function PelanggaranPage({
 }: Props) {
   const [activeTab, setActiveTab] = useState<'sanksi' | 'jenis'>('sanksi')
   const [search, setSearch] = useState('')
+const [openModal, setOpenModal] = useState(false)
+const [selectedKaryawanId, setSelectedKaryawanId] = useState<number | null>(null)
 
-  /* ================= FILTER (GUNAKAN useMemo) ================= */
+const openTambahSanksi = () => {
+  setSelectedKaryawanId(null)
+  setOpenModal(true)
+}
+
+const openEditSanksi = (item: Pelanggaran) => {
+  setSelectedKaryawanId(item.id)
+  setOpenModal(true)
+}
 
   const filteredSanksi = useMemo(() => {
     return pelanggaran.filter(item =>
