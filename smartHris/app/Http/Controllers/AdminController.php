@@ -431,14 +431,14 @@ class AdminController extends Controller
         $request->validate([
             'karyawan_id' => 'required|exists:karyawan,id',
             'jenis_pelanggaran_id' => 'required|exists:jenis_pelanggaran,id',
-            'tanggal' => 'required|date',
+            'sp' => 'nullable|in:SP1,SP2,SP3',
             'catatan' => 'nullable|string',
         ]);
 
         $create = PelanggaranKaryawan::create([
             'karyawan_id' => $request->karyawan_id,
             'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
-            'tanggal' => $request->tanggal,
+            'tanggal' => now()->toDateString(),
             'catatan' => $request->catatan,
         ]);
         if ($create) {

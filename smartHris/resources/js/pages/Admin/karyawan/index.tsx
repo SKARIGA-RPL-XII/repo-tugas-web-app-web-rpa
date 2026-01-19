@@ -1,7 +1,7 @@
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import KaryawanFormModal from '@/components/karyawan-form-modal';
 // Import Modal Pelanggaran
-import PelanggaranFormModal from '@/components/pelanggaran-form-modal'; 
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal';
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import WarningModal from '@/components/warning-modal';
 import SuccessModal from '@/components/success-modal';
@@ -315,9 +315,24 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     setIsSanksiModalOpen(false);
                     setKaryawanForSanksi(null);
                 }}
-                karyawanList={karyawan} 
+                karyawanList={karyawan}
                 jenisPelanggaranList={jenisPelanggaranList}
                 defaultKaryawanId={karyawanForSanksi?.id}
+                onSuccess={(message) => {
+                    setIsSanksiModalOpen(false);
+                    setKaryawanForSanksi(null);
+                    setSuccessTitle('Berhasil');
+                    setSuccessMessage(message);
+                    setShowSuccessModal(true);
+                    setTimeout(() => {
+                        router.visit(window.location.pathname);
+                    }, 1500);
+                }}
+                onError={(message) => {
+                    setFailureTitle('Gagal Menambahkan Sanksi');
+                    setFailureMessage(message);
+                    setShowFailureModal(true);
+                }}
             />
 
             <ConfirmDeleteModal
@@ -338,7 +353,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
-            
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
