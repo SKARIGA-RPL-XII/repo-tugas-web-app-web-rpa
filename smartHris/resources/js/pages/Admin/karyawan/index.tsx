@@ -27,6 +27,7 @@ export type Karyawan = {
     tanggal_lahir: string;
     tanggal_masuk: string;
     jenis_kelamin: string;
+    is_password_default?: boolean;
 };
 
 type PageProps = {
@@ -97,6 +98,10 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     };
 
     const handleResetPasswordClick = (item: Karyawan) => {
+        if (item.is_password_default) {
+            alert('Password karyawan ini sudah dalam kondisi default (NIP). Ubah password terlebih dahulu sebelum melakukan reset.');
+            return;
+        }
         setKaryawanToReset(item);
         setIsResetWarningOpen(true);
     };
@@ -104,26 +109,37 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     const executeResetPassword = () => {
         if (karyawanToReset && karyawanToReset.id) {
             router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
-                onBefore: () => setIsResetting(true),
+                onBefore: () => {
+                    setIsResetting(true);
+                },
 
-                onSuccess: () => {
+                onSuccess: (page) => {
+                    console.log('Success response:', page);
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
                     setSuccessTitle('Berhasil');
-                    setSuccessMessage('Password karyawan berhasil direset.');
+                    setSuccessMessage('Password karyawan berhasil direset ke NIP.');
                     setShowSuccessModal(true);
+
+                    setTimeout(() => {
+                        router.visit(window.location.pathname);
+                    }, 1500);
                 },
 
                 onError: (errors) => {
+                    console.error('Error response:', errors);
                     setIsResetWarningOpen(false);
 
-                    const pesanError = errors.error || "Terjadi kesalahan saat mereset password.";
+                    const pesanError = errors.error || errors.message || "Terjadi kesalahan saat mereset password.";
 
                     alert(pesanError);
                 },
 
-                onFinish: () => setIsResetting(false),
+                onFinish: () => {
+                    console.log('Finish reset password');
+                    setIsResetting(false);
+                },
                 preserveScroll: true,
             });
         }
@@ -212,9 +228,11 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                             <span className="font-medium">Edit Karyawan</span>
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem onClick={() => handleResetPasswordClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
+                        <DropdownMenuItem onClick={() => handleResetPasswordClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900" disabled={item.is_password_default}>
                             <Key className="h-4 w-4" />
-                            <span className="font-medium">Reset Password</span>
+                            <span className="font-medium">
+                                {item.is_password_default ? 'Password sudah default' : 'Reset Password'}
+                            </span>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
