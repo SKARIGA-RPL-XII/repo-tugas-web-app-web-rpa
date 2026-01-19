@@ -1,228 +1,240 @@
-import React, { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { Calendar as CalendarIcon, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Head } from '@inertiajs/react'
+import { useState } from 'react'
+import { MoreHorizontal, Trash2, Pencil, Plus } from 'lucide-react'
 
-import AppLayout from '@/layouts/app-layout';
-import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
-import EmptyState from '@/components/empty-state';
-import FilterTanggalModal from '@/components/filter-tanggal-modal';
-import ConfirmDeleteModal from '@/components/confirm-delete-modal';
-import SuccessModal from '@/components/success-modal';
-import AbsensiFormModal, { AbsensiData } from '@/components/absensi-form-modal';
-
-import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout'
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table'
+import ConfirmDeleteModal from '@/components/confirm-delete-modal'
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal'
+import ProfileMenu from '@/components/profile-menu'
+import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+    DropdownMenuContent,
+    DropdownMenuItem
+} from '@/components/ui/dropdown-menu'
 
-export type Absensi = {
-    id: number;
-    nama: string;
-    jabatan: string;
-    departemen: string;
-    tanggal: string;
-    jam_masuk: string | null;
-    jam_pulang: string | null;
-    status: string;
-    keterangan: string | null;
-    terlambat?: number;
-    lembur?: number;
-    catatan?: string;
-};
+/* ================= TYPES ================= */
 
-type PageProps = {
-    absensi: Absensi[];
-    tanggal?: string;
-};
+type Pelanggaran = {
+    id: number
+    tanggal: string
+    karyawan: {
+        nama: string
+        jabatan: string
+        departemen: string
+    }
+    jenis_pelanggaran: {
+        nama: string
+    }
+}
 
-export default function AbsensiKaryawan({ absensi, tanggal }: PageProps) {
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+type JenisPelanggaran = {
+    id: number
+    nama_pelanggaran: string
+    tingkat: string
+    keterangan?: string
+}
 
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
+type Props = {
+    pelanggaran: Pelanggaran[]
+    jenisPelanggaran: JenisPelanggaran[]
+    karyawan: any[]
+}
 
-    const [selectedAbsensi, setSelectedAbsensi] = useState<Absensi | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
+/* ================= PAGE ================= */
 
-    const handleOpenCalendar = () => {
-        setIsCalendarOpen(true);
-    };
+export default function PelanggaranPage({
+    pelanggaran,
+    jenisPelanggaran,
+    karyawan
+}: Props) {
+    const [activeTab, setActiveTab] = useState<'sanksi' | 'jenis'>('sanksi')
+    const [showForm, setShowForm] = useState(false)
+    const [selected, setSelected] = useState<any>(null)
 
-    const handleDateConfirm = (date: Date) => {
-        setIsCalendarOpen(false);
-        const formattedDate = format(date, 'yyyy-MM-dd');
+    /* ================= COLUMNS ================= */
 
-        router.get('/app/absensi', {
-            tanggal: formattedDate
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['absensi', 'tanggal'],
-        });
-    };
-
-    const handleDeleteClick = (item: Absensi) => {
-        setSelectedAbsensi(item);
-        setIsDeleteModalOpen(true);
-    };
-
-    const confirmDelete = () => {
-        if (!selectedAbsensi) return;
-
-        router.delete(`/app/absensi/${selectedAbsensi.id}`, {
-            onBefore: () => setIsDeleting(true),
-            onSuccess: () => {
-                setIsDeleteModalOpen(false);
-                setSelectedAbsensi(null);
-                setSuccessMessage('Data absensi berhasil dihapus.');
-                setShowSuccessModal(true);
-            },
-            onFinish: () => setIsDeleting(false),
-            preserveScroll: true,
-        });
-    };
-
-    const columns: ColumnDef<Absensi>[] = [
+    const columnsSanksi: ColumnDef<Pelanggaran>[] = [
         {
             header: 'No',
-            className: 'w-20 text-center',
-            render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
+            className: 'w-16 text-center',
+            render: (_, i) => i + 1
         },
         {
             header: 'Karyawan',
-            accessorKey: 'nama',
-            className: 'font-medium text-gray-900',
+            render: (item) => item.karyawan.nama
         },
         {
             header: 'Jabatan',
-            accessorKey: 'jabatan',
-            className: 'text-gray-700',
+            render: (item) => item.karyawan.jabatan
         },
         {
             header: 'Departemen',
-            accessorKey: 'departemen',
-            className: 'text-gray-600',
+            render: (item) => item.karyawan.departemen
         },
         {
-            header: 'Jam Absen',
-            render: (item) => (
-                <div className="grid grid-cols-[60px_10px_1fr] gap-x-1 text-sm text-gray-600">
-                    <span>Masuk</span><span>:</span><span className="font-medium text-gray-900">{item.jam_masuk ? item.jam_masuk.substring(0, 5) : '-'}</span>
-                    <span>Pulang</span><span>:</span><span className="font-medium text-gray-900">{item.jam_pulang ? item.jam_pulang.substring(0, 5) : '-'}</span>
-                </div>
-            ),
+            header: 'Pelanggaran',
+            render: (item) => item.jenis_pelanggaran.nama
         },
         {
-            header: 'Keterangan',
-            render: (item) => {
-                const keterangan = item.keterangan ?? '-';
-                return (
-                    <span className="font-medium">
-                        {keterangan}
-                    </span>
-                );
-            },
+            header: 'Tanggal',
+            render: (item) => item.tanggal
         },
         {
             header: '',
-            id: 'actions',
-            className: 'w-10 px-0',
-            render: (item) => (
+            render: () => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100">
-
+                        <Button variant="ghost" className="h-8 w-8 p-0">
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
-                        <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700">
-                            <Trash2 className="h-4 w-4" /> <span className="font-medium">Delete</span>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            ),
-        },
-    ];
+            )
+        }
+    ]
 
-    const displayDate = tanggal
-        ? format(new Date(tanggal), "d MMMM yyyy", { locale: id })
-        : "";
+    const columnsJenis: ColumnDef<JenisPelanggaran>[] = [
+        {
+            header: 'No',
+            className: 'w-16 text-center',
+            render: (_, i) => i + 1
+        },
+        {
+            header: 'Nama Pelanggaran',
+            render: (item) => item.nama_pelanggaran
+        },
+        {
+            header: 'Tingkat',
+            render: (item) => item.tingkat
+        },
+        {
+            header: 'Keterangan',
+            render: (item) => item.keterangan ?? '-'
+        },
+        {
+            header: '',
+            render: () => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-5 w-5" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )
+        }
+    ]
 
     return (
         <AppLayout>
-            <Head title="Absensi Karyawan" />
+            <Head title="Pelanggaran Karyawan" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+            {/* ===== HEADER ATAS ===== */}
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-xl font-semibold text-gray-900">
+                    Pelanggaran Karyawan
+                </h1>
+                <ProfileMenu />
+            </div>
 
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Absensi Karyawan
-                        </h2>
+            {/* ===== CARD ===== */}
+            <div className="rounded-2xl bg-white shadow-sm">
+                {/* TAB + SEARCH + BUTTON */}
+                <div className="flex items-center justify-between border-b px-6 pt-6">
+                    <div className="flex gap-6">
+                        <button
+                            onClick={() => setActiveTab('sanksi')}
+                            className={`pb-3 text-sm font-semibold ${
+                                activeTab === 'sanksi'
+                                    ? 'text-[#114F38] border-b-2 border-[#114F38]'
+                                    : 'text-gray-400'
+                            }`}
+                        >
+                            Sanksi Karyawan
+                        </button>
 
-                        {tanggal && (
-                            <Button onClick={handleOpenCalendar} variant="outline" className="gap-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-500">
-                                <CalendarIcon className="h-4 w-4" />
-                                {displayDate}
+                        <button
+                            onClick={() => setActiveTab('jenis')}
+                            className={`pb-3 text-sm font-semibold ${
+                                activeTab === 'jenis'
+                                    ? 'text-[#114F38] border-b-2 border-[#114F38]'
+                                    : 'text-gray-400'
+                            }`}
+                        >
+                            Jenis Pelanggaran
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {activeTab === 'jenis' && (
+                            <Button className="bg-[#114F38] hover:bg-[#0d3f2d]">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Tambah Jenis Pelanggaran
                             </Button>
                         )}
                     </div>
+                </div>
 
-                    {!tanggal ? (
-                        <EmptyState
-                            title="Belum ada tanggal absensi yang dipilih"
-                            description="Silakan pilih tanggal pada kalender untuk menampilkan riwayat absensi seluruh karyawan pada hari tersebut."
-                            action={
-                                <Button
-                                    onClick={handleOpenCalendar}
-                                    className="bg-[#114F38] hover:bg-[#0d3f2d] text-white px-6 gap-2 h-11 rounded-lg shadow-sm"
-                                >
-                                    <CalendarIcon className="h-4 w-4" />
-                                    Tampilkan Kalender
-                                </Button>
-                            }
-                        />
-                    ) : (
+                {/* TABLE */}
+                <div className="p-6">
+                    {activeTab === 'sanksi' && (
                         <DynamicTable
-                            title={`Data Absensi: ${displayDate}`}
-                            data={absensi}
-                            columns={columns}
-                            searchKeys={['nama', 'jabatan', 'departemen']}
+                            title=""
+                            data={pelanggaran}
+                            columns={columnsSanksi}
+                            searchKeys={[]}
                         />
                     )}
 
+                    {activeTab === 'jenis' && (
+                        <DynamicTable
+                            title=""
+                            data={jenisPelanggaran}
+                            columns={columnsJenis}
+                            searchKeys={[]}
+                        />
+                    )}
                 </div>
             </div>
 
-            {isCalendarOpen && (
-                <FilterTanggalModal
-                    isOpen={isCalendarOpen}
-                    onClose={() => setIsCalendarOpen(false)}
-                    onConfirm={handleDateConfirm}
-                    initialDate={tanggal}
-                />
-            )}
-
-            <ConfirmDeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={confirmDelete}
-                processing={isDeleting}
-                inputType="absensi"
+            {/* MODAL (kalau mau dipakai) */}
+            <PelanggaranFormModal
+                isOpen={showForm}
+                onClose={() => setShowForm(false)}
+                data={selected}
+                karyawan={karyawan}
+                jenisPelanggaran={jenisPelanggaran}
             />
 
-            <SuccessModal
-                isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                title="Berhasil"
-                message={successMessage}
+            <ConfirmDeleteModal
+                isOpen={false}
+                onClose={() => {}}
+                onConfirm={() => {}}
+                processing={false}
+                inputType="pelanggaran"
             />
         </AppLayout>
     )

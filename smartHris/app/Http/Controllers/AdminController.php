@@ -432,39 +432,40 @@ public function rejectCuti($id)
 
     /* ========= PELANGGARAN KARYAWAN ========= */
 
-    public function pKaryawan()
-    {
-        return Inertia::render('Admin/pelanggaran/index', [
-            'pelanggaran' => PelanggaranKaryawan::with([
-                'karyawan.user',
-                'jenisPelanggaran'
-            ])->latest()->get()->map(function ($p) {
-                return [
-                    'id' => $p->id,
-                    'karyawan_id' => $p->karyawan_id,
-                    'jenis_pelanggaran_id' => $p->jenis_pelanggaran_id,
-                    'tanggal' => $p->tanggal,
-                    'catatan' => $p->catatan,
-                    'karyawan' => [
-                        'nama' => $p->karyawan->user->name,
-                    ],
-                    'jenis_pelanggaran' => [
-                        'nama' => $p->jenisPelanggaran->nama_pelanggaran,
-                    ],
-                ];
-            }),
+public function pKaryawan()
+{
+    return Inertia::render('Admin/pelanggaran/index', [
+        'pelanggaran' => PelanggaranKaryawan::with([
+            'karyawan.user',
+            'jenisPelanggaran'
+        ])->get()->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'tanggal' => $p->tanggal,
+                'karyawan' => [
+                    'nama' => $p->karyawan->user->name,
+                    'jabatan' => $p->karyawan->jabatan,
+                    'departemen' => $p->karyawan->departemen,
+                ],
+                'jenis_pelanggaran' => [
+                    'nama' => $p->jenisPelanggaran->nama_pelanggaran,
+                ],
+            ];
+        }),
 
-            'karyawan' => Karyawan::with('user')->get()->map(fn($k) => [
-                'id' => $k->id,
-                'nama' => $k->user->name,
-            ]),
-
-            'jenisPelanggaran' => JenisPelanggaran::get()->map(fn($j) => [
+        // 🔥 INI YANG PENTING
+        'jenisPelanggaran' => JenisPelanggaran::get()->map(function ($j) {
+            return [
                 'id' => $j->id,
-                'nama' => $j->nama_pelanggaran,
-            ]),
-        ]);
-    }
+                'nama_pelanggaran' => $j->nama_pelanggaran,
+                'tingkat' => $j->tingkat,
+                'keterangan' => $j->keterangan,
+            ];
+        }),
+    ]);
+}
+
+
     public function pKaryawanStore(Request $request)
     {
         $request->validate([

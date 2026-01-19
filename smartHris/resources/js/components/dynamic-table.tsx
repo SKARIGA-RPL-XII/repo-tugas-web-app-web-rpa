@@ -26,7 +26,11 @@ interface DynamicTableProps<T> {
     searchKeys?: (keyof T)[];
     onAddClick?: () => void;
     addButtonLabel?: string;
+    headerSlot?: React.ReactNode
+
 }
+
+
 
 function DynamicTable<T extends { id: string | number }>({
     title,
@@ -35,7 +39,9 @@ function DynamicTable<T extends { id: string | number }>({
     searchKeys = [],
     onAddClick,
     addButtonLabel = "Tambah Data",
+    headerSlot
 }: DynamicTableProps<T>) {
+
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{
         key: keyof T;
@@ -114,35 +120,41 @@ function DynamicTable<T extends { id: string | number }>({
 
     return (
         <Card className="flex w-full flex-col overflow-hidden rounded-3xl border-none bg-white shadow-sm">
-            <CardHeader className="px-4 pt-6 pb-4 sm:px-8">
-                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                    <CardTitle className="text-xl font-semibold text-gray-800">
-                        {title}
-                    </CardTitle>
+<CardHeader className="px-4 pt-6 pb-4 sm:px-8">
+  {headerSlot ? (
+    headerSlot
+  ) : (
+    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <CardTitle className="text-xl font-semibold text-gray-800">
+        {title}
+      </CardTitle>
 
-                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <Input
-                                type="search"
-                                placeholder="Search..."
-                                value={searchTerm}
-                                onChange={handleSearch}
-                                className="h-10 w-full rounded-lg border-gray-200 bg-white pl-10 focus:ring-1 focus:ring-emerald-500"
-                            />
-                        </div>
-                        {onAddClick && (
-                            <Button
-                                onClick={onAddClick}
-                                className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                {addButtonLabel}
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </CardHeader>
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="h-10 w-full rounded-lg border-gray-200 bg-white pl-10 focus:ring-1 focus:ring-emerald-500"
+          />
+        </div>
+
+        {onAddClick && (
+          <Button
+            onClick={onAddClick}
+            className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {addButtonLabel}
+          </Button>
+        )}
+      </div>
+    </div>
+  )}
+</CardHeader>
+
 
             <CardContent className="flex-1 px-0 pb-0">
                 <div className="w-full overflow-x-auto">

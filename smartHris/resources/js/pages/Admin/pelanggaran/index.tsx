@@ -1,221 +1,166 @@
-import React, { useState } from "react";
-import { router, Head } from "@inertiajs/react";
+import { Head } from '@inertiajs/react'
+import { useState } from 'react'
+import { MoreHorizontal, Trash2, Pencil, Plus, Search } from 'lucide-react'
 
-export default function Pelanggaran({
-    pelanggaran = [],
-    karyawan = [],
-    jenisPelanggaran = [],
-}: any) {
-    const [showModal, setShowModal] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
+import AppLayout from '@/layouts/app-layout'
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table'
+import ProfileMenu from '@/components/profile-menu'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu'
 
-    const [form, setForm] = useState({
-        id: null as number | null,
-        karyawan_id: "",
-        jenis_pelanggaran_id: "",
-        tanggal: "",
-        catatan: "",
-    });
+/* ================= TYPES ================= */
 
-    const resetForm = () => {
-        setForm({
-            id: null,
-            karyawan_id: "",
-            jenis_pelanggaran_id: "",
-            tanggal: "",
-            catatan: "",
-        });
-        setIsEdit(false);
-    };
+type Pelanggaran = {
+  id: number
+  tanggal: string
+  karyawan: {
+    nama: string
+    jabatan: string
+    departemen: string
+  }
+  jenis_pelanggaran: {
+    nama: string
+  }
+}
 
-    const handleSubmit = () => {
-        if (!form.karyawan_id || !form.jenis_pelanggaran_id || !form.tanggal) {
-            alert("Mohon lengkapi data wajib");
-            return;
-        }
+type JenisPelanggaran = {
+  id: number
+  nama_pelanggaran: string
+  tingkat: string
+  keterangan?: string
+}
 
-        if (isEdit && form.id) {
-            router.put(`/app/pelanggaran/${form.id}`, form);
-        } else {
-            router.post("/app/pelanggaran", form);
-        }
+type Props = {
+  pelanggaran: Pelanggaran[]
+  jenisPelanggaran: JenisPelanggaran[]
+}
 
-        setShowModal(false);
-        resetForm();
-    };
+/* ================= PAGE ================= */
 
-    const handleEdit = (data: any) => {
-        setIsEdit(true);
-        setForm({
-            id: data.id,
-            karyawan_id: data.karyawan_id,
-            jenis_pelanggaran_id: data.jenis_pelanggaran_id,
-            tanggal: data.tanggal,
-            catatan: data.catatan ?? "",
-        });
-        setShowModal(true);
-    };
+export default function PelanggaranPage({
+  pelanggaran,
+  jenisPelanggaran
+}: Props) {
+  const [activeTab, setActiveTab] = useState<'sanksi' | 'jenis'>('sanksi')
+  const [search, setSearch] = useState('')
 
-    const handleDelete = (id: number) => {
-        if (confirm("Yakin hapus data ini?")) {
-            router.delete(`/app/pelanggaran/${id}`);
-        }
-    };
+  const filteredSanksi = pelanggaran.filter(item =>
+    item.karyawan.nama.toLowerCase().includes(search.toLowerCase()) ||
+    item.jenis_pelanggaran.nama.toLowerCase().includes(search.toLowerCase())
+  )
 
-    return (
-        <>
-            <Head title="Pelanggaran Karyawan" />
+  const filteredJenis = jenisPelanggaran.filter(item =>
+    item.nama_pelanggaran.toLowerCase().includes(search.toLowerCase()) ||
+    item.tingkat.toLowerCase().includes(search.toLowerCase())
+  )
 
-            <div className="p-6 bg-gray-100 min-h-screen">
-                <div className="bg-white p-6 rounded shadow">
-                    <div className="flex justify-between mb-4">
-                        <h1 className="text-xl font-bold">🚫 Pelanggaran Karyawan</h1>
-                        <button
-                            onClick={() => {
-                                resetForm();
-                                setShowModal(true);
-                            }}
-                            className="bg-blue-600 text-white px-4 py-2 rounded"
-                        >
-                            + Tambah
-                        </button>
-                    </div>
+  const columnsSanksi: ColumnDef<Pelanggaran>[] = [
+    { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
+    { header: 'Karyawan', render: i => i.karyawan.nama },
+    { header: 'Jabatan', render: i => i.karyawan.jabatan },
+    { header: 'Departemen', render: i => i.karyawan.departemen },
+    { header: 'Pelanggaran', render: i => i.jenis_pelanggaran.nama },
+    { header: 'Tanggal', render: i => i.tanggal },
+    {
+      header: '',
+      render: () => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem className="text-red-600">
+              <Trash2 className="mr-2 h-4 w-4" /> Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ]
 
-                    <table className="w-full border">
-                        <thead className="bg-gray-200">
-                            <tr>
-                                <th className="border p-2">Karyawan</th>
-                                <th className="border p-2">Pelanggaran</th>
-                                <th className="border p-2">Tanggal</th>
-                                <th className="border p-2">Catatan</th>
-                                <th className="border p-2">Aksi</th>
-                            </tr>
-                        </thead>
+  const columnsJenis: ColumnDef<JenisPelanggaran>[] = [
+    { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
+    { header: 'Nama Pelanggaran', render: i => i.nama_pelanggaran },
+    { header: 'Tingkat', render: i => i.tingkat },
+    { header: 'Keterangan', render: i => i.keterangan ?? '-' }
+  ]
 
-                        <tbody>
-                            {pelanggaran.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="text-center p-4 text-gray-500 italic"
-                                    >
-                                        Belum ada data pelanggaran karyawan.
-                                    </td>
-                                </tr>
-                            )}
+  return (
+    <AppLayout>
+      <Head title="Pelanggaran Karyawan" />
 
-                            {pelanggaran.map((p: any) => (
-                                <tr key={p.id} className="hover:bg-gray-50">
-                                    <td className="border p-2">
-                                        {p.karyawan?.nama}
-                                    </td>
-                                    <td className="border p-2">
-                                        {p.jenis_pelanggaran?.nama}
-                                    </td>
-                                    <td className="border p-2">{p.tanggal}</td>
-                                    <td className="border p-2">
-                                        {p.catatan || "-"}
-                                    </td>
-                                    <td className="border p-2 flex gap-2">
-                                        <button
-                                            onClick={() => handleEdit(p)}
-                                            className="bg-yellow-500 text-white px-2 py-1 rounded"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(p.id)}
-                                            className="bg-red-600 text-white px-2 py-1 rounded"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      {/* PAGE HEADER */}
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Pelanggaran Karyawan</h1>
+        <ProfileMenu />
+      </div>
 
-            {/* MODAL */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 w-96 rounded shadow">
-                        <h2 className="font-bold mb-4">
-                            {isEdit ? "✏️ Edit Pelanggaran" : "➕ Tambah Pelanggaran"}
-                        </h2>
+      {/* TABLE */}
+<DynamicTable
+  title=""
+  data={activeTab === 'sanksi' ? filteredSanksi : filteredJenis}
+  columns={activeTab === 'sanksi' ? columnsSanksi : columnsJenis}
+  headerSlot={
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* TAB */}
+      <div className="flex gap-6">
+        <button
+          onClick={() => setActiveTab('sanksi')}
+          className={`pb-2 text-sm font-semibold ${
+            activeTab === 'sanksi'
+              ? 'border-b-2 border-[#114F38] text-[#114F38]'
+              : 'text-gray-400'
+          }`}
+        >
+          Sanksi Karyawan
+        </button>
 
-                        <select
-                            className="w-full border p-2 mb-2"
-                            value={form.karyawan_id}
-                            onChange={(e) =>
-                                setForm({ ...form, karyawan_id: e.target.value })
-                            }
-                        >
-                            <option value="">-- Pilih Karyawan --</option>
-                            {karyawan.map((k: any) => (
-                                <option key={k.id} value={k.id}>
-                                    {k.nama}
-                                </option>
-                            ))}
-                        </select>
+        <button
+          onClick={() => setActiveTab('jenis')}
+          className={`pb-2 text-sm font-semibold ${
+            activeTab === 'jenis'
+              ? 'border-b-2 border-[#114F38] text-[#114F38]'
+              : 'text-gray-400'
+          }`}
+        >
+          Jenis Pelanggaran
+        </button>
+      </div>
 
-                        <select
-                            className="w-full border p-2 mb-2"
-                            value={form.jenis_pelanggaran_id}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    jenis_pelanggaran_id: e.target.value,
-                                })
-                            }
-                        >
-                            <option value="">-- Jenis Pelanggaran --</option>
-                            {jenisPelanggaran.map((j: any) => (
-                                <option key={j.id} value={j.id}>
-                                    {j.nama}
-                                </option>
-                            ))}
-                        </select>
+      {/* ACTION */}
+      <div className="flex gap-3">
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="pl-10"
+          />
+        </div>
 
-                        <input
-                            type="date"
-                            className="w-full border p-2 mb-2"
-                            value={form.tanggal}
-                            onChange={(e) =>
-                                setForm({ ...form, tanggal: e.target.value })
-                            }
-                        />
+        {activeTab === 'jenis' && (
+          <Button className="bg-[#114F38] hover:bg-[#0d3f2d]">
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Jenis Pelanggaran
+          </Button>
+        )}
+      </div>
+    </div>
+  }
+/>
 
-                        <textarea
-                            className="w-full border p-2 mb-4"
-                            placeholder="Catatan (opsional)"
-                            value={form.catatan}
-                            onChange={(e) =>
-                                setForm({ ...form, catatan: e.target.value })
-                            }
-                        />
-
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => {
-                                    setShowModal(false);
-                                    resetForm();
-                                }}
-                                className="px-3 py-1 bg-gray-300 rounded"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={handleSubmit}
-                                className="bg-blue-600 text-white px-3 py-1 rounded"
-                            >
-                                Simpan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+    </AppLayout>
+  )
 }
