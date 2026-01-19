@@ -25,7 +25,7 @@ Route::middleware(['auth'])->group(function () {
     // --- ADMIN ROUTES ---
     Route::middleware(['role:admin'])->group(function () {
 
-        Route::controller(AdminController::class)->group(function() {
+        Route::controller(AdminController::class)->group(function () {
             Route::get('/app/karyawan', 'indexKaryawan')->name('admin.karyawan');
             Route::post('/app/karyawan', 'storeKaryawan')->name('admin.karyawan.store');
             Route::put('/app/karyawan/{id}', 'updateKaryawan')->name('admin.karyawan.update');
@@ -70,12 +70,12 @@ Route::middleware(['auth'])->group(function () {
 
     // --- USER ROUTES ---
     Route::middleware(['role:user'])->group(function () {
-        Route::controller(UserController::class)->group(function() {
+        Route::controller(UserController::class)->group(function () {
             Route::get('/absensi', 'absensi')->name('user.absensi');
             Route::post('/absensi/masuk', 'masukStore')->name('user.absensi.masuk');
             Route::post('/absensi/pulang', 'pulangStore')->name('user.absensi.pulang');
-            Route::get('/riwayat-absensi', 'riwayat')->name('user.riwayat-absensi');
-            Route::get('/pelanggaran', 'index')->name('user.pelanggaran');
+            Route::get('/absensi/riwayat', 'riwayat')->name('user.absensi.riwayat');
+            Route::get('/pelanggaran', 'pelanggaran')->name('user.pelanggaran');
             Route::get('/cuti', 'cuti')->name('user.cuti');
             Route::post('/cuti', 'cutiStore')->name('user.cuti.store');
         });

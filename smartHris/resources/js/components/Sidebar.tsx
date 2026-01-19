@@ -177,7 +177,7 @@ export default function Sidebar() {
                                         : ''
                                         }`}
                                 >
-                                    <Link href="/absen/riwayat">
+                                    <Link href="/absensi/riwayat">
                                         <Icon
                                             icon="mage:note-text-fill"
                                             width="24"
