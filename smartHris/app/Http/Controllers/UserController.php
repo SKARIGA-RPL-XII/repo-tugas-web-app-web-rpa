@@ -56,7 +56,7 @@ class UserController extends Controller
         $canAbsenPulang = $absensiHariIni && $absensiHariIni->jam_masuk && !$absensiHariIni->jam_pulang;
         $canCuti = !$absensiHariIni;
 
-        return Inertia::render('User/absensi', [
+        return Inertia::render('User/absensi/index', [
             'user' => [
                 'name' => $user->name,
             ],
@@ -81,109 +81,115 @@ class UserController extends Controller
         ]);
     }
     public function masukStore(Request $request)
-    {
-        $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+{
+    $request->validate([
+        'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $karyawan = auth()->user()->karyawan;
-        $today = now()->toDateString();
-        $now = now()->toTimeString();
+    $karyawan = auth()->user()->karyawan;
+    $today = now()->toDateString();
+    $now = now()->toTimeString();
 
-        $cuti = Cuti::where('karyawan_id', $karyawan->id)->where('tanggal_mulai', '<=', $today)->where('tanggal_selesai', '>=', $today)->exists();
+    $cuti = Cuti::where('karyawan_id', $karyawan->id)
+        ->where('tanggal_mulai', '<=', $today)
+        ->where('tanggal_selesai', '>=', $today)
+        ->exists();
 
-        if ($cuti) {
-            Absensi::updateOrCreate(
-                [
-                    'karyawan_id' => $karyawan->id,
-                    'tanggal' => $today,
-                ],
-                [
-                    'status' => 'cuti',
-                ]
-            );
-
-            return response()->json(['message' => 'Anda sedang cuti']);
-        }
-
-        $absen = Absensi::where('karyawan_id', $karyawan->id)->where('tanggal', $today)->first();
-
-        if ($absen && $absen->jam_masuk) {
-            return response()->json(['message' => 'Sudah absen masuk'], 400);
-        }
-
-        // ⛔ TERLAMBAT
-        if ($now > $this->jamMasukAkhir) {
-            Absensi::updateOrCreate(
-                [
-                    'karyawan_id' => $karyawan->id,
-                    'tanggal' => $today,
-                ],
-                [
-                    'status' => 'alpha',
-                ]
-            );
-
-            return response()->json(['message' => 'Terlambat, status alpha'], 403);
-        }
-
-        // 📸 SIMPAN FOTO
-        $file = $request->file('foto');
-        $filename = 'masuk_' . $karyawan->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('images/absensi/masuk'), $filename);
-
+    if ($cuti) {
         Absensi::updateOrCreate(
             [
                 'karyawan_id' => $karyawan->id,
                 'tanggal' => $today,
             ],
             [
-                'jam_masuk' => $now,
-                'foto_masuk' => $filename,
-                'status' => 'hadir',
+                'status' => 'cuti',
             ]
         );
 
-        return response()->json(['message' => 'Absen masuk berhasil']);
+        return back()->withErrors(['message' => 'Anda sedang cuti']);
     }
-    public function pulangStore(Request $request)
-    {
-        $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
 
-        $karyawan = auth()->user()->karyawan;
-        $today = now()->toDateString();
-        $now = now()->toTimeString();
+    $absen = Absensi::where('karyawan_id', $karyawan->id)
+        ->where('tanggal', $today)
+        ->first();
 
-        $absen = Absensi::where('karyawan_id', $karyawan->id)
-            ->where('tanggal', $today)
-            ->first();
-
-        if (!$absen || !$absen->jam_masuk) {
-            return response()->json(['message' => 'Belum absen masuk'], 400);
-        }
-
-        if ($absen->jam_pulang) {
-            return response()->json(['message' => 'Sudah absen pulang'], 400);
-        }
-
-        if ($now < $this->jamPulangMulai) {
-            return response()->json(['message' => 'Belum waktunya pulang'], 403);
-        }
-
-        // 📸 SIMPAN FOTO
-        $file = $request->file('foto');
-        $filename = 'pulang_' . $karyawan->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('images/absensi/pulang'), $filename);
-
-        $absen->update([
-            'jam_pulang' => $now,
-            'foto_pulang' => $filename,
-        ]);
-
-        return response()->json(['message' => 'Absen pulang berhasil']);
+    if ($absen && $absen->jam_masuk) {
+        return back()->withErrors(['message' => 'Sudah absen masuk']);
     }
+
+    // ⛔ TERLAMBAT
+    if ($now > $this->jamMasukAkhir) {
+        Absensi::updateOrCreate(
+            [
+                'karyawan_id' => $karyawan->id,
+                'tanggal' => $today,
+            ],
+            [
+                'status' => 'alpha',
+            ]
+        );
+
+        return back()->withErrors(['message' => 'Terlambat, status alpha']);
+    }
+
+    // 📸 SIMPAN FOTO
+    $file = $request->file('foto');
+    $filename = 'masuk_' . $karyawan->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+    $file->move(public_path('images/absensi/masuk'), $filename);
+
+    Absensi::updateOrCreate(
+        [
+            'karyawan_id' => $karyawan->id,
+            'tanggal' => $today,
+        ],
+        [
+            'jam_masuk' => $now,
+            'foto_masuk' => $filename,
+            'status' => 'hadir',
+        ]
+    );
+
+    return back()->with('success', 'Absen masuk berhasil');
+}
+
+public function pulangStore(Request $request)
+{
+    $request->validate([
+        'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    $karyawan = auth()->user()->karyawan;
+    $today = now()->toDateString();
+    $now = now()->toTimeString();
+
+    $absen = Absensi::where('karyawan_id', $karyawan->id)
+        ->where('tanggal', $today)
+        ->first();
+
+    if (!$absen || !$absen->jam_masuk) {
+        return back()->withErrors(['message' => 'Belum absen masuk']);
+    }
+
+    if ($absen->jam_pulang) {
+        return back()->withErrors(['message' => 'Sudah absen pulang']);
+    }
+
+    if ($now < $this->jamPulangMulai) {
+        return back()->withErrors(['message' => 'Belum waktunya pulang']);
+    }
+
+    // 📸 SIMPAN FOTO
+    $file = $request->file('foto');
+    $filename = 'pulang_' . $karyawan->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+    $file->move(public_path('images/absensi/pulang'), $filename);
+
+    $absen->update([
+        'jam_pulang' => $now,
+        'foto_pulang' => $filename,
+    ]);
+
+    return back()->with('success', 'Absen pulang berhasil');
+}
     public function autoAlpha()
     {
         $karyawan = auth()->user()->karyawan;

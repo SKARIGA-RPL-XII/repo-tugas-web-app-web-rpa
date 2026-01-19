@@ -154,12 +154,12 @@ export default function Sidebar() {
                                 <Button
                                     variant="ghost"
                                     asChild
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absen')
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi')
                                         ? sidebarConfig.activeStyle
                                         : ''
                                         }`}
                                 >
-                                    <Link href="/absen">
+                                    <Link href="/absensi">
                                         <Icon
                                             icon="fluent:task-list-square-16-filled"
                                             width="16"
