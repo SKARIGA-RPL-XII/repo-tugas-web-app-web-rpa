@@ -53,7 +53,6 @@
         "clsx": "^2.1.1",
         "concurrently": "^9.0.1",
         "date-fns": "^4.1.0",
-        "date-fns": "^4.1.0",
         "date-holidays": "^3.26.6",
         "globals": "^15.14.0",
         "input-otp": "^1.4.2",

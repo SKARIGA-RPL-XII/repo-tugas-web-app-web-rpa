@@ -44,7 +44,8 @@ class AdminController extends Controller
         });
 
         return Inertia::render('Admin/karyawan/index', [
-            'karyawan' => $karyawan
+            'karyawan' => $karyawan,
+            'jenisPelanggaranList' => JenisPelanggaran::select('id', 'nama_pelanggaran')->get(),
         ]);
     }
     public function storeKaryawan(Request $request)
