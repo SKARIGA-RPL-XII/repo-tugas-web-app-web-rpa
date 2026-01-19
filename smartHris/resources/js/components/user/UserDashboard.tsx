@@ -11,10 +11,10 @@ type Props = {
 
 export default function UserDashboard({ summary }: Props) {
   const s: UserSummary = summary ?? {
-    hadir: 0,
+    hadir: 5,
     terlambat: 0,
     cuti: 0,
-    hariKerja: 0,
+    hariKerja: 5,
   }
 
   return (

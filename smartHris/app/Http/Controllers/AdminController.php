@@ -26,8 +26,8 @@ class AdminController extends Controller
     public function indexKaryawan()
     {
         $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
-            $isPasswordDefault = $item->user && password_verify($item->nip, $item->user->password);
-            
+            $isPasswordDefault = $item->user && password_verify($item->tanggal_lahir, $item->user->password);
+
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
@@ -136,9 +136,9 @@ class AdminController extends Controller
     public function resetPassword($id)
     {
         Log::info("Reset password called for karyawan ID: $id");
-        
+
         $karyawan = Karyawan::find($id);
-        
+
         if (!$karyawan) {
             throw ValidationException::withMessages([
                 'error' => 'Data karyawan tidak ditemukan.'
@@ -160,21 +160,20 @@ class AdminController extends Controller
             ]);
         }
 
-        if (!$karyawan->nip) {
+        if (!$karyawan->tanggal_lahir) {
             throw ValidationException::withMessages([
-                'error' => 'NIP karyawan tidak valid (kosong).'
+                'error' => 'Tanggal lahir karyawan tidak valid (kosong).'
             ]);
         }
 
         try {
             $user->update([
-                'password' => bcrypt($karyawan->nip),
+                'password' => bcrypt($karyawan->tanggal_lahir),
             ]);
 
             Log::info("Password reset successfully for user ID: " . $user->id);
-            
-            return redirect()->back()->with('success', 'Password berhasil direset ke NIP.');
 
+            return redirect()->back()->with('success', 'Password berhasil direset ke Tanggal Lahir.');
         } catch (\Exception $e) {
             Log::error("Error resetting password: " . $e->getMessage());
 
@@ -432,14 +431,14 @@ public function pKaryawan()
         $request->validate([
             'karyawan_id' => 'required|exists:karyawan,id',
             'jenis_pelanggaran_id' => 'required|exists:jenis_pelanggaran,id',
-            'tanggal' => 'required|date',
+            'sp' => 'nullable|in:SP1,SP2,SP3',
             'catatan' => 'nullable|string',
         ]);
 
         $create = PelanggaranKaryawan::create([
             'karyawan_id' => $request->karyawan_id,
             'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
-            'tanggal' => $request->tanggal,
+            'tanggal' => now()->toDateString(),
             'catatan' => $request->catatan,
         ]);
         if ($create) {
