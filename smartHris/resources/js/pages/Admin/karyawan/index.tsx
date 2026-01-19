@@ -3,6 +3,7 @@ import KaryawanFormModal from '@/components/karyawan-form-modal';
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import WarningModal from '@/components/warning-modal';
 import SuccessModal from '@/components/success-modal';
+import FailureModal from '@/components/failure-modal'; // Import Modal Gagal
 
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -36,9 +37,15 @@ type PageProps = {
 
 export default function DataKaryawan({ karyawan }: PageProps) {
 
+    // State untuk Success Modal
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [successTitle, setSuccessTitle] = useState('Berhasil');
+
+    // State untuk Failure Modal (BARU)
+    const [showFailureModal, setShowFailureModal] = useState(false);
+    const [failureMessage, setFailureMessage] = useState('');
+    const [failureTitle, setFailureTitle] = useState('Gagal');
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
@@ -91,6 +98,13 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                     setSuccessMessage('Data karyawan berhasil dihapus.');
                     setShowSuccessModal(true);
                 },
+                onError: (errors) => {
+                    setIsDeleteModalOpen(false);
+                    // Menampilkan modal gagal jika delete error
+                    setFailureTitle('Gagal Menghapus');
+                    setFailureMessage(Object.values(errors).flat().join(', ') || 'Gagal menghapus data.');
+                    setShowFailureModal(true);
+                },
                 onFinish: () => setIsDeleting(false),
                 preserveScroll: true,
             });
@@ -99,7 +113,10 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const handleResetPasswordClick = (item: Karyawan) => {
         if (item.is_password_default) {
-            alert('Password karyawan ini sudah dalam kondisi default (NIP). Ubah password terlebih dahulu sebelum melakukan reset.');
+            // Kita bisa gunakan modal failure juga di sini daripada alert biasa agar konsisten
+            setFailureTitle('Info');
+            setFailureMessage('Password karyawan ini sudah dalam kondisi default (NIP).');
+            setShowFailureModal(true);
             return;
         }
         setKaryawanToReset(item);
@@ -118,10 +135,12 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
+                    // Tampilkan Modal Sukses
                     setSuccessTitle('Berhasil');
                     setSuccessMessage('Password karyawan berhasil direset ke NIP.');
                     setShowSuccessModal(true);
 
+                    // Refresh halaman otomatis
                     setTimeout(() => {
                         router.visit(window.location.pathname);
                     }, 1500);
@@ -131,9 +150,13 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                     console.error('Error response:', errors);
                     setIsResetWarningOpen(false);
 
-                    const pesanError = errors.error || errors.message || "Terjadi kesalahan saat mereset password.";
+                    // Ambil pesan error dari response
+                    const pesanError = errors.error || errors.message || (typeof errors === 'object' ? Object.values(errors).flat().join(', ') : "Terjadi kesalahan saat mereset password.");
 
-                    alert(pesanError);
+                    // Tampilkan Modal Gagal
+                    setFailureTitle('Gagal Reset');
+                    setFailureMessage(pesanError);
+                    setShowFailureModal(true);
                 },
 
                 onFinish: () => {
@@ -275,7 +298,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 </div>
             </div>
 
-            {/* Modal Form Tambah/Edit */}
             <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
@@ -284,7 +306,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 onSuccess={handleFormSuccess}
             />
 
-            {/* Modal Confirm Delete */}
             <ConfirmDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -293,7 +314,6 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 inputType="karyawan"
             />
 
-            {/* Modal Warning Reset Password (BARU) */}
             <WarningModal
                 isOpen={isResetWarningOpen}
                 onClose={() => setIsResetWarningOpen(false)}
@@ -304,13 +324,19 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
-
-            {/* Modal Success */}
+            
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
                 title={successTitle}
                 message={successMessage}
+            />
+
+            <FailureModal
+                isOpen={showFailureModal}
+                onClose={() => setShowFailureModal(false)}
+                title={failureTitle}
+                message={failureMessage}
             />
         </AppLayout>
     );

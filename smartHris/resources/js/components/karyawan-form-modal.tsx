@@ -202,7 +202,6 @@ export default function KaryawanFormModal({
                             </p>
                         )}
                     </div>
-
                     <div className="md:col-span-3">
                         <Label className={labelClass}>
                             Email <span className="text-red-500">*</span>
