@@ -1,7 +1,10 @@
-import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import KaryawanFormModal from '@/components/karyawan-form-modal';
+import ConfirmDeleteModal from '@/components/confirm-delete-modal';
+import WarningModal from '@/components/warning-modal';
 import SuccessModal from '@/components/success-modal';
+
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -9,9 +12,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Key, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export type Karyawan = {
@@ -25,6 +27,7 @@ export type Karyawan = {
     tanggal_lahir: string;
     tanggal_masuk: string;
     jenis_kelamin: string;
+    is_password_default?: boolean;
 };
 
 type PageProps = {
@@ -35,6 +38,8 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [successTitle, setSuccessTitle] = useState('Berhasil');
+
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -43,6 +48,14 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
     const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(null);
 
+    const [isResetWarningOpen, setIsResetWarningOpen] = useState(false);
+    const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
+    const [isResetting, setIsResetting] = useState(false);
+
+
+    const handleAddSanksi = (item: Karyawan) => {
+        alert(`Fitur Tambah Sanksi untuk ${item.nama} belum dipasang.`);
+    };
 
     const handleAddClick = () => {
         setFormMode('create');
@@ -57,6 +70,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
     };
 
     const handleFormSuccess = (msg: string) => {
+        setSuccessTitle('Berhasil');
         setSuccessMessage(msg);
         setShowSuccessModal(true);
     };
@@ -68,18 +82,69 @@ export default function DataKaryawan({ karyawan }: PageProps) {
 
     const confirmDelete = () => {
         if (karyawanToDelete && karyawanToDelete.id) {
-            router.visit(`/app/karyawan/${karyawanToDelete.id}`, {
-                method: 'delete',
+            router.delete(`/app/karyawan/${karyawanToDelete.id}`, {
                 onBefore: () => setIsDeleting(true),
                 onSuccess: () => {
                     setIsDeleteModalOpen(false);
                     setKaryawanToDelete(null);
+                    setSuccessTitle('Dihapus');
+                    setSuccessMessage('Data karyawan berhasil dihapus.');
+                    setShowSuccessModal(true);
                 },
                 onFinish: () => setIsDeleting(false),
                 preserveScroll: true,
             });
         }
     };
+
+    const handleResetPasswordClick = (item: Karyawan) => {
+        if (item.is_password_default) {
+            alert('Password karyawan ini sudah dalam kondisi default (NIP). Ubah password terlebih dahulu sebelum melakukan reset.');
+            return;
+        }
+        setKaryawanToReset(item);
+        setIsResetWarningOpen(true);
+    };
+
+    const executeResetPassword = () => {
+        if (karyawanToReset && karyawanToReset.id) {
+            router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
+                onBefore: () => {
+                    setIsResetting(true);
+                },
+
+                onSuccess: (page) => {
+                    console.log('Success response:', page);
+                    setIsResetWarningOpen(false);
+                    setKaryawanToReset(null);
+
+                    setSuccessTitle('Berhasil');
+                    setSuccessMessage('Password karyawan berhasil direset ke NIP.');
+                    setShowSuccessModal(true);
+
+                    setTimeout(() => {
+                        router.visit(window.location.pathname);
+                    }, 1500);
+                },
+
+                onError: (errors) => {
+                    console.error('Error response:', errors);
+                    setIsResetWarningOpen(false);
+
+                    const pesanError = errors.error || errors.message || "Terjadi kesalahan saat mereset password.";
+
+                    alert(pesanError);
+                },
+
+                onFinish: () => {
+                    console.log('Finish reset password');
+                    setIsResetting(false);
+                },
+                preserveScroll: true,
+            });
+        }
+    };
+
     const columns: ColumnDef<Karyawan>[] = [
         {
             header: 'No',
@@ -155,15 +220,31 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+
+                    <DropdownMenuContent align="end" className="w-48 rounded-xl border border-gray-100 bg-white p-1 shadow-lg">
+
                         <DropdownMenuItem onClick={() => handleEdit(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Pencil className="h-4 w-4" />
-                            <span className="font-medium">Edit</span>
+                            <span className="font-medium">Edit Karyawan</span>
                         </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => handleResetPasswordClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900" disabled={item.is_password_default}>
+                            <Key className="h-4 w-4" />
+                            <span className="font-medium">
+                                {item.is_password_default ? 'Password sudah default' : 'Reset Password'}
+                            </span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
+                            <Plus className="h-4 w-4" />
+                            <span className="font-medium">Tambah Sanksi</span>
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem onClick={() => handleDeleteClick(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700">
                             <Trash2 className="h-4 w-4" />
                             <span className="font-medium">Delete</span>
                         </DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             ),
@@ -194,6 +275,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 </div>
             </div>
 
+            {/* Modal Form Tambah/Edit */}
             <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
@@ -202,6 +284,7 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 onSuccess={handleFormSuccess}
             />
 
+            {/* Modal Confirm Delete */}
             <ConfirmDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -210,10 +293,23 @@ export default function DataKaryawan({ karyawan }: PageProps) {
                 inputType="karyawan"
             />
 
+            {/* Modal Warning Reset Password (BARU) */}
+            <WarningModal
+                isOpen={isResetWarningOpen}
+                onClose={() => setIsResetWarningOpen(false)}
+                onConfirm={executeResetPassword}
+                isLoading={isResetting}
+                title="Reset Password?"
+                message="Password karyawan akan direset ke password default sistem. Apakah Anda yakin ingin mereset password karyawan ini?"
+                confirmLabel="Konfirmasi"
+                cancelLabel="Batal"
+            />
+
+            {/* Modal Success */}
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
-                title="Berhasil"
+                title={successTitle}
                 message={successMessage}
             />
         </AppLayout>

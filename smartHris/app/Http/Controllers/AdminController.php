@@ -14,6 +14,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
@@ -23,10 +26,12 @@ class AdminController extends Controller
     public function indexKaryawan()
     {
         $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
+            $isPasswordDefault = $item->user && password_verify($item->nip, $item->user->password);
+            
             return [
                 'id'             => $item->id,
                 'nama'           => $item->user->name ?? '-',
-                'email'           => $item->user->email ?? '-',
+                'email'          => $item->user->email ?? '',
                 'nip'            => $item->nip ?? '-',
                 'jabatan'        => $item->jabatan ?? '-',
                 'departemen'     => $item->departemen ?? '-',
@@ -34,6 +39,7 @@ class AdminController extends Controller
                 'tanggal_masuk'  => $item->tanggal_masuk,
                 'tanggal_lahir'  => $item->tanggal_lahir,
                 'jenis_kelamin'  => $item->jenis_kelamin,
+                'is_password_default' => $isPasswordDefault,
             ];
         });
 
@@ -128,41 +134,65 @@ class AdminController extends Controller
     }
     public function resetPassword($id)
     {
-        // Ambil user berdasarkan ID
-        $user = User::with('karyawan')->find($id);
+        Log::info("Reset password called for karyawan ID: $id");
+        
+        // Find Karyawan by ID, then get related User
+        $karyawan = Karyawan::find($id);
+        Log::info("Karyawan found:", ['karyawan' => $karyawan ? 'yes' : 'no']);
+
+        if (!$karyawan) {
+            Log::warning("Karyawan not found with ID: $id");
+            throw ValidationException::withMessages([
+                'error' => 'Data karyawan tidak ditemukan.'
+            ]);
+        }
+
+        $user = $karyawan->user;
+        Log::info("User found:", ['user' => $user ? 'yes' : 'no']);
 
         if (!$user) {
-            return response()->json([
-                'message' => 'User tidak ditemukan'
-            ], 404);
+            Log::warning("User not found for karyawan ID: $id");
+            throw ValidationException::withMessages([
+                'error' => 'User tidak ditemukan.'
+            ]);
         }
 
-        if ($user->id === auth()->id) {
-            return response()->json([
-                'message' => 'Tidak dapat mereset password sendiri'
-            ], 403);
+        Log::info("Checking if user is current user", ['current_user_id' => Auth::id(), 'target_user_id' => $user->id]);
+        
+        if ($user->id === Auth::id()) {
+            Log::warning("Attempting to reset own password");
+            throw ValidationException::withMessages([
+                'error' => 'Tidak dapat mereset password akun sendiri.'
+            ]);
         }
 
-        if (!$user->karyawan) {
-            return response()->json([
-                'message' => 'User tidak memiliki data karyawan'
-            ], 422);
+        if (!$karyawan->nip) {
+            Log::warning("Karyawan NIP is empty for ID: $id");
+            throw ValidationException::withMessages([
+                'error' => 'NIP karyawan tidak valid.'
+            ]);
         }
 
-        if (!$user->karyawan->nip) {
+        try {
+            Log::info("Updating password for user ID: " . $user->id . " with NIP: " . $karyawan->nip);
+            
+            $user->update([
+                'password' => bcrypt($karyawan->nip),
+            ]);
+
+            Log::info("Password reset successfully for user ID: " . $user->id);
+            
             return response()->json([
-                'message' => 'NIP karyawan kosong'
-            ], 422);
+                'message' => 'Password berhasil direset ke NIP.',
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Error resetting password: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Gagal mereset password: ' . $e->getMessage(),
+                'error' => 'Gagal mereset password: ' . $e->getMessage()
+            ], 500);
         }
-
-        $user->update([
-            'password' => bcrypt($user->karyawan->nip),
-
-        ]);
-
-        return response()->json([
-            'message' => 'Password berhasil direset ke NIP'
-        ]);
     }
 
     /* ========= ABSENSI ========= */
