@@ -26,7 +26,7 @@ class AdminController extends Controller
     public function indexKaryawan()
     {
         $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
-            $isPasswordDefault = $item->user && password_verify($item->nip, $item->user->password);
+            $isPasswordDefault = $item->user && password_verify($item->tanggal_lahir, $item->user->password);
 
             return [
                 'id'             => $item->id,
@@ -160,9 +160,9 @@ class AdminController extends Controller
             ]);
         }
 
-        if (!$karyawan->nip) {
+        if (!$karyawan->tanggal_lahir) {
             throw ValidationException::withMessages([
-                'error' => 'NIP karyawan tidak valid (kosong).'
+                'error' => 'Tanggal lahir karyawan tidak valid (kosong).'
             ]);
         }
 

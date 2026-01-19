@@ -1,6 +1,5 @@
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import KaryawanFormModal from '@/components/karyawan-form-modal';
-// Import Modal Pelanggaran
 import PelanggaranFormModal from '@/components/pelanggaran-form-modal';
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import WarningModal from '@/components/warning-modal';
@@ -35,11 +34,9 @@ export type Karyawan = {
 
 type PageProps = {
     karyawan: Karyawan[];
-    // Tambahkan prop ini dari Controller
     jenisPelanggaranList: { id: number; nama_pelanggaran: string }[];
 };
 
-// Destructure jenisPelanggaranList di sini
 export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: PageProps) {
 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -62,11 +59,9 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
     const [isResetting, setIsResetting] = useState(false);
 
-    // --- STATE UNTUK POPUP PELANGGARAN ---
     const [isSanksiModalOpen, setIsSanksiModalOpen] = useState(false);
     const [karyawanForSanksi, setKaryawanForSanksi] = useState<Karyawan | null>(null);
 
-    // --- LOGIKA BUKA POPUP SANKSI ---
     const handleAddSanksi = (item: Karyawan) => {
         setKaryawanForSanksi(item);
         setIsSanksiModalOpen(true);
@@ -121,7 +116,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const handleResetPasswordClick = (item: Karyawan) => {
         if (item.is_password_default) {
             setFailureTitle('Info');
-            setFailureMessage('Password karyawan ini sudah dalam kondisi default (NIP).');
+            setFailureMessage('Password karyawan ini sudah dalam kondisi default (Tanggal Lahir).');
             setShowFailureModal(true);
             return;
         }
@@ -138,24 +133,19 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
-                    // Tampilkan Modal Sukses
                     setSuccessTitle('Berhasil');
                     setSuccessMessage('Password karyawan berhasil direset ke NIP.');
                     setShowSuccessModal(true);
 
-                    // Refresh halaman otomatis
                     setTimeout(() => {
                         router.visit(window.location.pathname);
                     }, 1500);
                 },
                 onError: (errors) => {
-                    console.error('Error response:', errors);
                     setIsResetWarningOpen(false);
 
-                    // Ambil pesan error dari response
                     const pesanError = errors.error || errors.message || (typeof errors === 'object' ? Object.values(errors).flat().join(', ') : "Terjadi kesalahan saat mereset password.");
 
-                    // Tampilkan Modal Gagal
                     setFailureTitle('Gagal Reset');
                     setFailureMessage(pesanError);
                     setShowFailureModal(true);
@@ -259,7 +249,6 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                             </span>
                         </DropdownMenuItem>
 
-                        {/* TOMBOL ACTION TAMBAH SANKSI YANG SUDAH AKTIF */}
                         <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Plus className="h-4 w-4" />
                             <span className="font-medium">Tambah Sanksi</span>
@@ -308,7 +297,6 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 onSuccess={handleFormSuccess}
             />
 
-            {/* --- MODAL PELANGGARAN DIRENDER DI SINI --- */}
             <PelanggaranFormModal
                 isOpen={isSanksiModalOpen}
                 onClose={() => {
@@ -349,7 +337,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 onConfirm={executeResetPassword}
                 isLoading={isResetting}
                 title="Reset Password?"
-                message="Password karyawan akan direset ke password default sistem. Apakah Anda yakin ingin mereset password karyawan ini?"
+                message="Password karyawan akan direset ke tanggal lahir. Apakah Anda yakin ingin mereset password karyawan ini?"
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
