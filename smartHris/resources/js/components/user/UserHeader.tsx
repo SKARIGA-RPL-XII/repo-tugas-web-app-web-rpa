@@ -1,48 +1,46 @@
 import { usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import ProfileMenu from '@/components/profile-menu';
+import { useState } from 'react';
 
-export default function UserHeader() {
-  const { auth } = usePage<PageProps>().props;
-  const user = auth.user;
+export default function UserHeader({ className = "" }: { className?: string }) {
+    const { auth } = usePage<PageProps>().props;
+    const user = auth.user;
 
-  const now = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  };
-  const dateString = now.toLocaleDateString('id-ID', options);
+    const [currentDate] = useState(() => {
+        return new Date().toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    });
 
-  return (
-    <div className="relative mb-6 h-40 w-full"> 
-      
-      <div className="absolute inset-0 h-full w-full overflow-hidden rounded-3xl">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 hover:scale-105"
-          style={{
-            backgroundImage: "url('/images/img_bg.jpg')",
-          }}
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-[#0F4C3A] to-[#1B6B57]/80 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-black/10" />
-      </div>
+    return (
+        <div className={`relative h-24 w-full ${className}`}>
+            <div className="absolute inset-0 h-full w-full overflow-hidden rounded-2xl bg-[#0F172A] shadow-lg">
+                <div className="absolute inset-0 bg-linear-to-r from-blue-600/40 to-purple-600/40 mix-blend-overlay" />
+                <img 
+                    src="/images/img_bg.jpg" 
+                    alt="Header Background" 
+                    className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-multiply"
+                />
+            </div>
+            
+            <div className="relative z-10 flex h-full w-full items-center justify-between px-6 sm:px-8">
+                <div className="flex flex-col justify-center">
+                    <h1 className="text-xl font-bold text-white sm:text-2xl">
+                        Hi, {user.name}
+                    </h1>
+                    <p className="text-xs text-gray-200 sm:text-sm">
+                        {currentDate}
+                    </p>
+                </div>
 
-      <div className="relative z-10 flex h-full items-center justify-between px-8 py-8 text-white">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Halo, {user.name}! 👋
-          </h1>
-          <p className="text-sm font-medium opacity-90 capitalize">
-            {dateString}
-          </p>
+                <div className="flex items-center">
+                    <ProfileMenu />
+                </div>
+            </div>
         </div>
-
-        <div className="flex items-center">
-          <ProfileMenu />
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -22,7 +22,7 @@ export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
     const page = usePage<PageProps>();
     const auth = page.props.auth ?? { user: null };
-    const isActive = (path: string) => page.url.startsWith(path);
+    const isActive = (path: string) => page.url === path;
 
     const isAdmin = auth.user?.role === 'admin';
     const sidebarConfig = isAdmin
@@ -262,14 +262,6 @@ export default function Sidebar() {
                                         : ''
                                         }`}
                                 >
-                                    <Link href="/logout" method='post'>
-                                        <Icon
-                                            icon="mage:star-moving-fill"
-                                            width="24"
-                                            height="24"
-                                        />
-                                        <span>Logout</span>
-                                    </Link>
                                 </Button>
 
                             </>

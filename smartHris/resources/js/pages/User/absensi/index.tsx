@@ -1,10 +1,9 @@
-import Sidebar from '@/components/sidebar';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import UserHeader from '@/components/user/UserHeader';
 import { Head, useForm } from '@inertiajs/react';
 import { AlertCircle, Calendar, Camera, Clock } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Props {
     absensiHariIni?: {
@@ -41,6 +40,7 @@ export default function Index({
     } | null>(null);
     const [errorModal, setErrorModal] = useState<string | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const lastActionRef = useRef<'masuk' | 'pulang'>('masuk');
 
     const formMasuk = useForm({
         foto: null as File | null,
@@ -55,13 +55,26 @@ export default function Index({
         return () => clearInterval(timer);
     }, []);
 
-    // Handle flash messages from backend
     useEffect(() => {
         if (flash?.success) {
-            setSuccessModal({ type: 'masuk', message: flash.success });
+            const successMsg = flash.success;
+            
+            setSuccessModal((prev) => {
+                if (prev?.message === successMsg) return prev;
+                
+                return { 
+                    type: lastActionRef.current, 
+                    message: successMsg 
+                };
+            });
         }
+        
         if (flash?.error || errors?.message) {
-            setErrorModal(flash?.error || errors?.message || '');
+            const newErrorMessage = flash?.error || errors?.message || '';
+            setErrorModal((prev) => {
+                if (prev === newErrorMessage) return prev;
+                return newErrorMessage;
+            });
         }
     }, [flash, errors]);
 
@@ -98,16 +111,16 @@ export default function Index({
         input.accept = 'image/jpeg,image/jpg,image/png';
         input.capture = 'environment';
 
-        input.onchange = (e: any) => {
-            const file = e.target.files[0];
+        input.onchange = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
+
             if (file) {
-                // Validasi ukuran file (max 2MB)
                 if (file.size > 2048 * 1024) {
                     setErrorModal('Ukuran foto maksimal 2MB');
                     return;
                 }
 
-                // Validasi tipe file
                 if (
                     !['image/jpeg', 'image/jpg', 'image/png'].includes(
                         file.type,
@@ -140,6 +153,8 @@ export default function Index({
             return;
         }
 
+        lastActionRef.current = 'masuk';
+
         formMasuk.post('/absensi/masuk', {
             forceFormData: true,
             onSuccess: () => {
@@ -158,6 +173,8 @@ export default function Index({
             setErrorModal('Silakan ambil foto terlebih dahulu');
             return;
         }
+
+        lastActionRef.current = 'pulang';
 
         formPulang.post('/absensi/pulang', {
             forceFormData: true,
@@ -188,119 +205,112 @@ export default function Index({
     const currentTime = formatTime(time);
 
     return (
-        <div className="min-h-screen bg-white">
+        <AppLayout breadcrumbs={[{ title: 'Absensi', href: '/absensi' }]}>
             <Head title="Absensi" />
 
-            <Sidebar />
+            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-10">
+                <div className="flex flex-col items-center justify-between gap-12 border-b border-gray-100 pb-12 md:flex-row">
+                    <div className="text-center md:text-left">
+                        <h1 className="font-mono text-[80px] font-medium leading-none tracking-tight text-[#1a1a1a] sm:text-[100px] md:text-[120px]">
+                            {currentTime}
+                        </h1>
+                        <p className="mt-2 text-xl font-light text-gray-500">
+                            {formatDate(time)}
+                        </p>
+                    </div>
 
-            <div className="ml-64">
-                <UserHeader />
-
-                <main className="mx-auto mt-4 max-w-6xl p-10">
-                    <div className="flex flex-col items-center justify-between gap-12 border-b border-gray-100 pb-12 md:flex-row">
-                        <div className="text-center md:text-left">
-                            <h1 className="font-mono text-[100px] leading-none font-medium tracking-tight text-[#1a1a1a] md:text-[120px]">
-                                {currentTime}
-                            </h1>
-                            <p className="mt-2 text-xl font-light text-gray-500">
-                                {formatDate(time)}
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-10 text-sm md:text-base">
-                            <div className="space-y-3">
-                                <div className="flex gap-4">
-                                    <span className="w-20 text-right font-medium text-gray-500">
-                                        Status
-                                    </span>
-                                    <span className="font-semibold text-gray-700">
-                                        : {absensiHariIni?.status || '-'}
-                                    </span>
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="w-20 text-right font-medium text-gray-500">
-                                        Keterangan
-                                    </span>
-                                    <span className="font-semibold text-gray-700">
-                                        : {absensiHariIni?.keterangan || '-'}
-                                    </span>
-                                </div>
+                    <div className="flex items-center gap-10 text-sm md:text-base">
+                        <div className="space-y-3">
+                            <div className="flex gap-4">
+                                <span className="w-20 text-right font-medium text-gray-500">
+                                    Status
+                                </span>
+                                <span className="font-semibold text-gray-700">
+                                    : {absensiHariIni?.status || '-'}
+                                </span>
+                            </div>
+                            <div className="flex gap-4">
+                                <span className="w-20 text-right font-medium text-gray-500">
+                                    Keterangan
+                                </span>
+                                <span className="font-semibold text-gray-700">
+                                    : {absensiHariIni?.keterangan || '-'}
+                                </span>
                             </div>
 
-                            <div className="h-12 w-px bg-gray-200"></div>
+                            <div className="h-px w-full bg-gray-100 sm:hidden"></div>
+                        </div>
 
-                            <div className="space-y-3">
-                                <div className="flex gap-4">
-                                    <span className="w-16 text-right font-medium text-gray-500">
-                                        Datang
-                                    </span>
-                                    <span className="font-semibold text-gray-700">
-                                        : {absensiHariIni?.jamMasuk || '-'}
-                                    </span>
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="w-16 text-right font-medium text-gray-500">
-                                        Pulang
-                                    </span>
-                                    <span className="font-semibold text-gray-700">
-                                        : {absensiHariIni?.jamPulang || '-'}
-                                    </span>
-                                </div>
+                        <div className="hidden h-12 w-px bg-gray-200 sm:block"></div>
+
+                        <div className="space-y-3">
+                            <div className="flex gap-4">
+                                <span className="w-16 text-right font-medium text-gray-500">
+                                    Datang
+                                </span>
+                                <span className="font-semibold text-gray-700">
+                                    : {absensiHariIni?.jamMasuk || '-'}
+                                </span>
+                            </div>
+                            <div className="flex gap-4">
+                                <span className="w-16 text-right font-medium text-gray-500">
+                                    Pulang
+                                </span>
+                                <span className="font-semibold text-gray-700">
+                                    : {absensiHariIni?.jamPulang || '-'}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="mt-10 flex flex-wrap gap-4 md:flex-nowrap">
-                        <Button
-                            disabled={!canAbsenMasuk}
-                            onClick={() =>
-                                canAbsenMasuk && setModalType('masuk')
-                            }
-                            className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
-                                canAbsenMasuk
-                                    ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
-                                    : 'cursor-not-allowed bg-gray-100 text-gray-400'
-                            }`}
-                        >
-                            Absen
-                        </Button>
+                <div className="mt-10 flex flex-wrap gap-4 md:flex-nowrap">
+                    <Button
+                        disabled={!canAbsenMasuk}
+                        onClick={() =>
+                            canAbsenMasuk && setModalType('masuk')
+                        }
+                        className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
+                            canAbsenMasuk
+                                ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
+                                : 'cursor-not-allowed bg-gray-100 text-gray-400'
+                        }`}
+                    >
+                        Absen
+                    </Button>
 
-                        <Button
-                            disabled={!canAbsenPulang}
-                            onClick={() =>
-                                canAbsenPulang && setModalType('pulang')
-                            }
-                            className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
-                                canAbsenPulang
-                                    ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
-                                    : 'cursor-not-allowed bg-gray-100 text-gray-400'
-                            }`}
-                        >
-                            Pulang
-                        </Button>
+                    <Button
+                        disabled={!canAbsenPulang}
+                        onClick={() =>
+                            canAbsenPulang && setModalType('pulang')
+                        }
+                        className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
+                            canAbsenPulang
+                                ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
+                                : 'cursor-not-allowed bg-gray-100 text-gray-400'
+                        }`}
+                    >
+                        Pulang
+                    </Button>
 
-                        <Button
-                            disabled={!canCuti}
-                            className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
-                                canCuti
-                                    ? 'bg-[#D1D5DB] text-gray-800 hover:bg-gray-400'
-                                    : 'cursor-not-allowed bg-gray-100 text-gray-400'
-                            }`}
-                        >
-                            Cuti
-                        </Button>
-                    </div>
-                </main>
+                    <Button
+                        disabled={!canCuti}
+                        className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
+                            canCuti
+                                ? 'bg-[#D1D5DB] text-gray-800 hover:bg-gray-400'
+                                : 'cursor-not-allowed bg-gray-100 text-gray-400'
+                        }`}
+                    >
+                        Cuti
+                    </Button>
+                </div>
             </div>
-
-            {/* Modal Absen Datang */}
             <Dialog
                 open={modalType === 'masuk'}
                 onOpenChange={handleCloseModal}
             >
                 <DialogContent className="max-w-md gap-0 overflow-hidden rounded-xl border-none p-0">
                     <div className="p-8 pb-6">
-                        {/* Header: Logo & Title Row */}
                         <div className="mb-8 flex items-start justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#0D4838]">
@@ -328,7 +338,6 @@ export default function Index({
                         </div>
 
                         <div className="space-y-5">
-                            {/* Kamera Section */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Kamera{' '}
@@ -338,7 +347,7 @@ export default function Index({
                                     onClick={() => handlePhotoCapture('masuk')}
                                     className="flex h-24 flex-1 cursor-pointer items-center gap-4 rounded-xl border border-gray-200 bg-white px-4 shadow-sm transition-colors hover:bg-gray-50"
                                 >
-                                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gray-100">
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-100">
                                         <Camera className="h-6 w-6 text-gray-600" />
                                     </div>
                                     <div className="flex flex-col">
@@ -362,7 +371,6 @@ export default function Index({
                                 </div>
                             </div>
 
-                            {/* Tanggal Input */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Tanggal{' '}
@@ -381,7 +389,6 @@ export default function Index({
                                 </div>
                             </div>
 
-                            {/* Waktu Input */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Waktu{' '}
@@ -402,7 +409,6 @@ export default function Index({
                         </div>
                     </div>
 
-                    {/* Footer Buttons */}
                     <div className="flex gap-4 p-8 pt-4">
                         <Button
                             onClick={handleCloseModal}
@@ -422,14 +428,12 @@ export default function Index({
                 </DialogContent>
             </Dialog>
 
-            {/* Modal Absen Pulang */}
             <Dialog
                 open={modalType === 'pulang'}
                 onOpenChange={handleCloseModal}
             >
                 <DialogContent className="max-w-md gap-0 overflow-hidden rounded-xl border-none p-0">
                     <div className="p-8 pb-6">
-                        {/* Header Section */}
                         <div className="mb-10 flex items-start justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#0D4838]">
@@ -457,7 +461,6 @@ export default function Index({
                         </div>
 
                         <div className="space-y-6">
-                            {/* Kamera Section */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Kamera{' '}
@@ -465,9 +468,9 @@ export default function Index({
                                 </label>
                                 <div
                                     onClick={() => handlePhotoCapture('pulang')}
-                                    className="flex h-[88px] flex-1 cursor-pointer items-center gap-4 rounded-2xl border border-gray-200 bg-white px-4 transition-colors hover:bg-gray-50"
+                                    className="flex h-22 flex-1 cursor-pointer items-center gap-4 rounded-2xl border border-gray-200 bg-white px-4 transition-colors hover:bg-gray-50"
                                 >
-                                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gray-100">
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-100">
                                         <Camera className="h-6 w-6 text-gray-600" />
                                     </div>
                                     <div className="flex flex-col justify-center">
@@ -486,7 +489,6 @@ export default function Index({
                                 </div>
                             </div>
 
-                            {/* Tanggal Section */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Tanggal{' '}
@@ -505,7 +507,6 @@ export default function Index({
                                 </div>
                             </div>
 
-                            {/* Waktu Section */}
                             <div className="flex items-center gap-4">
                                 <label className="w-20 text-sm font-bold text-gray-700">
                                     Waktu{' '}
@@ -526,7 +527,6 @@ export default function Index({
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-4 p-8 pt-6">
                         <Button
                             onClick={handleCloseModal}
@@ -601,6 +601,6 @@ export default function Index({
                     </Button>
                 </DialogContent>
             </Dialog>
-        </div>
+        </AppLayout>
     );
 }
