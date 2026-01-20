@@ -51,7 +51,12 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
     const baseUrl = '/riwayat-absensi';
 
     const handleFilter = () => {
-        router.get(baseUrl, params, {
+        // Membersihkan parameter kosong sebelum dikirim ke server
+        const filteredParams = Object.fromEntries(
+            Object.entries(params).filter(([_, value]) => value !== "")
+        );
+
+        router.get(baseUrl, filteredParams, {
             preserveState: true,
             replace: true,
         });
@@ -65,7 +70,12 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
     const removeFilter = (key: keyof typeof params) => {
         const newParams = { ...params, [key]: '' };
         setParams(newParams);
-        router.get(baseUrl, newParams);
+        
+        // Langsung arahkan ke URL baru dengan parameter yang sudah dihapus
+        const filteredParams = Object.fromEntries(
+            Object.entries(newParams).filter(([_, value]) => value !== "")
+        );
+        router.get(baseUrl, filteredParams);
     };
 
     const getMonthName = (value: string) => {
