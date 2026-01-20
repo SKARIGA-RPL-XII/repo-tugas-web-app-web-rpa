@@ -133,7 +133,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     setKaryawanToReset(null);
 
                     setSuccessTitle('Berhasil');
-                    setSuccessMessage('Password karyawan berhasil direset ke NIP.');
+                    setSuccessMessage('Password karyawan berhasil direset ke Tanggal lahir.');
                     setShowSuccessModal(true);
 
                     setTimeout(() => {
