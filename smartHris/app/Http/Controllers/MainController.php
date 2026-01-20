@@ -17,7 +17,6 @@ class MainController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
         Carbon::setLocale('id');
         $today = Carbon::now();
 
@@ -28,16 +27,10 @@ class MainController extends Controller
             $pengajuanCuti = Cuti::where('status', 'pending')->count();
             $sanksiAktif = SuratPeringatan::distinct('karyawan_id')->count('karyawan_id');
 
-            $attendanceWeekly = Absensi::select(
-                DB::raw('DATE(tanggal) as date'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereBetween('tanggal', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
-            ->groupBy('date')->orderBy('date')->get()
-            ->map(fn($item) => [
-                'date'  => Carbon::parse($item->date)->format('d M'),
-                'value' => $item->total,
-            ]);
+            $attendanceWeekly = Absensi::select(DB::raw('DATE(tanggal) as date'), DB::raw('COUNT(*) as total'))
+                ->whereBetween('tanggal', [Carbon::now()->subDays(6)->startOfDay(), Carbon::now()->endOfDay()])
+                ->groupBy('date')->orderBy('date')->get()
+                ->map(fn($item) => ['date' => Carbon::parse($item->date)->format('d M'), 'value' => $item->total]);
 
             $statusRaw = Absensi::select('status', DB::raw('COUNT(*) as total'))
                 ->groupBy('status')->pluck('total', 'status');
@@ -63,73 +56,71 @@ class MainController extends Controller
         $karyawan = $user->karyawan;
         
         if (!$karyawan) {
-            return Inertia::render('dashboard', [
-                'role' => 'user', 
-                'error' => 'Data Karyawan tidak ditemukan.'
-            ]);
+            return Inertia::render('dashboard', ['role' => 'user', 'user' => ['name' => $user->name]]);
         }
 
         $bulanIni = $today->month;
         $tahunIni = $today->year;
+        
+        $jumlahHadir = Absensi::where('karyawan_id', $karyawan->id)
+            ->whereMonth('tanggal', $bulanIni)
+            ->whereYear('tanggal', $tahunIni)
+            ->where('status', 'hadir')
+            ->count();
 
-        $totalHariKerja = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->count();
-        $jumlahHadir = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->where('status', 'hadir')->count();
-        $jumlahTerlambat = Absensi::where('karyawan_id', $karyawan->id)->whereMonth('tanggal', $bulanIni)->whereYear('tanggal', $tahunIni)->where('keterangan', 'like', '%Terlambat%')->count();
-        $jumlahCuti = Cuti::where('karyawan_id', $karyawan->id)->where('status', 'approved')->whereMonth('tanggal_mulai', $bulanIni)->count();
+        $batasJamMasuk = '08:00:00'; 
+        
+        $jumlahTerlambat = Absensi::where('karyawan_id', $karyawan->id)
+            ->whereMonth('tanggal', $bulanIni)
+            ->whereYear('tanggal', $tahunIni)
+            ->where('status', 'hadir')
+            ->whereTime('jam_masuk', '>', $batasJamMasuk)
+            ->count();
 
-        $rawAttendance = Absensi::select(
-            DB::raw('MONTH(tanggal) as month'),
-            DB::raw('COUNT(*) as total')
-        )
+        $jumlahCuti = Cuti::where('karyawan_id', $karyawan->id)
+            ->where('status', 'approved')
+            ->whereMonth('tanggal_mulai', $bulanIni)
+            ->count();
+
+        $totalHariKerja = Absensi::where('karyawan_id', $karyawan->id)
+            ->whereMonth('tanggal', $bulanIni)
+            ->whereYear('tanggal', $tahunIni)
+            ->count();
+
+
+        $rawAttendance = Absensi::select(DB::raw('MONTH(tanggal) as bulan'), DB::raw('COUNT(*) as total'))
             ->where('karyawan_id', $karyawan->id)
             ->whereYear('tanggal', $tahunIni)
-            ->groupBy('month')
-            ->pluck('total', 'month')
-            ->toArray();
+            ->groupBy('bulan')->pluck('total', 'bulan')->toArray();
 
-        $months = [
-            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 
-            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu', 
-            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
-        ];
-
+        $months = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'];
         $grafikKehadiran = [];
         foreach ($months as $idx => $name) {
-            $grafikKehadiran[] = [
-                'name' => $name,
-                'value' => $rawAttendance[$idx] ?? 0
-            ];
+            $grafikKehadiran[] = ['bulan' => $name, 'value' => $rawAttendance[$idx] ?? 0];
         }
-
         
-        $absenDB = Absensi::where('karyawan_id', $karyawan->id)
-            ->whereDate('tanggal', $today->format('Y-m-d')) 
-            ->first();
-
+        $absenDB = Absensi::where('karyawan_id', $karyawan->id)->whereDate('tanggal', $today->format('Y-m-d'))->first();
+        
         $absenHariIni = [
-            'status'        => 'Belum Hadir',
-            'jamMasuk'      => '-- : --',
-            'jamPulang'     => '-- : --',
+            'status' => 'Belum Hadir',
+            'jamMasuk' => '-- : --',
+            'jamPulang' => '-- : --',
             'keterlambatan' => '-',
-            'tanggal'       => $today->translatedFormat('l, d F Y'), // Format Bahasa Indonesia
+            'tanggal' => $today->translatedFormat('l, d F Y'),
         ];
 
         if ($absenDB) {
             $keterlambatan = '-';
-            $jamJadwalMasuk = '08:00:00';
             if ($absenDB->jam_masuk) {
                 $masuk = Carbon::parse($absenDB->jam_masuk);
-                $jadwal = Carbon::parse($jamJadwalMasuk);
-                
-                // Jika masuk > jadwal, hitung selisih
+                $jadwal = Carbon::parse($batasJamMasuk);
                 if ($masuk->gt($jadwal)) {
-                    $selisih = $masuk->diffInMinutes($jadwal);
-                    $keterlambatan = $selisih . ' Menit';
+                    $keterlambatan = $masuk->diffInMinutes($jadwal) . ' Menit';
                 }
             }
 
             $absenHariIni = [
-                'status'        => ucfirst($absenDB->status), 
+                'status'        => ucfirst($absenDB->status),
                 'jamMasuk'      => $absenDB->jam_masuk ? Carbon::parse($absenDB->jam_masuk)->format('H : i') : '-- : --',
                 'jamPulang'     => $absenDB->jam_pulang ? Carbon::parse($absenDB->jam_pulang)->format('H : i') : '-- : --',
                 'keterlambatan' => $keterlambatan,
@@ -142,24 +133,17 @@ class MainController extends Controller
             'user' => ['name' => $user->name],
             
             'statistik' => [
-                'hadir' => ['total' => $jumlahHadir, 'hariKerja' => $totalHariKerja],
+                'hadir'     => ['total' => $jumlahHadir, 'hariKerja' => $totalHariKerja],
                 'terlambat' => ['total' => $jumlahTerlambat, 'hariKerja' => $totalHariKerja],
-                'cuti' => ['total' => $jumlahCuti, 'hariKerja' => $totalHariKerja],
+                'cuti'      => ['total' => $jumlahCuti, 'hariKerja' => $totalHariKerja],
             ],
 
             'grafikKehadiran' => $grafikKehadiran,
-
-            // Kirim data yang sudah fix
-            'absenHariIni' => $absenHariIni,
-
-            'jadwalKerja' => [
-                'jamDatang' => '08 : 00',
-                'jamPulang' => '17 : 00',
-            ],
-            
-            'tanggalHariIni' => $today->translatedFormat('l, d F Y'),
-            'bulanAktif' => $today->translatedFormat('F Y'),
-            'tanggalAktif' => $today->day,
+            'absenHariIni'    => $absenHariIni,
+            'jadwalKerja'     => ['datang' => '08 : 00', 'pulang' => '17 : 00'],
+            'tanggalHariIni'  => $today->translatedFormat('l, d F Y'),
+            'bulanAktif'      => $today->translatedFormat('F Y'),
+            'tanggalAktif'    => $today->day,
         ]);
     }
 }
