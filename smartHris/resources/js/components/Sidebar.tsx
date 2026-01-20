@@ -43,7 +43,7 @@ export default function Sidebar() {
 
     return (
         <>
-            <div className={`fixed top-0 left-0 right-0 h-16 ${sidebarConfig.bg} z-40 flex items-center justify-between px-4 md:hidden`}>
+            <div className={`fixed top-0 left-0 right-0 h-16 ${sidebarConfig.bg} z-50 flex items-center justify-between px-4 md:hidden`}>
                 <img
                     src={sidebarConfig.logo}
                     alt="SmartHRIS Logo"
