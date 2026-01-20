@@ -7,11 +7,6 @@ use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| GUEST
-|--------------------------------------------------------------------------
-*/
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest.redirect')->name('home');
@@ -30,17 +25,10 @@ Route::middleware(['auth'])->group(function () {
     // --- ADMIN ROUTES ---
     Route::middleware(['role:admin'])->group(function () {
 
-        // ===================== KARYAWAN =====================
-        Route::get('/karyawan', [AdminController::class, 'indexKaryawan'])->name('admin.karyawan');
-        Route::post('/karyawan', [AdminController::class, 'storeKaryawan'])->name('admin.karyawan.store');
-        Route::put('/karyawan/{id}', [AdminController::class, 'updateKaryawan'])->name('admin.karyawan.update');
-        Route::put('/karyawan/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.karyawan.reset-password');
-        Route::delete('/karyawan/{id}', [AdminController::class, 'destroyKaryawan'])->name('admin.karyawan.destroy');
-
-        // KARYAWAN
-        Route::controller(AdminController::class)->group(function() {
+        Route::controller(AdminController::class)->group(function () {
             Route::get('/app/karyawan', 'indexKaryawan')->name('admin.karyawan');
             Route::post('/app/karyawan', 'storeKaryawan')->name('admin.karyawan.store');
+            Route::post('/app/karyawan/{id}', 'updateKaryawan')->name('admin.karyawan.update');
             Route::put('/app/karyawan/{id}', 'updateKaryawan')->name('admin.karyawan.update');
             Route::put('/app/karyawan/{id}/reset-password', 'resetPassword')->name('admin.karyawan.reset-password');
             Route::delete('/app/karyawan/{id}', 'destroyKaryawan')->name('admin.karyawan.destroy');
@@ -83,15 +71,12 @@ Route::middleware(['auth'])->group(function () {
 
     // --- USER ROUTES ---
     Route::middleware(['role:user'])->group(function () {
-        Route::controller(UserController::class)->group(function() {
-            // Absensi User
+        Route::controller(UserController::class)->group(function () {
             Route::get('/absensi', 'absensi')->name('user.absensi');
             Route::post('/absensi/masuk', 'masukStore')->name('user.absensi.masuk');
             Route::post('/absensi/pulang', 'pulangStore')->name('user.absensi.pulang');
-            Route::get('/riwayat-absensi', 'riwayat')->name('user.riwayat-absensi');
-
-            // Fitur User Lainnya
-            Route::get('/pelanggaran', 'index')->name('user.pelanggaran');
+            Route::get('/absensi/riwayat', 'riwayat')->name('user.absensi.riwayat');
+            Route::get('/pelanggaran', 'pelanggaran')->name('user.pelanggaran');
             Route::get('/cuti', 'cuti')->name('user.cuti');
             Route::post('/cuti', 'cutiStore')->name('user.cuti.store');
         });

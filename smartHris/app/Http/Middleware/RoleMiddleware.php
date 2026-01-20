@@ -19,7 +19,6 @@ class RoleMiddleware
             return redirect()->route('home');
         }
 
-        // Jika role tidak sesuai → 403 (AMAN UNTUK INERTIA)
         if (!in_array(auth()->user()->role, $roles)) {
             abort(403, 'Unauthorized');
         }
