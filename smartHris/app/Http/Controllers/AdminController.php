@@ -110,7 +110,6 @@ class AdminController extends Controller
 
         return redirect()->route('admin.karyawan')->with('success', 'Karyawan berhasil ditambahkan');
     }
-
     public function updateKaryawan(Request $request, $id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -267,14 +266,11 @@ class AdminController extends Controller
             'cutiData' => $cutiData,
         ]);
     }
-
-
     public function approveCuti($id)
     {
         Cuti::findOrFail($id)->update(['status' => 'disetujui']);
         return redirect()->route('admin.cuti');
     }
-
     public function rejectCuti($id)
     {
         Cuti::findOrFail($id)->update(['status' => 'ditolak']);
@@ -424,22 +420,56 @@ class AdminController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $create = PelanggaranKaryawan::create([
-            'karyawan_id' => $request->karyawan_id,
-            'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
-            'tanggal' => now()->toDateString(),
-            'catatan' => $request->catatan,
-        ]);
-        if ((int) $request->sp != 0) {
-            SuratPeringatan::create([
+        DB::beginTransaction();
+
+        try {
+            // simpan pelanggaran
+            $pelanggaran = PelanggaranKaryawan::create([
                 'karyawan_id' => $request->karyawan_id,
-                'pelanggaran_karyawan_id' => $create->id,
-                'tanggal' => $request->tanggal,
-                'isi_pernyataan' => $request->catatan,
+                'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
+                'tanggal' => now()->toDateString(),
+                'catatan' => $request->catatan,
             ]);
-        }
-        if ($create) {
+
+            if ($request->filled('sp')) {
+
+                $bulan = now()->format('m');
+
+                $lastSp = SuratPeringatan::whereMonth('tanggal_terbit', now()->month)->whereYear('tanggal_terbit', now()->year)->orderBy('id', 'desc')->first();
+
+                $urut = 1;
+
+                if ($lastSp) {
+                    $lastNumber = intval(substr($lastSp->nomor_sp, -3));
+                    $urut = $lastNumber + 1;
+                }
+
+                $nomorSp = 'SP-' . $bulan . '-' . str_pad($urut, 3, '0', STR_PAD_LEFT);
+
+                $sp = SuratPeringatan::create([
+                    'karyawan_id' => $request->karyawan_id,
+                    'pelanggaran_karyawan_id' => $pelanggaran->id,
+                    'nomor_sp' => $nomorSp,
+                    'tanggal_terbit' => now()->toDateString(),
+                    'isi_pernyataan' => $request->catatan,
+                    'jenis_sp' => $request->sp,
+                ]);
+
+                if (!$sp) {
+                    throw new \Exception('SP gagal disimpan');
+                }
+            }
+
+
+            DB::commit();
+
             return redirect()->back()->with('success', 'Pelanggaran berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan data. Surat Peringatan tidak berhasil disimpan.');
         }
         dd($create);
     }

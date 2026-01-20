@@ -127,14 +127,39 @@ class DatabaseSeeder extends Seeder
 
         $pelanggaranList = PelanggaranKaryawan::all();
 
-        foreach ($pelanggaranList as $i => $pel) {
+        $counterPerBulan = [];
+
+        foreach ($pelanggaranList as $pel) {
+
+            // skip jika sudah punya SP
+            if (SuratPeringatan::where('pelanggaran_karyawan_id', $pel->id)->exists()) {
+                continue;
+            }
+
+            $tanggalTerbit = Carbon::parse($pel->tanggal)->addDay();
+            $bulan = $tanggalTerbit->format('m');
+            $tahun = $tanggalTerbit->format('Y');
+
+            $key = $bulan . '-' . $tahun;
+
+            // inisialisasi counter per bulan
+            if (!isset($counterPerBulan[$key])) {
+                $counterPerBulan[$key] = SuratPeringatan::whereMonth('tanggal_terbit', $bulan)
+                    ->whereYear('tanggal_terbit', $tahun)
+                    ->count();
+            }
+
+            $counterPerBulan[$key]++;
+
+            $nomorSp = 'SP-' . $bulan . '-' . str_pad($counterPerBulan[$key], 3, '0', STR_PAD_LEFT);
+
             SuratPeringatan::create([
                 'karyawan_id' => $pel->karyawan_id,
                 'pelanggaran_karyawan_id' => $pel->id,
-                'nomor_sp' => 'SP-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
-                'jenis_sp' => $i % 2 === 0 ? 'SP1' : 'SP2',
+                'nomor_sp' => $nomorSp,
+                'jenis_sp' => $counterPerBulan[$key] % 2 === 0 ? 'SP2' : 'SP1',
                 'isi_pernyataan' => 'Karyawan berjanji memperbaiki kedisiplinan',
-                'tanggal_terbit' => Carbon::parse($pel->tanggal)->addDay(),
+                'tanggal_terbit' => $tanggalTerbit,
             ]);
         }
 

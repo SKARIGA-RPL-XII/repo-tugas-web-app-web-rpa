@@ -25,7 +25,6 @@ class AuthController extends Controller
         $user = auth()->user();
         return redirect()->route('dashboard');
     }
-
     public function destroy(Request $request)
     {
         Auth::logout();
