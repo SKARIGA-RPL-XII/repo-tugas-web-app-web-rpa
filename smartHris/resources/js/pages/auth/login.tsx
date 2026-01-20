@@ -1,12 +1,11 @@
 import InputError from '@/components/input-error'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import AuthLayout from '@/layouts/auth-layout'
 
-import { Head, useForm, Link } from '@inertiajs/react'
+import { Head, useForm } from '@inertiajs/react'
 
 interface LoginProps {
   status?: string
@@ -14,7 +13,7 @@ interface LoginProps {
   canRegister: boolean
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status }: LoginProps) {
   const { data, setData, post, processing, errors, reset } = useForm({
     email: '',
     password: '',
@@ -34,7 +33,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
       <Head title="Login" />
 
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[530px_1fr]">
-        {/* LEFT */}
         <div className="hidden lg:block relative m-6 rounded-3xl overflow-hidden">
           <img
             src="/images/img_bg.jpg"
@@ -52,7 +50,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
           </div>
         </div>
 
-        {/* RIGHT */}
         <div className="flex items-center justify-center px-6">
           <div className="w-full max-w-md">
             <img
@@ -75,6 +72,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               <div className="mb-4">
                 <Label>Email</Label>
                 <Input
+                  placeholder='Masukkan Email'
                   value={data.email}
                   onChange={(e) => setData('email', e.target.value)}
                 />
@@ -84,32 +82,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
               <div className="mb-4">
                 <Label>Password</Label>
                 <Input
+                  placeholder='Masukkan Password'
                   type="password"
                   value={data.password}
                   onChange={(e) => setData('password', e.target.value)}
                 />
                 <InputError message={errors.password} />
-              </div>
-
-              <div className="flex justify-between mb-6">
-                <label className="flex items-center gap-2">
-                  <Checkbox
-                    checked={data.remember}
-                    onCheckedChange={(v) =>
-                      setData('remember', Boolean(v))
-                    }
-                  />
-                  Ingat Saya
-                </label>
-
-                {canResetPassword && (
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-emerald-700"
-                  >
-                    Lupa Password?
-                  </Link>
-                )}
               </div>
 
               <Button

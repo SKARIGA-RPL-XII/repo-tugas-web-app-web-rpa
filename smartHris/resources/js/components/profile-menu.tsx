@@ -69,22 +69,32 @@ export default function ProfileMenu() {
                 <button
                     type="button"
                     onClick={() => setOpen(!open)}
-                    className={`group flex items-center gap-2 rounded-full p-1 pl-1 pr-3 bg-white border border-gray-200 shadow-sm transition-all duration-200 focus:outline-none ${open ? 'ring-2 ring-gray-200' : 'hover:shadow-md'}`}>
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm overflow-hidden border border-gray-200">
+                    className={`
+        flex items-center gap-2 rounded-full bg-white px-3 py-1.5
+        border border-gray-200 shadow-sm
+        transition-all duration-200
+        ${open ? 'ring-2 ring-gray-200' : 'hover:shadow-md'}
+    `}
+                >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 overflow-hidden border">
                         <img
-                            src={avatar || "/profile.png"}
+                            src={avatar || '/profile.png'}
                             alt={name}
                             className="h-full w-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/profile.png'; }}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/profile.png'
+                            }}
                         />
                     </div>
 
+                    <span className="text-sm font-medium text-gray-800">
+                        {auth.user.role === 'admin' ? 'Hi, Admin' : ``}
+                    </span>
+
                     <ChevronDown
-                        className={`h-4 w-4 text-gray-600 group-hover:text-gray-800 transition-all duration-300 ${open ? 'rotate-180' : ''
+                        className={`h-4 w-4 text-gray-600 transition-transform ${open ? 'rotate-180' : ''
                             }`}
                     />
-
                 </button>
 
                 {open && (
