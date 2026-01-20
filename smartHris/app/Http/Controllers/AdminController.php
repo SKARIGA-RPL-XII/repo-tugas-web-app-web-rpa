@@ -395,31 +395,32 @@ class AdminController extends Controller
 public function pKaryawan()
 {
     return Inertia::render('Admin/pelanggaran/index', [
-        'pelanggaran' => PelanggaranKaryawan::with([
-            'karyawan.user',
-            'jenisPelanggaran'
-        ])->get()->map(function ($p) {
+        'pelanggaran' => PelanggaranKaryawan::with(['karyawan.user', 'jenisPelanggaran'])->get()->map(function ($p) {
             return [
-                'id' => $p->id,
+                'id' => $p->id, 
                 'tanggal' => $p->tanggal,
+                'catatan' => $p->catatan,
+                'sp' => $p->sp,
                 'karyawan' => [
+                    'id' => $p->karyawan_id, 
                     'nama' => $p->karyawan->user->name,
                     'jabatan' => $p->karyawan->jabatan,
                     'departemen' => $p->karyawan->departemen,
                 ],
                 'jenis_pelanggaran' => [
+                    'id' => $p->jenis_pelanggaran_id,
                     'nama' => $p->jenisPelanggaran->nama_pelanggaran,
                 ],
             ];
         }),
-
-        // 🔥 INI YANG PENTING
-        'jenisPelanggaran' => JenisPelanggaran::get()->map(function ($j) {
+        'jenisPelanggaran' => JenisPelanggaran::all(),
+        // TAMBAHKAN INI:
+        'karyawanList' => Karyawan::with('user')->get()->map(function($k) {
             return [
-                'id' => $j->id,
-                'nama_pelanggaran' => $j->nama_pelanggaran,
-                'tingkat' => $j->tingkat,
-                'keterangan' => $j->keterangan,
+                'id' => $k->id,
+                'nama' => $k->user->name,
+                'jabatan' => $k->jabatan,
+                'departemen' => $k->departemen
             ];
         }),
     ]);
