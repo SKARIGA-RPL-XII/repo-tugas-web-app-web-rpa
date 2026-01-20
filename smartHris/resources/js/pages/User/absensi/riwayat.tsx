@@ -77,7 +77,6 @@ export default function RiwayatAbsensi({ auth, absensi, filters }: AbsensiProps)
                 <UserHeader  />
 
                 <main className="p-8 space-y-6">
-                    {/* Filter & Search Bar */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex flex-wrap items-center gap-2">
                             <div className="relative">
