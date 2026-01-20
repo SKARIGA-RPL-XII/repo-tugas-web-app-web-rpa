@@ -440,6 +440,14 @@ class AdminController extends Controller
             'tanggal' => $request->tanggal,
             'catatan' => $request->catatan,
         ]);
+        if ((int) $request->sp === 1) {
+            SuratPeringatan::create([
+                'karyawan_id' => $request->karyawan_id,
+                'pelanggaran_karyawan_id' => $create->id,
+                'tanggal' => $request->tanggal,
+                'isi_pernyataan' => $request->catatan,
+            ]);
+        }
         if ($create) {
             return redirect()->back()->with('success', 'Pelanggaran berhasil ditambahkan');
         }
