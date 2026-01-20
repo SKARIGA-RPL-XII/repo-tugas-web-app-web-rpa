@@ -297,47 +297,50 @@ class UserController extends Controller
                 'sanksi' => $item->keterangan ?? '-',
             ]),
             // Pastikan ini dikirim balik untuk menjaga state dropdown/input search
-            'filters' => $request->only(['bulan', 'tingkat_pelanggaran', 'search'
+            'filters' => $request->only([
+                'bulan',
+                'tingkat_pelanggaran',
+                'search'
             ]),
         ]);
     }
-   public function cuti(Request $request)
-{
-    $query = Cuti::query()
-        ->where('karyawan_id', auth()->user()->karyawan->id);
+    public function cuti(Request $request)
+    {
+        $query = Cuti::query()
+            ->where('karyawan_id', auth()->user()->karyawan->id);
 
-    if ($request->filled('bulan')) {
-        $query->whereMonth('created_at', substr($request->bulan, 5, 2))
-              ->whereYear('created_at', substr($request->bulan, 0, 4));
+        if ($request->filled('bulan')) {
+            $query->whereMonth('created_at', substr($request->bulan, 5, 2))
+                ->whereYear('created_at', substr($request->bulan, 0, 4));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('alasan', 'like', '%' . $request->search . '%');
+        }
+
+        // Ambil data dengan pagination
+        $cuti = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        // PERBAIKAN DI SINI:
+        return Inertia::render('User/cuti', [
+            'auth' => ['user' => auth()->user()],
+            'cuti' => $cuti->through(fn($item) => [
+                'id' => $item->id,
+                // Kita beri nama 'tanggal_pengajuan' agar sesuai dengan Interface di React
+                'tanggal_pengajuan' => $item->created_at->format('d F Y'),
+                // Kita gabungkan mulai & selesai menjadi satu string 'tanggal_cuti'
+                'tanggal_cuti' => Carbon::parse($item->tanggal_mulai)->format('d M') . ' - ' . Carbon::parse($item->tanggal_selesai)->format('d M Y'),
+                'jumlah_hari' => $item->jumlah_hari,
+                'alasan' => $item->alasan,
+                'status' => $item->status,
+            ]),
+            'filters' => $request->only(['bulan', 'status', 'search']),
+        ]);
     }
-
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    if ($request->filled('search')) {
-        $query->where('alasan', 'like', '%' . $request->search . '%');
-    }
-
-    // Ambil data dengan pagination
-    $cuti = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
-
-    // PERBAIKAN DI SINI:
-   return Inertia::render('User/cuti', [
-    'auth' => ['user' => auth()->user()],
-    'cuti' => $cuti->through(fn($item) => [
-        'id' => $item->id,
-        // Kita beri nama 'tanggal_pengajuan' agar sesuai dengan Interface di React
-        'tanggal_pengajuan' => $item->created_at->format('d F Y'), 
-        // Kita gabungkan mulai & selesai menjadi satu string 'tanggal_cuti'
-        'tanggal_cuti' => \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M') . ' - ' . \Carbon\Carbon::parse($item->tanggal_selesai)->format('d M Y'),
-        'jumlah_hari' => $item->jumlah_hari,
-        'alasan' => $item->alasan,
-        'status' => $item->status,
-    ]),
-    'filters' => $request->only(['bulan', 'status', 'search']),
-]);
-}
     public function cutiStore(Request $request)
     {
         $request->validate([
