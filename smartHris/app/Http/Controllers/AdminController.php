@@ -440,7 +440,7 @@ class AdminController extends Controller
             'tanggal' => $request->tanggal,
             'catatan' => $request->catatan,
         ]);
-        if ((int) $request->sp === 1) {
+        if ((int) $request->sp != 0) {
             SuratPeringatan::create([
                 'karyawan_id' => $request->karyawan_id,
                 'pelanggaran_karyawan_id' => $create->id,
