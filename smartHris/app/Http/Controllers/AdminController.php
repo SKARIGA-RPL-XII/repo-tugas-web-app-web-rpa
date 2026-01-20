@@ -430,6 +430,14 @@ class AdminController extends Controller
             'tanggal' => now()->toDateString(),
             'catatan' => $request->catatan,
         ]);
+        if ((int) $request->sp != 0) {
+            SuratPeringatan::create([
+                'karyawan_id' => $request->karyawan_id,
+                'pelanggaran_karyawan_id' => $create->id,
+                'tanggal' => $request->tanggal,
+                'isi_pernyataan' => $request->catatan,
+            ]);
+        }
         if ($create) {
             return redirect()->back()->with('success', 'Pelanggaran berhasil ditambahkan');
         }
