@@ -1,7 +1,6 @@
 import DynamicTable, { ColumnDef } from '@/components/dynamic-table';
 import KaryawanFormModal from '@/components/karyawan-form-modal';
-// Import Modal Pelanggaran
-import PelanggaranFormModal from '@/components/pelanggaran-form-modal'; 
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal';
 import ConfirmDeleteModal from '@/components/confirm-delete-modal';
 import WarningModal from '@/components/warning-modal';
 import SuccessModal from '@/components/success-modal';
@@ -35,11 +34,9 @@ export type Karyawan = {
 
 type PageProps = {
     karyawan: Karyawan[];
-    // Tambahkan prop ini dari Controller
     jenisPelanggaranList: { id: number; nama_pelanggaran: string }[];
 };
 
-// Destructure jenisPelanggaranList di sini
 export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: PageProps) {
 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -62,11 +59,9 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
     const [isResetting, setIsResetting] = useState(false);
 
-    // --- STATE UNTUK POPUP PELANGGARAN ---
     const [isSanksiModalOpen, setIsSanksiModalOpen] = useState(false);
     const [karyawanForSanksi, setKaryawanForSanksi] = useState<Karyawan | null>(null);
 
-    // --- LOGIKA BUKA POPUP SANKSI ---
     const handleAddSanksi = (item: Karyawan) => {
         setKaryawanForSanksi(item);
         setIsSanksiModalOpen(true);
@@ -121,7 +116,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const handleResetPasswordClick = (item: Karyawan) => {
         if (item.is_password_default) {
             setFailureTitle('Info');
-            setFailureMessage('Password karyawan ini sudah dalam kondisi default (NIP).');
+            setFailureMessage('Password karyawan ini sudah dalam kondisi default (Tanggal Lahir).');
             setShowFailureModal(true);
             return;
         }
@@ -133,35 +128,28 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
         if (karyawanToReset && karyawanToReset.id) {
             router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
                 onBefore: () => setIsResetting(true),
-                onSuccess: (page) => {
-                    console.log('Success response:', page);
+                onSuccess: () => {
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
-                    // Tampilkan Modal Sukses
                     setSuccessTitle('Berhasil');
                     setSuccessMessage('Password karyawan berhasil direset ke NIP.');
                     setShowSuccessModal(true);
 
-                    // Refresh halaman otomatis
                     setTimeout(() => {
                         router.visit(window.location.pathname);
                     }, 1500);
                 },
                 onError: (errors) => {
-                    console.error('Error response:', errors);
                     setIsResetWarningOpen(false);
 
-                    // Ambil pesan error dari response
                     const pesanError = errors.error || errors.message || (typeof errors === 'object' ? Object.values(errors).flat().join(', ') : "Terjadi kesalahan saat mereset password.");
 
-                    // Tampilkan Modal Gagal
                     setFailureTitle('Gagal Reset');
                     setFailureMessage(pesanError);
                     setShowFailureModal(true);
                 },
                 onFinish: () => {
-                    console.log('Finish reset password');
                     setIsResetting(false);
                 },
                 preserveScroll: true,
@@ -175,6 +163,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
             accessorKey: 'id',
             sortable: true,
             className: 'w-24 pl-8 text-center',
+            hidden: 'mobile',
             render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
         },
         {
@@ -201,16 +190,19 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     </span>
                 </div>
             ),
+            hidden: 'mobile',
         },
         {
             header: 'Jabatan',
             accessorKey: 'jabatan',
             className: 'font-medium text-gray-700',
+            hidden: 'tablet',
         },
         {
             header: 'Departemen',
             accessorKey: 'departemen',
             className: 'text-gray-600',
+            hidden: 'tablet',
         },
         {
             header: 'Tanggal Masuk',
@@ -222,6 +214,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     })}
                 </div>
             ),
+            hidden: 'mobile',
         },
         {
             header: 'Alamat',
@@ -231,6 +224,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     <span className="line-clamp-2 leading-relaxed">{item.alamat}</span>
                 </div>
             ),
+            hidden: 'tablet',
         },
         {
             header: '',
@@ -259,7 +253,6 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                             </span>
                         </DropdownMenuItem>
 
-                        {/* TOMBOL ACTION TAMBAH SANKSI YANG SUDAH AKTIF */}
                         <DropdownMenuItem onClick={() => handleAddSanksi(item)} className="cursor-pointer gap-3 rounded-lg px-3 py-2.5 text-gray-600 focus:bg-gray-50 focus:text-gray-900">
                             <Plus className="h-4 w-4" />
                             <span className="font-medium">Tambah Sanksi</span>
@@ -279,11 +272,11 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     return (
         <AppLayout>
             <Head title="Data Karyawan" />
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+            <div className="py-6 sm:py-12">
+                <div className="mx-auto w-full max-w-7xl space-y-4 px-4 sm:space-y-6 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                            <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
                                 Data Karyawan
                             </h2>
                         </div>
@@ -308,16 +301,30 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 onSuccess={handleFormSuccess}
             />
 
-            {/* --- MODAL PELANGGARAN DIRENDER DI SINI --- */}
             <PelanggaranFormModal
                 isOpen={isSanksiModalOpen}
                 onClose={() => {
                     setIsSanksiModalOpen(false);
                     setKaryawanForSanksi(null);
                 }}
-                karyawanList={karyawan} 
+                karyawanList={karyawan}
                 jenisPelanggaranList={jenisPelanggaranList}
                 defaultKaryawanId={karyawanForSanksi?.id}
+                onSuccess={(message) => {
+                    setIsSanksiModalOpen(false);
+                    setKaryawanForSanksi(null);
+                    setSuccessTitle('Berhasil');
+                    setSuccessMessage(message);
+                    setShowSuccessModal(true);
+                    setTimeout(() => {
+                        router.visit(window.location.pathname);
+                    }, 1500);
+                }}
+                onError={(message) => {
+                    setFailureTitle('Gagal Menambahkan Sanksi');
+                    setFailureMessage(message);
+                    setShowFailureModal(true);
+                }}
             />
 
             <ConfirmDeleteModal
@@ -334,11 +341,11 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 onConfirm={executeResetPassword}
                 isLoading={isResetting}
                 title="Reset Password?"
-                message="Password karyawan akan direset ke password default sistem. Apakah Anda yakin ingin mereset password karyawan ini?"
+                message="Password karyawan akan direset ke tanggal lahir. Apakah Anda yakin ingin mereset password karyawan ini?"
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
-            
+
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}

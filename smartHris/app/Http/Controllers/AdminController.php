@@ -25,23 +25,30 @@ class AdminController extends Controller
     /* ========= KARYAWAN ========= */
     public function indexKaryawan()
     {
-        $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
-            $isPasswordDefault = $item->user && password_verify($item->nip, $item->user->password);
+        $karyawan = Karyawan::with(['user:id,name,email,password'])
+            ->select('id', 'user_id', 'nip', 'jabatan', 'departemen', 'alamat', 'tanggal_masuk', 'tanggal_lahir', 'jenis_kelamin')
+            ->orderBy('nip', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $isPasswordDefault = false;
+                if ($item->user && $item->user->password) {
+                    $isPasswordDefault = password_verify($item->tanggal_lahir, $item->user->password);
+                }
 
-            return [
-                'id'             => $item->id,
-                'nama'           => $item->user->name ?? '-',
-                'email'          => $item->user->email ?? '',
-                'nip'            => $item->nip ?? '-',
-                'jabatan'        => $item->jabatan ?? '-',
-                'departemen'     => $item->departemen ?? '-',
-                'alamat'         => $item->alamat ?? '-',
-                'tanggal_masuk'  => $item->tanggal_masuk,
-                'tanggal_lahir'  => $item->tanggal_lahir,
-                'jenis_kelamin'  => $item->jenis_kelamin,
-                'is_password_default' => $isPasswordDefault,
-            ];
-        });
+                return [
+                    'id'             => $item->id,
+                    'nama'           => $item->user->name ?? '-',
+                    'email'          => $item->user->email ?? '',
+                    'nip'            => $item->nip ?? '-',
+                    'jabatan'        => $item->jabatan ?? '-',
+                    'departemen'     => $item->departemen ?? '-',
+                    'alamat'         => $item->alamat ?? '-',
+                    'tanggal_masuk'  => $item->tanggal_masuk,
+                    'tanggal_lahir'  => $item->tanggal_lahir,
+                    'jenis_kelamin'  => $item->jenis_kelamin,
+                    'is_password_default' => $isPasswordDefault,
+                ];
+            });
 
         return Inertia::render('Admin/karyawan/index', [
             'karyawan' => $karyawan,
@@ -160,9 +167,9 @@ class AdminController extends Controller
             ]);
         }
 
-        if (!$karyawan->nip) {
+        if (!$karyawan->tanggal_lahir) {
             throw ValidationException::withMessages([
-                'error' => 'NIP karyawan tidak valid (kosong).'
+                'error' => 'Tanggal lahir karyawan tidak valid (kosong).'
             ]);
         }
 
@@ -430,14 +437,14 @@ class AdminController extends Controller
         $request->validate([
             'karyawan_id' => 'required|exists:karyawan,id',
             'jenis_pelanggaran_id' => 'required|exists:jenis_pelanggaran,id',
-            'tanggal' => 'required|date',
+            'sp' => 'nullable|in:SP1,SP2,SP3',
             'catatan' => 'nullable|string',
         ]);
 
         $create = PelanggaranKaryawan::create([
             'karyawan_id' => $request->karyawan_id,
             'jenis_pelanggaran_id' => $request->jenis_pelanggaran_id,
-            'tanggal' => $request->tanggal,
+            'tanggal' => now()->toDateString(),
             'catatan' => $request->catatan,
         ]);
         if ((int) $request->sp != 0) {

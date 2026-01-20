@@ -23,11 +23,11 @@ class UserController extends Controller
         $karyawan = Karyawan::where('user_id', auth()->id())->firstOrFail();
 
         $validated = $request->validate([
-            'nama'           => 'required|string|max:100',
-            'jenis_kelamin'  => 'required|in:Laki-laki,Perempuan',
-            'tanggal_lahir'  => 'required|date',
-            'alamat'         => 'nullable|string',
-            'departemen_id'  => 'required|exists:departemen,id',
+            'nama' => 'required|string|max:100',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'tanggal_lahir' => 'required|date',
+            'alamat' => 'nullable|string',
+            'departemen_id' => 'required|exists:departemen,id',
         ]);
 
         $karyawan->update($validated);
@@ -56,7 +56,7 @@ class UserController extends Controller
         $canAbsenPulang = $absensiHariIni && $absensiHariIni->jam_masuk && !$absensiHariIni->jam_pulang;
         $canCuti = !$absensiHariIni;
 
-        return Inertia::render('User/absensi', [
+        return Inertia::render('User/absensi/index', [
             'user' => [
                 'name' => $user->name,
             ],
@@ -90,7 +90,10 @@ class UserController extends Controller
         $today = now()->toDateString();
         $now = now()->toTimeString();
 
-        $cuti = Cuti::where('karyawan_id', $karyawan->id)->where('tanggal_mulai', '<=', $today)->where('tanggal_selesai', '>=', $today)->exists();
+        $cuti = Cuti::where('karyawan_id', $karyawan->id)
+            ->where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->exists();
 
         if ($cuti) {
             Absensi::updateOrCreate(
@@ -103,13 +106,15 @@ class UserController extends Controller
                 ]
             );
 
-            return response()->json(['message' => 'Anda sedang cuti']);
+            return back()->withErrors(['message' => 'Anda sedang cuti']);
         }
 
-        $absen = Absensi::where('karyawan_id', $karyawan->id)->where('tanggal', $today)->first();
+        $absen = Absensi::where('karyawan_id', $karyawan->id)
+            ->where('tanggal', $today)
+            ->first();
 
         if ($absen && $absen->jam_masuk) {
-            return response()->json(['message' => 'Sudah absen masuk'], 400);
+            return back()->withErrors(['message' => 'Sudah absen masuk']);
         }
 
         // ⛔ TERLAMBAT
@@ -124,7 +129,7 @@ class UserController extends Controller
                 ]
             );
 
-            return response()->json(['message' => 'Terlambat, status alpha'], 403);
+            return back()->withErrors(['message' => 'Terlambat, status alpha']);
         }
 
         // 📸 SIMPAN FOTO
@@ -144,8 +149,9 @@ class UserController extends Controller
             ]
         );
 
-        return response()->json(['message' => 'Absen masuk berhasil']);
+        return back()->with('success', 'Absen masuk berhasil');
     }
+
     public function pulangStore(Request $request)
     {
         $request->validate([
@@ -161,15 +167,15 @@ class UserController extends Controller
             ->first();
 
         if (!$absen || !$absen->jam_masuk) {
-            return response()->json(['message' => 'Belum absen masuk'], 400);
+            return back()->withErrors(['message' => 'Belum absen masuk']);
         }
 
         if ($absen->jam_pulang) {
-            return response()->json(['message' => 'Sudah absen pulang'], 400);
+            return back()->withErrors(['message' => 'Sudah absen pulang']);
         }
 
         if ($now < $this->jamPulangMulai) {
-            return response()->json(['message' => 'Belum waktunya pulang'], 403);
+            return back()->withErrors(['message' => 'Belum waktunya pulang']);
         }
 
         // 📸 SIMPAN FOTO
@@ -182,7 +188,7 @@ class UserController extends Controller
             'foto_pulang' => $filename,
         ]);
 
-        return response()->json(['message' => 'Absen pulang berhasil']);
+        return back()->with('success', 'Absen pulang berhasil');
     }
     public function autoAlpha()
     {
@@ -233,12 +239,12 @@ class UserController extends Controller
 
         return Inertia::render('User/absensi/riwayat', [
             'absensi' => $absensi->through(fn($item) => [
-                'id'          => $item->id,
-                'tanggal'     => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                'jam_masuk'   => $item->jam_masuk ?? '-',
-                'jam_pulang'  => $item->jam_pulang ?? '-',
-                'status'      => ucfirst($item->status),
-                'keterangan'  => $item->keterangan ?? 'Tanpa Keterangan',
+                'id' => $item->id,
+                'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                'jam_masuk' => $item->jam_masuk ?? '-',
+                'jam_pulang' => $item->jam_pulang ?? '-',
+                'status' => ucfirst($item->status),
+                'keterangan' => $item->keterangan ?? 'Tanpa Keterangan',
             ]),
 
             // kirim balik filter supaya tidak reset di UI
@@ -281,68 +287,78 @@ class UserController extends Controller
             'berat' => (clone $summaryQuery)->whereHas('jenisPelanggaran', fn($q) => $q->where('tingkat', 'berat'))->count(),
         ];
 
-        return Inertia::render('User/Pelanggaran', [
+        return Inertia::render('User/pelanggaran/index', [
             'summary' => $summary,
-
             'pelanggaran' => $pelanggaran->through(fn($item) => [
                 'id' => $item->id,
                 'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-                'status' => ucfirst($item->status),
-                'tingkat_pelanggaran' => ucfirst($item->jenisPelanggaran->tingkat),
-
+                'status' => $item->status, // Misal: Alpha, Terlambat
+                'tingkat_pelanggaran' => $item->jenisPelanggaran->tingkat, // Ringan/Berat
                 'sanksi' => $item->keterangan ?? '-',
             ]),
-
-            'filters' => $request->only([
-                'bulan',
-                'tingkat_pelanggaran',
-                'search'
+            // Pastikan ini dikirim balik untuk menjaga state dropdown/input search
+            'filters' => $request->only(['bulan', 'tingkat_pelanggaran', 'search'
             ]),
         ]);
     }
-    public function cuti(Request $request)
-    {
-        $query = Cuti::query()
-            ->where('karyawan_id', auth()->user()->karyawan->id);
+   public function cuti(Request $request)
+{
+    $query = Cuti::query()
+        ->where('karyawan_id', auth()->user()->karyawan->id);
 
-        if ($request->filled('bulan')) {
-            $query->whereMonth('created_at', substr($request->bulan, 5, 2))
-                ->whereYear('created_at', substr($request->bulan, 0, 4));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('search')) {
-            $query->where('alasan', 'like', '%' . $request->search . '%');
-        }
-
-        $cuti = $query->orderBy('tanggal_pengajuan', 'desc')->paginate(10);
-
-        return response()->json($cuti);
+    if ($request->filled('bulan')) {
+        $query->whereMonth('created_at', substr($request->bulan, 5, 2))
+              ->whereYear('created_at', substr($request->bulan, 0, 4));
     }
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('search')) {
+        $query->where('alasan', 'like', '%' . $request->search . '%');
+    }
+
+    // Ambil data dengan pagination
+    $cuti = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+    // PERBAIKAN DI SINI:
+   return Inertia::render('User/cuti', [
+    'auth' => ['user' => auth()->user()],
+    'cuti' => $cuti->through(fn($item) => [
+        'id' => $item->id,
+        // Kita beri nama 'tanggal_pengajuan' agar sesuai dengan Interface di React
+        'tanggal_pengajuan' => $item->created_at->format('d F Y'), 
+        // Kita gabungkan mulai & selesai menjadi satu string 'tanggal_cuti'
+        'tanggal_cuti' => \Carbon\Carbon::parse($item->tanggal_mulai)->format('d M') . ' - ' . \Carbon\Carbon::parse($item->tanggal_selesai)->format('d M Y'),
+        'jumlah_hari' => $item->jumlah_hari,
+        'alasan' => $item->alasan,
+        'status' => $item->status,
+    ]),
+    'filters' => $request->only(['bulan', 'status', 'search']),
+]);
+}
     public function cutiStore(Request $request)
     {
         $request->validate([
-            'tanggal_mulai'   => 'required|date',
+            'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'alasan'          => 'required|string',
+            'alasan' => 'required|string',
         ]);
 
-        $tanggalMulai   = Carbon::parse($request->tanggal_mulai);
+        $tanggalMulai = Carbon::parse($request->tanggal_mulai);
         $tanggalSelesai = Carbon::parse($request->tanggal_selesai);
 
         // HITUNG JUMLAH HARI (INKLUSIF)
         $jumlahHari = $tanggalMulai->diffInDays($tanggalSelesai) + 1;
 
         Cuti::create([
-            'karyawan_id'    => auth()->user()->karyawan->id,
-            'tanggal_mulai'  => $tanggalMulai,
+            'karyawan_id' => auth()->user()->karyawan->id,
+            'tanggal_mulai' => $tanggalMulai,
             'tanggal_selesai' => $tanggalSelesai,
-            'jumlah_hari'    => $jumlahHari,
-            'alasan'         => $request->alasan,
-            'status'         => 'pending',
+            'jumlah_hari' => $jumlahHari,
+            'alasan' => $request->alasan,
+            'status' => 'pending',
         ]);
 
         return back()->with('success', 'Pengajuan cuti berhasil dikirim');

@@ -1,9 +1,8 @@
 import WeeklyAttendanceChart from '@/components/weekly-attendance-chart'
 import AttendanceDonut from '@/components/attendance-donut'
 import AdminStats from './AdminStats'
-import ProfileMenu from '@/components/profile-menu';
 
-type Stats = { 
+type Stats = {
   total_karyawan: number
   hadir_hari_ini: number
   pengajuan_cuti: number
@@ -21,7 +20,6 @@ type AttendanceStatus = {
   color: string
 }
 
-
 type Props = {
   stats?: Stats
   weeklyAttendance?: WeeklyAttendance[]
@@ -38,44 +36,24 @@ export default function AdminDashboard({
     hadir_hari_ini: 0,
     pengajuan_cuti: 0,
     sanksi_aktif: 0,
-  } 
+  }
 
-
-
-
-
-return (
-  <div className="min-h-screen bg-[#EAF5F1]">
-      
-    {/* HEADER */}
-    <div className="w-full">
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-slate-800">
-            Absensi Karyawan
-          </h1>
-
-          <ProfileMenu />
+  return (
+    <div className="min-h-screen bg-[#EAF5F1] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
+          <AdminStats stats={safeStats} />
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:mt-8 lg:grid-cols-2">
+            <div className="overflow-hidden rounded-xl border border-slate-200 p-4 sm:p-6">
+              <WeeklyAttendanceChart data={weeklyAttendance ?? []} />
+            </div>
+            <div className="overflow-hidden rounded-xl border border-slate-200 p-4 sm:p-6">
+              <AttendanceDonut data={attendanceStatus ?? []} />
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
-
-    {/* CONTENT */}
-    <div className="mx-auto max-w-7xl px-6 py-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
-        {/* isi halaman */}
-        <AdminStats stats={safeStats} />
-
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <WeeklyAttendanceChart data={weeklyAttendance ?? []} />
-          <AttendanceDonut data={attendanceStatus ?? []} />
-        </div>
-      </div>
-    </div>
-
-  </div>
-)
-
-
-
+  )
 }

@@ -8,6 +8,7 @@ use App\Models\Karyawan;
 use App\Models\SuratPeringatan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -15,7 +16,7 @@ class MainController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $today = Carbon::today();
 
         /* ===================== ADMIN ======================== */
