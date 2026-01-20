@@ -4,31 +4,6 @@ import { Head } from '@inertiajs/react'
 import AdminDashboard from '@/components/admin/AdminDashboard'
 import UserDashboard from '@/components/user/UserDashboard'
 
-type Stats = {
-  total_karyawan: number
-  hadir_hari_ini: number
-  pengajuan_cuti: number
-  sanksi_aktif: number
-}
-
-type WeeklyAttendance = {
-  date: string
-  value: number
-}
-
-type AttendanceStatus = {
-  label: string
-  value: number
-  color: string
-}
-
-type UserSummary = {
-  hadir: number
-  terlambat: number
-  cuti: number
-  hariKerja: number
-}
-
 type PageProps = {
   auth: {
     user: {
@@ -38,17 +13,85 @@ type PageProps = {
       role: 'admin' | 'user'
     } | null
   }
-  stats?: Stats
-  weeklyAttendance?: WeeklyAttendance[]
-  attendanceStatus?: AttendanceStatus[]
-  userSummary?: UserSummary
+  role: 'admin' | 'user'
+
+  // --- Props untuk ADMIN ---
+  totalKaryawan?: number
+  hadirHariIni?: number
+  pengajuanCuti?: number
+  sanksiAktif?: number
+  attendanceWeekly?: Array<{ date: string; value: number }>
+  statusAbsensi?: {
+    hadir: number
+    alpha: number
+    izin: number
+    sakit: number
+    cuti: number
+  }
+
+  // --- Props untuk USER ---
+  user?: { name: string }
+  statistik?: {
+    hadir: { total: number; hariKerja: number }
+    terlambat: { total: number; hariKerja: number }
+    cuti: { total: number; hariKerja: number }
+  }
+  // PERBAIKAN 1: Ganti 'bulan' jadi 'name' agar sesuai dengan Recharts & Controller
+  grafikKehadiran?: Array<{ name: string; value: number }>
+
+  absenHariIni?: {
+    status: string
+    jamMasuk: string
+    jamPulang: string | null
+    keterlambatan: number | null
+    tanggal: string
+  } | null
+  jadwalKerja?: {
+    jamDatang: string
+    jamPulang: string
+  }
+  tanggalHariIni?: string
+  bulanAktif?: string
+  tanggalAktif?: number
 }
 
 export default function Dashboard(props: PageProps) {
-  const { auth, stats, weeklyAttendance, attendanceStatus, userSummary } = props;
+  // Destructure semua props yang dibutuhkan
+  const {
+    role,
+    totalKaryawan,
+    hadirHariIni,
+    pengajuanCuti,
+    sanksiAktif,
+    attendanceWeekly,
+    statusAbsensi,
 
-  const userRole = auth.user?.role || 'user';
-  const isAdmin = userRole === 'admin';
+    // Props User
+    statistik,
+    grafikKehadiran
+  } = props;
+
+  const isAdmin = role === 'admin';
+
+  // --- Logic Data Admin ---
+  const adminStats = {
+    total_karyawan: totalKaryawan ?? 0,
+    hadir_hari_ini: hadirHariIni ?? 0,
+    pengajuan_cuti: pengajuanCuti ?? 0,
+    sanksi_aktif: sanksiAktif ?? 0,
+  };
+
+  const attendanceStatusData = statusAbsensi ? [
+    { label: 'Hadir', value: statusAbsensi.hadir, color: '#10b981' },
+    { label: 'Alpha', value: statusAbsensi.alpha, color: '#ef4444' },
+    { label: 'Izin', value: statusAbsensi.izin, color: '#f59e0b' },
+    { label: 'Sakit', value: statusAbsensi.sakit, color: '#3b82f6' },
+    { label: 'Cuti', value: statusAbsensi.cuti, color: '#8b5cf6' },
+  ] : [];
+
+  // PERBAIKAN 2: Hapus variable 'userSummaryData'.
+  // Kita tidak perlu memformat ulang data lagi karena struktur dari
+  // Controller (MainController.php) sudah pas dengan yang diminta UserDashboard.
 
   return (
     <AppLayout>
@@ -59,17 +102,16 @@ export default function Dashboard(props: PageProps) {
 
           {isAdmin ? (
             <AdminDashboard
-              stats={stats ?? {
-                total_karyawan: 0, hadir_hari_ini: 0, pengajuan_cuti: 0, sanksi_aktif: 0
-              }}
-              weeklyAttendance={weeklyAttendance ?? []}
-              attendanceStatus={attendanceStatus ?? []}
+              stats={adminStats}
+              weeklyAttendance={attendanceWeekly ?? []}
+              attendanceStatus={attendanceStatusData}
             />
           ) : (
             <UserDashboard
-              summary={userSummary ?? {
-                hadir: 0, terlambat: 0, cuti: 0, hariKerja: 0
-              }}
+              statistik={statistik}
+              grafikKehadiran={grafikKehadiran}
+              absenHariIni={props.absenHariIni}
+              jadwalKerja={props.jadwalKerja}
             />
           )}
 

@@ -1,27 +1,27 @@
 import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Check } from "lucide-react";
+import { X } from "lucide-react";
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
-interface SuccessModalProps {
+interface FailureModalProps {
   isOpen: boolean;
   onClose: () => void;
   message?: string;
   title?: string;
 }
 
-const SuccessModal = ({
+const FailureModal = ({
   isOpen,
   onClose,
-  title = "Berhasil",
-  message = "Data karyawan berhasil diperbarui."
-}: SuccessModalProps) => {
+  title = "Gagal",
+  message = "Terjadi kesalahan saat memproses data."
+}: FailureModalProps) => {
 
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [isOpen, onClose]);
@@ -31,11 +31,11 @@ const SuccessModal = ({
       <DialogContent className="sm:max-w-sm p-8 overflow-hidden bg-white rounded-3xl gap-6 shadow-2xl border-none outline-none flex flex-col items-center justify-center [&>button]:hidden">
 
         <VisuallyHidden>
-            <DialogTitle>Notifikasi Berhasil</DialogTitle>
+            <DialogTitle>Notifikasi Gagal</DialogTitle>
         </VisuallyHidden>
 
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 animate-in zoom-in duration-300">
-          <Check className="h-12 w-12 text-emerald-600" strokeWidth={3} />
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-red-100 animate-in zoom-in duration-300">
+          <X className="h-12 w-12 text-red-600" strokeWidth={3} />
         </div>
 
         <div className="flex flex-col items-center gap-2 text-center">
@@ -52,4 +52,4 @@ const SuccessModal = ({
   );
 };
 
-export default SuccessModal;
+export default FailureModal;

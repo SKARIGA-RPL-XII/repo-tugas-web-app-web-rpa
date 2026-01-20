@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import ReusableFormModal from '@/components/ui/reusable-form-modal'; 
-import WarningModal from '@/components/warning-modal'; 
+import ReusableFormModal from '@/components/ui/reusable-form-modal';
+import WarningModal from '@/components/warning-modal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,16 +9,13 @@ import { Calendar } from 'lucide-react';
 
 interface KaryawanForm {
     id?: string;
-    nip: string;
     nama: string;
     jenis_kelamin: string;
     tanggal_lahir: string;
     jabatan: string;
     departemen: string;
-    tanggal_masuk: string;
     alamat: string;
-    email?: string;
-    password?: string;
+    email: string;
 }
 
 export interface KaryawanData {
@@ -29,8 +26,8 @@ export interface KaryawanData {
     tanggal_lahir: string;
     jabatan: string;
     departemen: string;
-    tanggal_masuk: string;
     alamat: string;
+    email: string;
 }
 
 export interface KaryawanFormModalProps {
@@ -41,44 +38,83 @@ export interface KaryawanFormModalProps {
     onSuccess: (message: string) => void;
 }
 
+const generateEmail = (nama: string) => {
+    if (!nama) return 'auto-generate@smarthris.com';
+
+    return (
+        nama
+            .toLowerCase()
+            .replace(/[^a-z\s]/g, '')
+            .trim()
+            .replace(/\s+/g, '.') +
+        '@smarthris.com'
+    );
+};
+
 export default function KaryawanFormModal({
     isOpen,
     onClose,
     mode,
     initialData,
-    onSuccess
+    onSuccess,
 }: KaryawanFormModalProps) {
-
     const [isSaveWarningOpen, setIsSaveWarningOpen] = useState(false);
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors, transform } = useForm<KaryawanForm>({
-        id: '', nip: '', nama: '', jenis_kelamin: '', tanggal_lahir: '', jabatan: '', departemen: '', tanggal_masuk: '', alamat: ''
-    });
+    const { data, setData, post, processing, errors, reset, clearErrors } =
+        useForm<KaryawanForm>({
+            id: '',
+            nama: '',
+            jenis_kelamin: '',
+            tanggal_lahir: '',
+            jabatan: '',
+            departemen: '',
+            alamat: '',
+            email: '',
+        });
 
     useEffect(() => {
-        if (isOpen) {
-            clearErrors();
-            if (mode === 'edit' && initialData) {
-                setData({
-                    id: initialData.id.toString(),
-                    nip: initialData.nip,
-                    nama: initialData.nama,
-                    jenis_kelamin: initialData.jenis_kelamin,
-                    tanggal_lahir: initialData.tanggal_lahir,
-                    jabatan: initialData.jabatan,
-                    departemen: initialData.departemen,
-                    tanggal_masuk: initialData.tanggal_masuk,
-                    alamat: initialData.alamat
-                });
-            } else {
-                reset();
-            }
+        if (!isOpen) return;
+        clearErrors();
+
+        if (mode === 'edit' && initialData) {
+            setData({
+                id: initialData.id.toString(),
+                nama: initialData.nama,
+                jenis_kelamin: initialData.jenis_kelamin,
+                tanggal_lahir: initialData.tanggal_lahir,
+                jabatan: initialData.jabatan,
+                departemen: initialData.departemen,
+                alamat: initialData.alamat,
+                email: initialData.email || '',
+            });
+        } else {
+            reset();
         }
-    }, [isOpen, mode, initialData, clearErrors, setData, reset]); 
+    }, [isOpen, mode, initialData, clearErrors, setData, reset]);
+
+    useEffect(() => {
+        if (mode === 'create') {
+            setData('email', generateEmail(data.nama));
+        }
+    }, [data.nama, mode, setData]);
 
     const handleSaveClick = (e: React.FormEvent) => {
-        e.preventDefault(); 
+        e.preventDefault();
+
+        if (
+            !data.nama ||
+            !data.jenis_kelamin ||
+            !data.tanggal_lahir ||
+            !data.jabatan ||
+            !data.departemen ||
+            !data.alamat ||
+            !data.email
+        ) {
+            alert("Mohon lengkapi seluruh field bertanda bintang (*) sebelum menyimpan.");
+            return;
+        }
+
         setIsSaveWarningOpen(true);
     };
 
@@ -87,37 +123,27 @@ export default function KaryawanFormModal({
     };
 
     const executeSubmit = () => {
-        
-        transform((data) => ({
-            ...data,
-            email: `${data.nip.toLowerCase()}@smarthris.com`,
-            password: 'password123',
-        }));
-
-        const successText = mode === 'edit' 
-            ? "Data karyawan berhasil diperbarui." 
-            : "Data karyawan berhasil disimpan.";
-
-        const options = {
-            onSuccess: () => { 
-                onSuccess(successText); 
-                
-                setIsSaveWarningOpen(false);
-                onClose(); 
-                reset(); 
-            },
-            preserveScroll: true,
-            onError: () => {
-                setIsSaveWarningOpen(false);
+        post(
+            mode === 'edit'
+                ? `/app/karyawan/${data.id}`
+                : '/app/karyawan',
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    onSuccess(
+                        mode === 'edit'
+                            ? 'Data karyawan berhasil diperbarui.'
+                            : 'Data karyawan berhasil disimpan.'
+                    );
+                    setIsSaveWarningOpen(false);
+                    onClose();
+                    reset();
+                },
+                onError: () => setIsSaveWarningOpen(false),
             }
-        };
-
-        if (mode === 'edit') {
-            put(`/app/karyawan/${data.id}`, options);
-        } else {
-            post('/app/karyawan', options);
-        }
+        );
     };
+
 
     const executeCancel = () => {
         setIsCancelWarningOpen(false);
@@ -125,86 +151,203 @@ export default function KaryawanFormModal({
         onClose();
     };
 
-    const labelClass = "text-sm font-bold text-gray-700 mb-2 block tracking-tight";
-    const commonInputClass = "w-full rounded-lg border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-600 focus-visible:border-emerald-600 focus-visible:ring-offset-0";
-    const inputClass = `${commonInputClass} h-11 px-4 py-2.5`;
-    const dateInputClass = `${inputClass} pl-10`; 
-    const textareaClass = `${commonInputClass} min-h-[120px] px-4 py-3 resize-none`;
-    const readOnlyClass = "w-full h-11 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500 cursor-not-allowed focus-visible:ring-0";
+    const labelClass =
+        'text-sm font-bold text-gray-700 mb-2 block tracking-tight';
 
     return (
         <>
             <ReusableFormModal
                 isOpen={isOpen}
                 onClose={handleCancelClick}
-                title={mode === 'edit' ? "Edit Karyawan" : "Tambah Karyawan"}
+                title={mode === 'edit' ? 'Edit Karyawan' : 'Tambah Karyawan'}
                 onSubmit={handleSaveClick}
                 isLoading={processing}
-                submitLabel={mode === 'edit' ? "Update" : "Simpan"}
+                submitLabel={mode === 'edit' ? 'Update' : 'Simpan'}
             >
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                     <div className="md:col-span-3">
-                        <Label className={labelClass}>NIP <span className="text-red-500">*</span></Label>
-                        <Input value={data.nip} onChange={(e) => setData('nip', e.target.value)} placeholder="Contoh: 2211001" readOnly={mode === 'edit'} className={mode === 'edit' ? readOnlyClass : inputClass} />
-                        {errors.nip && <p className="mt-1 text-xs text-red-500">{errors.nip}</p>}
+                        <Label className={labelClass}>
+                            NIP <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            readOnly
+                            value={
+                                mode === 'edit'
+                                    ? initialData?.nip ?? '-'
+                                    : 'Auto generate'
+                            }
+                            className="form-control form-readonly"
+                        />
+                        {mode === 'create' && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                NIP akan dibuat otomatis oleh sistem
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="md:col-span-3">
+                        <Label className={labelClass}>
+                            Nama Lengkap <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            value={data.nama}
+                            onChange={(e) => setData('nama', e.target.value)}
+                            placeholder="Masukkan Nama Lengkap"
+                            className="form-control"
+                            required
+                        />
+                        {errors.nama && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.nama}
+                            </p>
+                        )}
                     </div>
                     <div className="md:col-span-3">
-                        <Label className={labelClass}>Nama Lengkap <span className="text-red-500">*</span></Label>
-                        <Input value={data.nama} onChange={(e) => setData('nama', e.target.value)} placeholder="Masukkan Nama Lengkap" className={inputClass} />
-                        {errors.nama && <p className="mt-1 text-xs text-red-500">{errors.nama}</p>}
+                        <Label className={labelClass}>
+                            Email <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            placeholder="Masukkan Email"
+                            className="form-control"
+                            required
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.email}
+                            </p>
+                        )}
                     </div>
+
                     <div className="md:col-span-3">
-                        <Label className={labelClass}>Jenis Kelamin <span className="text-red-500">*</span></Label>
-                        <div className="relative">
-                            <select className={`${inputClass} appearance-none cursor-pointer`} value={data.jenis_kelamin} onChange={(e) => setData('jenis_kelamin', e.target.value)}>
-                                <option value="">--Pilih--</option><option value="L">Laki-laki</option><option value="P">Perempuan</option>
+                        <Label className={labelClass}>
+                            Jenis Kelamin <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="form-select-wrapper">
+                            <select
+                                className="form-select"
+                                value={data.jenis_kelamin}
+                                required
+                                onChange={(e) =>
+                                    setData('jenis_kelamin', e.target.value)
+                                }
+                            >
+                                <option value="">--Pilih--</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
-                            </div>
                         </div>
-                        {errors.jenis_kelamin && <p className="mt-1 text-xs text-red-500">{errors.jenis_kelamin}</p>}
+                        {errors.jenis_kelamin && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.jenis_kelamin}
+                            </p>
+                        )}
                     </div>
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>Tanggal Lahir <span className="text-red-500">*</span></Label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                            <Input type="date" value={data.tanggal_lahir} onChange={(e) => setData('tanggal_lahir', e.target.value)} className={dateInputClass} />
-                        </div>
-                        {errors.tanggal_lahir && <p className="mt-1 text-xs text-red-500">{errors.tanggal_lahir}</p>}
-                    </div>
+
                     <div className="md:col-span-2">
-                        <Label className={labelClass}>Jabatan <span className="text-red-500">*</span></Label>
+                        <Label className={labelClass}>
+                            Tanggal Lahir <span className="text-red-500">*</span>
+                        </Label>
                         <div className="relative">
-                            <select className={`${inputClass} appearance-none cursor-pointer`} value={data.jabatan} onChange={(e) => setData('jabatan', e.target.value)}>
-                                <option value="">--Pilih--</option><option value="Store Manager">Store Manager</option><option value="Staff">Staff</option>
+                            <Input
+                                required
+                                id="tanggal_lahir"
+                                type="date"
+                                value={data.tanggal_lahir}
+                                onChange={(e) =>
+                                    setData('tanggal_lahir', e.target.value)
+                                }
+                                className="form-control pr-12"
+                            />
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    (
+                                        document.getElementById(
+                                            'tanggal_lahir'
+                                        ) as HTMLInputElement
+                                    )?.showPicker()
+                                }
+                                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-md bg-emerald-700 text-white hover:bg-emerald-800"
+                            >
+                                <Calendar className="h-4 w-4" />
+                            </button>
+                        </div>
+                        {errors.tanggal_lahir && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.tanggal_lahir}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <Label className={labelClass}>
+                            Jabatan <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="form-select-wrapper">
+                            <select
+                                required
+                                className="form-select"
+                                value={data.jabatan}
+                                onChange={(e) =>
+                                    setData('jabatan', e.target.value)
+                                }
+                            >
+                                <option value="">--Pilih Jabatan--</option>
+                                <option value="Store Manager">Store Manager</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Kasir">Kasir</option>
+                                <option value="Staff">Staff</option>
                             </select>
-                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500"><svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg></div>
                         </div>
-                        {errors.jabatan && <p className="mt-1 text-xs text-red-500">{errors.jabatan}</p>}
+                        {errors.jabatan && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.jabatan}
+                            </p>
+                        )}
                     </div>
+
                     <div className="md:col-span-2">
-                        <Label className={labelClass}>Departemen <span className="text-red-500">*</span></Label>
-                        <div className="relative">
-                            <select className={`${inputClass} appearance-none cursor-pointer`} value={data.departemen} onChange={(e) => setData('departemen', e.target.value)}>
-                                <option value="">--Pilih--</option><option value="IT">IT</option><option value="HRD">HRD</option>
+                        <Label className={labelClass}>
+                            Departemen <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="form-select-wrapper">
+                            <select
+                                required
+                                className="form-select"
+                                value={data.departemen}
+                                onChange={(e) =>
+                                    setData('departemen', e.target.value)
+                                }
+                            >
+                                <option value="">--Pilih Departemen--</option>
+                                <option value="IT">IT</option>
+                                <option value="HRD">HRD</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Operasional">Operasional</option>
+                                <option value="Marketing">Marketing</option>
                             </select>
-                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500"><svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg></div>
                         </div>
-                         {errors.departemen && <p className="mt-1 text-xs text-red-500">{errors.departemen}</p>}
+                        {errors.departemen && (
+                            <p className="mt-1 text-xs text-red-500">
+                                {errors.departemen}
+                            </p>
+                        )}
                     </div>
-                    <div className="md:col-span-2">
-                        <Label className={labelClass}>Tanggal Masuk <span className="text-red-500">*</span></Label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                            <Input type="date" value={data.tanggal_masuk} onChange={(e) => setData('tanggal_masuk', e.target.value)} className={dateInputClass} />
-                        </div>
-                        {errors.tanggal_masuk && <p className="mt-1 text-xs text-red-500">{errors.tanggal_masuk}</p>}
-                    </div>
+
                     <div className="md:col-span-6">
-                        <Label className={labelClass}>Alamat <span className="text-red-500">*</span></Label>
-                        <Textarea placeholder="Masukkan Alamat Lengkap" className={textareaClass} value={data.alamat} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('alamat', e.target.value)} />
-                        {errors.alamat && <p className="mt-1 text-xs text-red-500">{errors.alamat}</p>}
+                        <Label className={labelClass}>
+                            Alamat <span className="text-red-500">*</span>
+                        </Label>
+                        <Textarea
+                            required
+                            value={data.alamat}
+                            onChange={(e) => setData('alamat', e.target.value)}
+                            placeholder="Masukkan Alamat Lengkap"
+                            className="form-textarea"
+                        />
                     </div>
                 </div>
             </ReusableFormModal>
@@ -214,12 +357,12 @@ export default function KaryawanFormModal({
                 onClose={() => setIsSaveWarningOpen(false)}
                 onConfirm={executeSubmit}
                 isLoading={processing}
-                title={mode === 'edit' ? "Konfirmasi Perubahan Data" : "Konfirmasi Simpan Data"}
-                message={
-                    mode === 'edit' 
-                    ? "Anda yakin ingin menyimpan perubahan data karyawan ini? Perubahan akan langsung diterapkan ke sistem."
-                    : "Anda yakin ingin menyimpan data karyawan ini? Pastikan seluruh data yang diinput sudah benar."
+                title={
+                    mode === 'edit'
+                        ? 'Konfirmasi Perubahan Data'
+                        : 'Konfirmasi Simpan Data'
                 }
+                message="Pastikan seluruh data sudah benar."
                 confirmLabel="Konfirmasi"
                 cancelLabel="Batal"
             />
@@ -229,7 +372,7 @@ export default function KaryawanFormModal({
                 onClose={() => setIsCancelWarningOpen(false)}
                 onConfirm={executeCancel}
                 title="Batalkan Perubahan?"
-                message="Data yang telah Anda isi belum disimpan. Anda yakin ingin membatalkan dan keluar dari form ini?"
+                message="Data belum disimpan. Yakin ingin keluar?"
                 confirmLabel="Ya, Batalkan"
                 cancelLabel="Kembali"
             />
