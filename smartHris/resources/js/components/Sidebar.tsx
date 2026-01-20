@@ -182,12 +182,12 @@ export default function Sidebar() {
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absen')
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi')
                                         ? sidebarConfig.activeStyle
                                         : ''
                                         }`}
                                 >
-                                    <Link href="/absen">
+                                    <Link href="/absensi">
                                         <Icon
                                             icon="fluent:task-list-square-16-filled"
                                             width="16"
@@ -206,7 +206,7 @@ export default function Sidebar() {
                                         : ''
                                         }`}
                                 >
-                                    <Link href="/absen/riwayat">
+                                    <Link href="/absensi/riwayat">
                                         <Icon
                                             icon="mage:note-text-fill"
                                             width="24"
