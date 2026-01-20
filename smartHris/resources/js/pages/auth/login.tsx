@@ -155,7 +155,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 className="w-full py-3.5 bg-emerald-900 hover:bg-emerald-800 text-white"
               >
                 {processing && <Spinner />}
-                Masukk
+                Masuk
               </Button>
             </form>
 
