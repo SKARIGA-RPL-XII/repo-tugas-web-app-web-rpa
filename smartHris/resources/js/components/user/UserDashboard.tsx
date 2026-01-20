@@ -1,68 +1,98 @@
-import { Head } from '@inertiajs/react';
+import { UserCheck, AlertCircle, CalendarX } from 'lucide-react'
+import StatsInfoCard from '@/components/stats-info-card'
+import CalendarWidget from '@/components/calendar-widget'
+import AttendanceChart from '@/components/attendance-chart'
+import DailyAttendance from '@/components/daily-attendance'
 
-type UserSummary = {
-  hadir: number;
-  terlambat: number;
-  cuti: number;
-  hariKerja: number;
-};
+type AbsenData = {
+    status: string
+    jamMasuk: string
+    jamPulang: string | null
+    keterlambatan: string | number | null
+    tanggal?: string
+}
+
+type StatistikItem = {
+    total: number
+    hariKerja: number
+}
+
+type ChartData = {
+    name: string
+    value: number
+}
 
 type Props = {
-  summary?: UserSummary;
-};
+    statistik?: {
+        hadir: StatistikItem
+        terlambat: StatistikItem
+        cuti: StatistikItem
+    }
+    grafikKehadiran?: ChartData[]
+    absenHariIni?: AbsenData | null
+    jadwalKerja?: {
+        jamDatang: string
+        jamPulang: string
+    }
 
-export default function UserDashboard({ summary }: Props) {
-  const s: UserSummary = summary ?? {
-    hadir: 0,
-    terlambat: 0,
-    cuti: 0,
-    hariKerja: 0,
-  };
+}
 
-  return (
-    <>
-      <Head title="Dashboard" />
+export default function UserDashboard({ statistik, grafikKehadiran, absenHariIni, jadwalKerja }: Props) {
+    const stats = statistik || {
+        hadir: { total: 0, hariKerja: 0 },
+        terlambat: { total: 0, hariKerja: 0 },
+        cuti: { total: 0, hariKerja: 0 },
+    }
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-slate-500">Jumlah Kehadiran</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-slate-700">{s.hadir}</h3>
-              <span className="mb-1 text-sm font-semibold text-emerald-600">Hadir</span>
+    const chartData = grafikKehadiran || []
+
+    return (
+        <div className="min-h-screen bg-[#F8FAFC] px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-350">
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+                    <StatsInfoCard
+                        title="Jumlah Kehadiran"
+                        value={stats.hadir.total}
+                        valueLabel="Hadir"
+                        subtitle={`Dari ${stats.hadir.hariKerja} Hari Kerja`}
+                        icon={<UserCheck size={20} strokeWidth={2.5} />}
+                    />
+                    <StatsInfoCard
+                        title="Jumlah Keterlambatan"
+                        value={stats.terlambat.total}
+                        valueLabel="Kali"
+                        subtitle={`Dari ${stats.terlambat.hariKerja} Hari Kerja`}
+                        icon={<AlertCircle size={20} strokeWidth={2.5} />}
+                    />
+                    <StatsInfoCard
+                        title="Jumlah Cuti"
+                        value={stats.cuti.total}
+                        valueLabel="Hari"
+                        subtitle={`Dari ${stats.cuti.hariKerja} Hari Kerja`}
+                        icon={<CalendarX size={20} strokeWidth={2.5} />}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 items-start mb-8">
+                    <div className="lg:col-span-2 h-105 rounded-xl border border-slate-100 bg-white shadow-sm p-6">
+                        <AttendanceChart data={chartData} />
+                    </div>
+
+                    <div className="h-105 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden flex flex-col">
+                        <CalendarWidget />
+                    </div>
+                </div>
+
+                <div className="mt-8">
+                    <DailyAttendance
+                        absen={absenHariIni}
+                        jadwal={jadwalKerja}
+                        tanggal={absenHariIni?.tanggal}
+                    />
+                </div>
+
             </div>
-            <p className="text-xs text-slate-400">
-              Dari total {s.hariKerja} hari kerja
-            </p>
-          </div>
         </div>
-
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-slate-500">Jumlah Keterlambatan</p>
-             <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-slate-700">{s.terlambat}</h3>
-              <span className="mb-1 text-sm font-semibold text-amber-500">Kali</span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Dari total {s.hariKerja} hari kerja
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex flex-col gap-2">
-             <p className="text-sm font-medium text-slate-500">Jumlah Cuti</p>
-             <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-slate-700">{s.cuti}</h3>
-              <span className="mb-1 text-sm font-semibold text-blue-500">Hari</span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Dari total {s.hariKerja} hari kerja
-            </p>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+    )
 }
