@@ -15,6 +15,7 @@ type PageProps = {
   }
   role: 'admin' | 'user'
 
+  // --- Props untuk ADMIN ---
   totalKaryawan?: number
   hadirHariIni?: number
   pengajuanCuti?: number
@@ -28,13 +29,16 @@ type PageProps = {
     cuti: number
   }
 
+  // --- Props untuk USER ---
   user?: { name: string }
   statistik?: {
     hadir: { total: number; hariKerja: number }
     terlambat: { total: number; hariKerja: number }
     cuti: { total: number; hariKerja: number }
   }
-  grafikKehadiran?: Array<{ bulan: string; value: number }>
+  // PERBAIKAN 1: Ganti 'bulan' jadi 'name' agar sesuai dengan Recharts & Controller
+  grafikKehadiran?: Array<{ name: string; value: number }>
+
   absenHariIni?: {
     status: string
     jamMasuk: string
@@ -42,17 +46,34 @@ type PageProps = {
     keterlambatan: number | null
     tanggal: string
   } | null
-  jadwalKerja?: { datang: string; pulang: string }
+  jadwalKerja?: {
+    jamDatang: string
+    jamPulang: string
+  }
   tanggalHariIni?: string
   bulanAktif?: string
   tanggalAktif?: number
 }
 
 export default function Dashboard(props: PageProps) {
-  const { role, totalKaryawan, hadirHariIni, pengajuanCuti, sanksiAktif, attendanceWeekly, statusAbsensi, statistik } = props;
+  // Destructure semua props yang dibutuhkan
+  const {
+    role,
+    totalKaryawan,
+    hadirHariIni,
+    pengajuanCuti,
+    sanksiAktif,
+    attendanceWeekly,
+    statusAbsensi,
+
+    // Props User
+    statistik,
+    grafikKehadiran
+  } = props;
 
   const isAdmin = role === 'admin';
 
+  // --- Logic Data Admin ---
   const adminStats = {
     total_karyawan: totalKaryawan ?? 0,
     hadir_hari_ini: hadirHariIni ?? 0,
@@ -68,17 +89,9 @@ export default function Dashboard(props: PageProps) {
     { label: 'Cuti', value: statusAbsensi.cuti, color: '#8b5cf6' },
   ] : [];
 
-  const userSummaryData = statistik ? {
-    hadir: statistik.hadir.total,
-    terlambat: statistik.terlambat.total,
-    cuti: statistik.cuti.total,
-    hariKerja: statistik.hadir.hariKerja,
-  } : {
-    hadir: 0,
-    terlambat: 0,
-    cuti: 0,
-    hariKerja: 0,
-  };
+  // PERBAIKAN 2: Hapus variable 'userSummaryData'.
+  // Kita tidak perlu memformat ulang data lagi karena struktur dari
+  // Controller (MainController.php) sudah pas dengan yang diminta UserDashboard.
 
   return (
     <AppLayout>
@@ -95,7 +108,10 @@ export default function Dashboard(props: PageProps) {
             />
           ) : (
             <UserDashboard
-              summary={userSummaryData}
+              statistik={statistik}
+              grafikKehadiran={grafikKehadiran}
+              absenHariIni={props.absenHariIni}
+              jadwalKerja={props.jadwalKerja}
             />
           )}
 
