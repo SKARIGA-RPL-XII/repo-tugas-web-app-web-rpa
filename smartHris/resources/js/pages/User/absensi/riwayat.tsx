@@ -108,7 +108,7 @@ export default function RiwayatAbsensi({ auth, absensi, filters }: AbsensiProps)
                             </div>
 
                             <button onClick={handleFilter} className="px-5 py-2 border border-[#0D4838] text-[#0D4838] rounded-lg text-sm font-semibold hover:bg-green-50 transition-colors">
-                                Terapkan
+                                Terapkann
                             </button>
                             <button onClick={handleReset} className="px-5 py-2 border border-gray-300 text-gray-500 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
                                 Reset
