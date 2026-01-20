@@ -20,73 +20,91 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
-
-    /* ========= SABIL ========= */
     /* ========= KARYAWAN ========= */
+
     public function indexKaryawan()
     {
-        $karyawan = Karyawan::with('user')->orderBy('nip', 'desc')->get()->map(function ($item) {
-            $isPasswordDefault = $item->user && password_verify($item->tanggal_lahir, $item->user->password);
+        $karyawan = Karyawan::with(['user:id,name,email,password'])
+            ->select('id', 'user_id', 'nip', 'jabatan', 'departemen', 'alamat', 'tanggal_masuk', 'tanggal_lahir', 'jenis_kelamin')
+            ->orderBy('nip', 'desc')
+            ->get()
+            ->map(function ($item) {
 
-            return [
-                'id'             => $item->id,
-                'nama'           => $item->user->name ?? '-',
-                'email'          => $item->user->email ?? '',
-                'nip'            => $item->nip ?? '-',
-                'jabatan'        => $item->jabatan ?? '-',
-                'departemen'     => $item->departemen ?? '-',
-                'alamat'         => $item->alamat ?? '-',
-                'tanggal_masuk'  => $item->tanggal_masuk,
-                'tanggal_lahir'  => $item->tanggal_lahir,
-                'jenis_kelamin'  => $item->jenis_kelamin,
-                'is_password_default' => $isPasswordDefault,
-            ];
-        });
+                $isPasswordDefault = false;
+
+                if ($item->user && $item->user->password && $item->tanggal_lahir) {
+                    $defaultPassword = Carbon::parse($item->tanggal_lahir)->format('dmY');
+
+                    $isPasswordDefault = password_verify(
+                        $defaultPassword,
+                        $item->user->password
+                    );
+                }
+
+                return [
+                    'id' => $item->id,
+                    'nama' => $item->user->name ?? '-',
+                    'email' => $item->user->email ?? '',
+                    'nip' => $item->nip ?? '-',
+                    'jabatan' => $item->jabatan ?? '-',
+                    'departemen' => $item->departemen ?? '-',
+                    'alamat' => $item->alamat ?? '-',
+                    'tanggal_masuk' => $item->tanggal_masuk,
+                    'tanggal_lahir' => $item->tanggal_lahir,
+                    'jenis_kelamin' => $item->jenis_kelamin,
+                    'is_password_default' => $isPasswordDefault,
+                ];
+            });
 
         return Inertia::render('Admin/karyawan/index', [
             'karyawan' => $karyawan,
             'jenisPelanggaranList' => JenisPelanggaran::select('id', 'nama_pelanggaran')->get(),
         ]);
     }
+
     public function storeKaryawan(Request $request)
     {
         $request->validate([
-            'nama'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:users,email',
-            'jabatan'        => 'required|string',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'tanggal_lahir'  => 'required|date',
-            'departemen'     => 'required|string',
-            'alamat'         => 'required|string',
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'jabatan' => 'required|string',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'required|date',
+            'departemen' => 'required|string',
+            'alamat' => 'required|string',
         ]);
 
         DB::transaction(function () use ($request) {
 
-            $lastKaryawan = Karyawan::where('nip', 'like', 'K%')->orderBy('nip', 'desc')->lockForUpdate()->first();
+            $lastKaryawan = Karyawan::where('nip', 'like', 'K%')
+                ->orderBy('nip', 'desc')
+                ->lockForUpdate()
+                ->first();
 
             $lastNumber = $lastKaryawan
                 ? (int) substr($lastKaryawan->nip, 1)
                 : 0;
 
             $nip = 'K' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
             $password = Carbon::parse($request->tanggal_lahir)->format('dmY');
 
             $user = User::create([
-                'name'     => $request->nama,
-                'email'    => $request->email,
+                'name' => $request->nama,
+                'email' => $request->email,
                 'password' => bcrypt($password),
-                'role'     => 'user',
+                'role' => 'user',
             ]);
 
             Karyawan::create([
-                'user_id'        => $user->id,
-                'nip'            => $nip,
-                'jabatan'        => $request->jabatan,
-                'jenis_kelamin'  => $request->jenis_kelamin,
-                'tanggal_lahir'  => $request->tanggal_lahir,
-                'departemen'     => $request->departemen,
-                'alamat'         => $request->alamat,
-                'tanggal_masuk'  => Carbon::now()->toDateString(),
+                'user_id' => $user->id,
+                'nip' => $nip,
+                'jabatan' => $request->jabatan,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'departemen' => $request->departemen,
+                'alamat' => $request->alamat,
+                'tanggal_masuk' => now()->toDateString(),
             ]);
         });
 
@@ -98,13 +116,13 @@ class AdminController extends Controller
         $karyawan = Karyawan::findOrFail($id);
 
         $request->validate([
-            'nama'           => 'required',
-            'email'          => 'required|email|unique:users,email,' . $karyawan->user_id,
-            'jabatan'        => 'required',
-            'jenis_kelamin'  => 'required|in:L,P',
-            'tanggal_lahir'  => 'required|date',
-            'departemen'     => 'required',
-            'alamat'         => 'required',
+            'nama' => 'required',
+            'email' => 'required|email|unique:users,email,' . $karyawan->user_id,
+            'jabatan' => 'required',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'required|date',
+            'departemen' => 'required',
+            'alamat' => 'required',
         ]);
 
         $karyawan->user->update([
@@ -113,7 +131,7 @@ class AdminController extends Controller
         ]);
 
         $karyawan->update([
-            'jabatan'       => $request->jabatan,
+            'jabatan' => $request->jabatan,
             'jenis_kelamin' => $request->jenis_kelamin,
             'tanggal_lahir' => $request->tanggal_lahir,
             'departemen' => $request->departemen,
@@ -122,6 +140,7 @@ class AdminController extends Controller
 
         return back()->with('success', 'Karyawan diperbarui');
     }
+
     public function destroyKaryawan($id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -133,54 +152,25 @@ class AdminController extends Controller
 
         return redirect()->route('admin.karyawan')->with('success', 'Data karyawan berhasil dihapus');
     }
+
     public function resetPassword($id)
     {
-        Log::info("Reset password called for karyawan ID: $id");
-
-        $karyawan = Karyawan::find($id);
-
-        if (!$karyawan) {
-            throw ValidationException::withMessages([
-                'error' => 'Data karyawan tidak ditemukan.'
-            ]);
-        }
-
+        $karyawan = Karyawan::findOrFail($id);
         $user = $karyawan->user;
 
-        if (!$user) {
-            throw ValidationException::withMessages([
-                'error' => 'User tidak ditemukan.'
-            ]);
-        }
-
-        // Cek apakah mereset diri sendiri
         if ($user->id === Auth::id()) {
             throw ValidationException::withMessages([
                 'error' => 'Tidak dapat mereset password akun sendiri.'
             ]);
         }
 
-        if (!$karyawan->tanggal_lahir) {
-            throw ValidationException::withMessages([
-                'error' => 'Tanggal lahir karyawan tidak valid (kosong).'
-            ]);
-        }
+        $password = Carbon::parse($karyawan->tanggal_lahir)->format('dmY');
 
-        try {
-            $user->update([
-                'password' => bcrypt($karyawan->tanggal_lahir),
-            ]);
+        $user->update([
+            'password' => bcrypt($password),
+        ]);
 
-            Log::info("Password reset successfully for user ID: " . $user->id);
-
-            return redirect()->back()->with('success', 'Password berhasil direset ke Tanggal Lahir.');
-        } catch (\Exception $e) {
-            Log::error("Error resetting password: " . $e->getMessage());
-
-            throw ValidationException::withMessages([
-                'error' => 'Gagal mereset password: ' . $e->getMessage()
-            ]);
-        }
+        return back()->with('success', 'Password berhasil direset ke tanggal lahir (ddmmyyyy)');
     }
 
     /* ========= ABSENSI ========= */
@@ -442,6 +432,14 @@ public function pKaryawan()
             'tanggal' => now()->toDateString(),
             'catatan' => $request->catatan,
         ]);
+        if ((int) $request->sp != 0) {
+            SuratPeringatan::create([
+                'karyawan_id' => $request->karyawan_id,
+                'pelanggaran_karyawan_id' => $create->id,
+                'tanggal' => $request->tanggal,
+                'isi_pernyataan' => $request->catatan,
+            ]);
+        }
         if ($create) {
             return redirect()->back()->with('success', 'Pelanggaran berhasil ditambahkan');
         }

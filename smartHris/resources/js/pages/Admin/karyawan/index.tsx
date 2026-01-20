@@ -125,13 +125,12 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
         if (karyawanToReset && karyawanToReset.id) {
             router.put(`/app/karyawan/${karyawanToReset.id}/reset-password`, {}, {
                 onBefore: () => setIsResetting(true),
-                onSuccess: (page) => {
-                    console.log('Success response:', page);
+                onSuccess: () => {
                     setIsResetWarningOpen(false);
                     setKaryawanToReset(null);
 
                     setSuccessTitle('Berhasil');
-                    setSuccessMessage('Password karyawan berhasil direset ke NIP.');
+                    setSuccessMessage('Password karyawan berhasil direset ke Tanggal lahir.');
                     setShowSuccessModal(true);
 
                     setTimeout(() => {
@@ -148,7 +147,6 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     setShowFailureModal(true);
                 },
                 onFinish: () => {
-                    console.log('Finish reset password');
                     setIsResetting(false);
                 },
                 preserveScroll: true,
@@ -160,9 +158,8 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
         {
             header: 'No',
             className: 'w-24 pl-8 text-center',
-            render: (_, index) => (
-                <span className="text-gray-500">{index + 1}</span>
-            )
+            hidden: 'mobile',
+            render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
         },
         {
             header: 'Karyawan',
@@ -177,39 +174,40 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                         </span>
                     )}
                 </div>
-            )
+            ),
+            hidden: 'mobile',
         },
         {
             header: 'Jabatan',
-            render: (item) => (
-                <span className="font-medium text-gray-700">
-                    {item.karyawan?.jabatan ?? '-'}
-                </span>
-            )
+            accessorKey: 'jabatan',
+            className: 'font-medium text-gray-700',
+            hidden: 'tablet',
         },
         {
             header: 'Departemen',
-            render: (item) => (
-                <span className="text-gray-600">
-                    {item.karyawan?.departemen ?? '-'}
-                </span>
-            )
+            accessorKey: 'departemen',
+            className: 'text-gray-600',
+            hidden: 'tablet',
         },
         {
             header: 'Pelanggaran',
             render: (item) => (
-                <span className="font-medium text-gray-900">
-                    {item.jenis_pelanggaran?.nama ?? '-'}
-                </span>
-            )
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                    {new Date(item.tanggal_masuk).toLocaleDateString('id-ID', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                    })}
+                </div>
+            ),
+            hidden: 'mobile',
         },
         {
             header: 'Tanggal',
             render: (item) => (
-                <span className="font-medium text-gray-900">
-                    {item.tanggal}
-                </span>
-            )
+                <div className="flex max-w-62.5 gap-2 text-sm text-gray-600">
+                    <span className="line-clamp-2 leading-relaxed">{item.alamat}</span>
+                </div>
+            ),
+            hidden: 'tablet',
         },
         {
             header: '',
@@ -260,15 +258,15 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
 
     return (
         <AppLayout>
-            <Head title="Sanksi Karyawan" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                            Sanksi Karyawan
-                        </h2>
+            <Head title="Data Karyawan" />
+            <div className="py-6 sm:py-12">
+                <div className="mx-auto w-full max-w-7xl space-y-4 px-4 sm:space-y-6 sm:px-6 lg:px-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+                                Data Karyawan
+                            </h2>
+                        </div>
                     </div>
 
                     <DynamicTable

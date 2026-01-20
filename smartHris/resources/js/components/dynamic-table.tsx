@@ -11,6 +11,7 @@ export interface ColumnDef<T> {
     className?: string;
     sortable?: boolean;
     id?: string;
+    hidden?: 'mobile' | 'tablet' | 'never';
 }
 
 interface DynamicTableProps<T> {
@@ -160,29 +161,38 @@ function DynamicTable<T extends { id: string | number }>({
 
             <CardContent className="flex-1 px-0 pb-0">
                 <div className="w-full overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-xs sm:text-sm">
                         <thead className="border-b border-gray-100 bg-white text-gray-500">
                             <tr>
-                                {columns.map((col, idx) => (
-                                    <th
-                                        key={idx}
-                                        className={`px-4 py-4 font-medium whitespace-nowrap ${col.className || ''}`}
-                                    >
-                                        {col.sortable && col.accessorKey ? (
-                                            <button
-                                                onClick={() =>
-                                                    handleSort(col.accessorKey!)
-                                                }
-                                                className="group flex items-center gap-1 hover:text-gray-900 focus:outline-none"
-                                            >
-                                                {col.header}
-                                                <ArrowUpDown className="h-3 w-3 text-gray-400 transition-colors group-hover:text-gray-900" />
-                                            </button>
-                                        ) : (
-                                            col.header
-                                        )}
-                                    </th>
-                                ))}
+                                {columns.map((col, idx) => {
+                                    let colClasses = 'px-2 py-3 sm:px-4 sm:py-4 font-medium whitespace-nowrap text-xs sm:text-sm';
+                                    if (col.hidden === 'mobile') {
+                                        colClasses += ' hidden md:table-cell';
+                                    } else if (col.hidden === 'tablet') {
+                                        colClasses += ' hidden lg:table-cell';
+                                    }
+
+                                    return (
+                                        <th
+                                            key={idx}
+                                            className={`${colClasses} ${col.className || ''}`}
+                                        >
+                                            {col.sortable && col.accessorKey ? (
+                                                <button
+                                                    onClick={() =>
+                                                        handleSort(col.accessorKey!)
+                                                    }
+                                                    className="group flex items-center gap-1 hover:text-gray-900 focus:outline-none"
+                                                >
+                                                    {col.header}
+                                                    <ArrowUpDown className="h-3 w-3 text-gray-400 transition-colors group-hover:text-gray-900" />
+                                                </button>
+                                            ) : (
+                                                col.header
+                                            )}
+                                        </th>
+                                    );
+                                })}
                             </tr>
                         </thead>
 
@@ -233,18 +243,18 @@ function DynamicTable<T extends { id: string | number }>({
                     <select
                         value={itemsPerPage}
                         onChange={handleItemsPerPageChange}
-                        className="h-8 cursor-pointer rounded-md border-gray-200 bg-white text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                        className="h-8 cursor-pointer rounded-md border-gray-200 bg-white text-xs focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
                     >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
                     </select>
-                    <span>per page</span>
+                    <span className="hidden sm:inline">per page</span>
                 </div>
 
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
-                    <span className="text-sm text-gray-600">
+                <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-6">
+                    <span className="text-xs text-gray-600 sm:text-sm">
                         {totalItems === 0
                             ? '0'
                             : `${startIndex + 1}-${endIndex}`}{' '}
@@ -255,9 +265,9 @@ function DynamicTable<T extends { id: string | number }>({
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent sm:h-8 sm:w-8"
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                         </button>
 
                         {Array.from(
@@ -293,9 +303,9 @@ function DynamicTable<T extends { id: string | number }>({
                             disabled={
                                 currentPage === totalPages || totalPages === 0
                             }
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent"
+                            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent sm:h-8 sm:w-8"
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                         </button>
                     </div>
                 </div>
