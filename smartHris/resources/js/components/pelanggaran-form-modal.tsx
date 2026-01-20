@@ -156,7 +156,8 @@ export default function PelanggaranFormModal({
                                         value={data.sp}
                                         onChange={(e) => setData('sp', e.target.value)}
                                     >
-                                        <option value="" disabled>Pilih SP</option>
+                                        <option value="">Pilih SP</option>
+                                        <option value="Teguran">Teguran</option>
                                         <option value="SP1">SP1 - Peringatan 1</option>
                                         <option value="SP2">SP2 - Peringatan 2</option>
                                         <option value="SP3">SP3 - Peringatan 3</option>
