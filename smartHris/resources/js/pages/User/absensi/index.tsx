@@ -1,9 +1,9 @@
-import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import AppLayout from '@/layouts/app-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { AlertCircle, Calendar, Camera, Clock } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
     absensiHariIni?: {
@@ -58,17 +58,17 @@ export default function Index({
     useEffect(() => {
         if (flash?.success) {
             const successMsg = flash.success;
-            
+
             setSuccessModal((prev) => {
                 if (prev?.message === successMsg) return prev;
-                
-                return { 
-                    type: lastActionRef.current, 
-                    message: successMsg 
+
+                return {
+                    type: lastActionRef.current,
+                    message: successMsg,
                 };
             });
         }
-        
+
         if (flash?.error || errors?.message) {
             const newErrorMessage = flash?.error || errors?.message || '';
             setErrorModal((prev) => {
@@ -92,9 +92,10 @@ export default function Index({
             .toLocaleTimeString('id-ID', {
                 hour: '2-digit',
                 minute: '2-digit',
+                second: '2-digit',
                 hour12: false,
             })
-            .replace('.', ':');
+            .replace(/\./g, ':');
     };
 
     const formatDateInput = (date: Date) => {
@@ -209,9 +210,16 @@ export default function Index({
             <Head title="Absensi" />
 
             <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-10">
+                <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+  `}</style>
+
                 <div className="flex flex-col items-center justify-between gap-12 border-b border-gray-100 pb-12 md:flex-row">
                     <div className="text-center md:text-left">
-                        <h1 className="font-mono text-[80px] font-medium leading-none tracking-tight text-[#1a1a1a] sm:text-[100px] md:text-[120px]">
+                        <h1
+                            className="text-[80px] leading-none font-bold tracking-wider text-[#1a1a1a] sm:text-[100px] md:text-[120px]"
+                            style={{ fontFamily: "'Orbitron', monospace" }}
+                        >
                             {currentTime}
                         </h1>
                         <p className="mt-2 text-xl font-light text-gray-500">
@@ -281,9 +289,7 @@ export default function Index({
 
                     <Button
                         disabled={!canAbsenPulang}
-                        onClick={() =>
-                            canAbsenPulang && setModalType('pulang')
-                        }
+                        onClick={() => canAbsenPulang && setModalType('pulang')}
                         className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
                             canAbsenPulang
                                 ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
