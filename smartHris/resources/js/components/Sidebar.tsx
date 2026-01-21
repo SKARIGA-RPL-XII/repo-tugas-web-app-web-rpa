@@ -27,19 +27,19 @@ export default function Sidebar() {
     const isAdmin = auth.user?.role === 'admin';
     const sidebarConfig = isAdmin
         ? {
-            bg: 'bg-[#0D4838]',
-            logo: '/asset/fullputih.png',
-            navStyle:
-                'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
-            activeStyle: 'bg-[#0A3D2FB8] text-white',
-        }
+              bg: 'bg-[#0D4838]',
+              logo: '/asset/fullputih.png',
+              navStyle:
+                  'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
+              activeStyle: 'bg-[#0A3D2FB8] text-white',
+          }
         : {
-            bg: 'bg-[#FFFFFF]',
-            logo: '/asset/logo_hijau.png',
-            navStyle:
-                'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
-            activeStyle: 'bg-[#0D48381A] text-[#0D4838]',
-        };
+              bg: 'bg-[#FFFFFF]',
+              logo: '/asset/logo_hijau.png',
+              navStyle:
+                  'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
+              activeStyle: 'bg-[#0D48381A] text-[#0D4838]',
+          };
 
     return (
         <>
@@ -77,212 +77,156 @@ export default function Sidebar() {
                 </div>
 
                 <div className="flex-1 mt-2 md:mt-0">
-                    <nav className="space-y-2">
+                    <nav className="space-y-2 mt-6 px-2">
                         {isAdmin ? (
+                            /* ================= MENU ADMIN ================= */
                             <>
+                                {/* 1. Dashboard */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/dashboard">
-                                        <Icon
-                                            icon="material-symbols:dashboard-rounded"
-                                            width="20"
-                                            height="20"
-                                        />
+                                    <Link href="/dashboard" className="flex items-center gap-3">
+                                        <Icon icon="material-symbols:dashboard-rounded" width="22" height="22" />
                                         <span>Dashboard</span>
                                     </Link>
                                 </Button>
 
+                                {/* 2. Data Karyawan */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/karyawan')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/karyawan') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/app/karyawan">
-                                        <Icon
-                                            icon="f7:person-2-fill"
-                                            width="24"
-                                            height="24"
-                                        />
+                                    <Link href="/app/karyawan" className="flex items-center gap-3">
+                                        <Icon icon="fluent:people-community-20-filled" width="22" height="22" />
                                         <span>Data Karyawan</span>
                                     </Link>
                                 </Button>
 
+                                {/* 3. Absensi Karyawan */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/absensi')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/absensi') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/app/absensi">
-                                        {' '}
-                                        <Icon
-                                            icon="streamline:office-worker-remix"
-                                            width="14"
-                                            height="14"
-                                        />
-                                        <span> Absensi Karyawan</span>
+                                    <Link href="/app/absensi" className="flex items-center gap-3">
+                                        <Icon icon="ic:round-access-time-filled" width="22" height="22" />
+                                        <span>Absensi Karyawan</span>
                                     </Link>
                                 </Button>
+
+                                {/* 4. Data Cuti Karyawan */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/cuti')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/cuti') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/app/cuti">
-                                        {' '}
-                                        <Icon
-                                            icon="streamline:office-worker-remix"
-                                            width="14"
-                                            height="14"
-                                        />
-                                        <span> Data Cuti Karyawan</span>
+                                    <Link href="/app/cuti" className="flex items-center gap-3">
+                                        <Icon icon="bxs:notepad" width="22" height="22" />
+                                        <span>Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
+
+                                {/* 5. Libur/Cuti Kalender */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/app/kalender')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/kalender') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/app/kalender">
-                                        {' '}
-                                        <Icon
-                                            icon="streamline:office-worker-remix"
-                                            width="14"
-                                            height="14"
-                                        />
-                                        <span> Libur/Cuti Kalender</span>
+                                    <Link href="/app/kalender" className="flex items-center gap-3">
+                                        <Icon icon="solar:calendar-date-bold" width="22" height="22" />
+                                        <span>Libur/Cuti Kalender</span>
+                                    </Link>
+                                </Button>
+
+                                {/* 6. Data Sanksi Karyawan */}
+                                <Button
+                                    variant="ghost"
+                                    asChild
+                                    onClick={() => setIsOpen(false)}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/pelanggaran') ? sidebarConfig.activeStyle : ''}`}
+                                >
+                                    <Link href="/app/pelanggaran" className="flex items-center gap-3">
+                                        <Icon icon="solar:shield-warning-bold" width="22" height="22" />
+                                        <span>Data Sanksi Karyawan</span>
                                     </Link>
                                 </Button>
                             </>
                         ) : (
+                            /* ================= MENU USER ================= */
                             <>
+                                {/* 1. Dashboard */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/dashboard') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/dashboard">
-                                        <Icon
-                                            icon="solar:home-2-bold"
-                                            width="24"
-                                            height="24"
-                                        />
-                                        <span>Home</span>
+                                    <Link href="/dashboard" className="flex items-center gap-3">
+                                        <Icon icon="material-symbols:dashboard-rounded" width="22" height="22" />
+                                        <span>Dashboard</span>
                                     </Link>
                                 </Button>
 
+                                {/* 2. Absen */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/absensi">
-                                        <Icon
-                                            icon="fluent:task-list-square-16-filled"
-                                            width="16"
-                                            height="16"
-                                        />
+                                    <Link href="/absensi" className="flex items-center gap-3">
+                                        {/* Menggunakan solar:user-id-bold (Kartu ID) */}
+                                        <Icon icon="solar:user-id-bold" width="22" height="22" />
                                         <span>Absen</span>
                                     </Link>
                                 </Button>
 
+                                {/* 3. Riwayat Absen */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi/riwayat')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/absensi/riwayat') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/absensi/riwayat">
-                                        <Icon
-                                            icon="mage:note-text-fill"
-                                            width="24"
-                                            height="24"
-                                        />
+                                    <Link href="/absensi/riwayat" className="flex items-center gap-3">
+                                        <Icon icon="fluent:text-bullet-list-square-clock-20-regular" width="22" height="22" />
                                         <span>Riwayat Absen</span>
                                     </Link>
                                 </Button>
 
+                                {/* 4. Pelanggaran */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/pelanggaran')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/pelanggaran') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/pelanggaran">
-                                        <Icon
-                                            icon="mingcute:warning-fill"
-                                            width="24"
-                                            height="24"
-                                        />
+                                    <Link href="/pelanggaran" className="flex items-center gap-3">
+                                        <Icon icon="solar:danger-circle-linear" width="22" height="22" />
                                         <span>Pelanggaran</span>
                                     </Link>
                                 </Button>
 
+                                {/* 5. Cuti */}
                                 <Button
                                     variant="ghost"
                                     asChild
                                     onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti') ? sidebarConfig.activeStyle : ''}`}
                                 >
-                                    <Link href="/cuti">
-                                        <Icon
-                                            icon="mage:star-moving-fill"
-                                            width="24"
-                                            height="24"
-                                        />
+                                    <Link href="/cuti" className="flex items-center gap-3">
+                                        <Icon icon="solar:star-fall-linear" width="22" height="22" />
                                         <span>Cuti</span>
                                     </Link>
                                 </Button>
-                                <Button
-                                    variant="ghost"
-                                    asChild
-                                    onClick={() => setIsOpen(false)}
-                                    className={`${sidebarConfig.navStyle} ${isActive('/cuti')
-                                        ? sidebarConfig.activeStyle
-                                        : ''
-                                        }`}
-                                >
-                                </Button>
-
                             </>
                         )}
                     </nav>
