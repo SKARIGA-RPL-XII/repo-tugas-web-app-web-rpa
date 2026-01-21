@@ -1,9 +1,7 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Form, Head, usePage } from '@inertiajs/react';
-import { CameraIcon, Edit2 } from 'lucide-react'; // Pastikan menginstall lucide-react
-
-import HeadingSmall from '@/components/heading-small';
+import { CameraIcon, Edit2 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
