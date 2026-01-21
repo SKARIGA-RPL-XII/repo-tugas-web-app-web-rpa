@@ -10,6 +10,8 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Head, router } from '@inertiajs/react';
@@ -49,8 +51,9 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const [karyawanToDelete, setKaryawanToDelete] = useState<Karyawan | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const [showSuccessModal, setShowSuccessModal] = useState(false)
-    const [successMessage, setSuccessMessage] = useState('')
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+    const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(null);
 
     const [isResetWarningOpen, setIsResetWarningOpen] = useState(false);
     const [karyawanToReset, setKaryawanToReset] = useState<Karyawan | null>(null);
@@ -157,22 +160,34 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
     const columns: ColumnDef<Karyawan>[] = [
         {
             header: 'No',
+            accessorKey: 'id',
+            sortable: true,
             className: 'w-24 pl-8 text-center',
             hidden: 'mobile',
             render: (_, index) => <span className="text-gray-500">{index + 1}</span>,
         },
         {
             header: 'Karyawan',
+            accessorKey: 'nama',
             render: (item) => (
                 <div className="flex flex-col gap-1">
-                    <span className="font-medium text-gray-900">
-                        {item.karyawan?.nama ?? '-'}
+                    <span className="font-medium text-gray-900">{item.nama}</span>
+                    <span className="text-xs text-gray-500">NIP: {item.nip}</span>
+                </div>
+            ),
+        },
+        {
+            header: 'Data Pribadi',
+            render: (item) => (
+                <div className="flex flex-col gap-1 text-sm text-gray-600">
+                    <span>
+                        {new Date(item.tanggal_lahir).toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'long', year: 'numeric',
+                        })}
                     </span>
-                    {item.karyawan?.nip && (
-                        <span className="text-xs text-gray-500">
-                            NIP: {item.karyawan.nip}
-                        </span>
-                    )}
+                    <span className="text-xs text-gray-500">
+                        {item.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}
+                    </span>
                 </div>
             ),
             hidden: 'mobile',
@@ -190,7 +205,8 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
             hidden: 'tablet',
         },
         {
-            header: 'Pelanggaran',
+            header: 'Tanggal Masuk',
+            accessorKey: 'tanggal_masuk',
             render: (item) => (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                     {new Date(item.tanggal_masuk).toLocaleDateString('id-ID', {
@@ -201,7 +217,8 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
             hidden: 'mobile',
         },
         {
-            header: 'Tanggal',
+            header: 'Alamat',
+            accessorKey: 'alamat',
             render: (item) => (
                 <div className="flex max-w-62.5 gap-2 text-sm text-gray-600">
                     <span className="line-clamp-2 leading-relaxed">{item.alamat}</span>
@@ -216,12 +233,8 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
             render: (item) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900
-                            focus-visible:ring-0 focus-visible:ring-offset-0
-                            data-[state=open]:bg-gray-100"
-                        >
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:bg-gray-100">
+                            <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>
@@ -252,9 +265,9 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
 
                     </DropdownMenuContent>
                 </DropdownMenu>
-            )
-        }
-    ]
+            ),
+        },
+    ];
 
     return (
         <AppLayout>
@@ -270,26 +283,22 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                     </div>
 
                     <DynamicTable
-                        title="Data Sanksi Karyawan"
-                        data={pelanggaran}
+                        title="List Karyawan"
+                        data={karyawan}
                         columns={columns}
-                        searchKeys={[
-                            'karyawan.nama',
-                            'karyawan.jabatan',
-                            'karyawan.departemen',
-                            'jenis_pelanggaran.nama'
-                        ]}
+                        searchKeys={['nama', 'nip']}
+                        onAddClick={handleAddClick}
+                        addButtonLabel="Tambah Karyawan"
                     />
                 </div>
             </div>
 
-            {/* MODAL FORM */}
-            <PelanggaranFormModal
+            <KaryawanFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
-                data={selected}
-                karyawan={karyawan}
-                jenisPelanggaran={jenisPelanggaran}
+                mode={formMode}
+                initialData={selectedKaryawan}
+                onSuccess={handleFormSuccess}
             />
 
             <PelanggaranFormModal
@@ -323,7 +332,7 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={confirmDelete}
                 processing={isDeleting}
-                inputType="pelanggaran"
+                inputType="karyawan"
             />
 
             <WarningModal
@@ -351,6 +360,5 @@ export default function DataKaryawan({ karyawan, jenisPelanggaranList = [] }: Pa
                 message={failureMessage}
             />
         </AppLayout>
-    )
+    );
 }
-    

@@ -215,7 +215,6 @@
 
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Pelanggaran Karyawan</h1>
-          <ProfileMenu />
         </div>
 
         {activeTab === 'sanksi' ? (
