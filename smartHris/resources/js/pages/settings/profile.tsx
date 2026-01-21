@@ -22,7 +22,8 @@ interface UserWithKaryawan extends User {
 export default function Profile() {
     const { auth } = usePage<SharedData>().props;
     const user = auth.user as UserWithKaryawan;
-    
+
+
     const karyawanData: KaryawanData = user.karyawan || {
         nip: '',
         jabatan: '',
@@ -31,6 +32,7 @@ export default function Profile() {
         tanggal_lahir: '',
         alamat: ''
     };
+
 
     return (
         <AppLayout>
