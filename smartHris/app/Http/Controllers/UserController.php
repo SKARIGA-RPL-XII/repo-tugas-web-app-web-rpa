@@ -207,31 +207,30 @@ class UserController extends Controller
             ]);
         }
     }
-    public function riwayat(Request $request)
+ public function riwayat(Request $request)
 {
-    $user = auth()->user();
-    $karyawan = $user->karyawan;
+    $karyawan = auth()->user()->karyawan;
 
-    // Mulai query dengan relasi karyawan
-    $query = Absensi::where('karyawan_id', $karyawan->id);
+    // 1. Ambil data dasar
+    $query = Absensi::where('karyawan_id', $karyawan->id)
+        ->orderBy('tanggal', 'desc');
 
-    // Filter berdasarkan Bulan (Format Y-m dari select di frontend)
+    // 2. Logika Filter (Mengikuti pola fungsi pelanggaran)
     if ($request->filled('bulan')) {
-        try {
-            $date = Carbon::parse($request->bulan);
-            $query->whereYear('tanggal', $date->year)
-                  ->whereMonth('tanggal', $date->month);
-        } catch (\Exception $e) {
-            // Jika format tanggal tidak valid, abaikan filter bulan
-        }
+        // Memecah string "2026-01" menjadi [2026, 01]
+        [$year, $month] = explode('-', $request->bulan);
+        $query->whereYear('tanggal', $year)->whereMonth('tanggal', $month);
     }
 
-    // Filter berdasarkan Status
     if ($request->filled('status')) {
-        $query->where('status', $request->status);
+    // Paksa menjadi huruf kecil sesuai definisi ENUM di migration
+    $query->where('status', strtolower($request->status));
+}
+
+    if ($request->filled('keterangan')) {
+        $query->where('keterangan', 'like', "%{$request->keterangan}%");
     }
 
-    // Filter Pencarian Global (Search Bar)
     if ($request->filled('search')) {
         $searchTerm = $request->search;
         $query->where(function ($q) use ($searchTerm) {
@@ -241,23 +240,20 @@ class UserController extends Controller
         });
     }
 
-    // Eksekusi pagination dan pastikan filter tetap ada di URL (query string)
-    // Saya naikkan menjadi 10 atau tetap 5 sesuai keinginan Anda
-    $absensi = $query->orderBy('tanggal', 'desc')->paginate(10)->withQueryString();
+    // 3. Eksekusi Pagination
+    $absensi = $query->paginate(10)->withQueryString();
 
+    // 4. Return ke View dengan mapping data
     return Inertia::render('User/absensi/riwayat', [
         'absensi' => $absensi->through(fn($item) => [
             'id' => $item->id,
-            // Menggunakan Carbon dengan locale Indonesia (pastikan app locale sudah ID)
-            'tanggal' => $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-',
-            'jam_masuk' => $item->jam_masuk ? Carbon::parse($item->jam_masuk)->format('H:i') : '-',
-            'jam_pulang' => $item->jam_pulang ? Carbon::parse($item->jam_pulang)->format('H:i') : '-',
-            'status' => ucfirst($item->status),
+            'tanggal' => $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-',
+            'jam_masuk' => $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-',
+            'jam_pulang' => $item->jam_pulang ? \Carbon\Carbon::parse($item->jam_pulang)->format('H:i') : '-',
+            'status' => strtoupper($item->status),
             'keterangan' => $item->keterangan ?? 'Tanpa Keterangan',
         ]),
-
-        // Kirim balik filter untuk sinkronisasi state di React
-        'filters' => $request->only(['bulan', 'status', 'search']),
+        'filters' => $request->only(['bulan', 'status', 'search', 'keterangan']),
     ]);
 }
  public function pelanggaran(Request $request)
