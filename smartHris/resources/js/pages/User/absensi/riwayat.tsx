@@ -65,9 +65,8 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
     ];
     const currentYear = new Date().getFullYear();
     const handleFilter = () => {
-        // Membersihkan parameter kosong sebelum dikirim
         const filteredParams = Object.fromEntries(
-            Object.entries(params).filter(([_, value]) => value !== ''),
+            Object.entries(params).filter(([value]) => value !== ''),
         );
 
         router.get(baseUrl, filteredParams, {
@@ -86,7 +85,7 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
         setParams(newParams);
 
         const filteredParams = Object.fromEntries(
-            Object.entries(newParams).filter(([_, value]) => value !== ''),
+            Object.entries(newParams).filter(([value]) => value !== ''),
         );
         router.get(baseUrl, filteredParams);
     };
@@ -104,10 +103,8 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
 
             <main className="min-h-screen bg-[#F2F7F5] py-10">
                 <div className="mx-auto max-w-6xl space-y-6 px-6">
-                    {/* Filter Section */}
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div className="flex flex-wrap items-center gap-2">
-                            {/* Dropdown Bulan Lengkap */}
                             <div className="relative">
                                 <select
                                     value={params.bulan}
@@ -130,7 +127,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                 <ChevronDown className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-white" />
                             </div>
 
-                            {/* Dropdown Status */}
                             <div className="relative">
                                 <select
                                     value={params.status}
@@ -150,7 +146,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                 <ChevronDown className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
                             </div>
 
-                            {/* Dropdown Keterangan */}
                             <div className="relative">
                                 <select
                                     value={params.keterangan}
@@ -187,7 +182,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                             </button>
                         </div>
 
-                        {/* Search Input */}
                         <div className="relative w-full md:w-64">
                             <input
                                 type="text"
@@ -208,7 +202,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                         </div>
                     </div>
 
-                    {/* Active Filter Badges */}
                     <div className="flex flex-wrap gap-2">
                         {params.bulan && (
                             <span className="flex items-center gap-2 rounded-full border border-[#0D4838]/40 bg-white px-3 py-1 text-xs font-medium text-[#0D4838]">
@@ -239,7 +232,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                         )}
                     </div>
 
-                    {/* Table Section */}
                     <div className="overflow-hidden rounded-xl border border-[#0D4838]/40 bg-white shadow-sm">
                         <table className="w-full text-sm">
                             <thead className="bg-[#0D4838] text-white">
@@ -314,7 +306,6 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     <div className="flex justify-center gap-2 pt-4">
                         {absensi.links.map((link, i) => (
                             <button

@@ -155,7 +155,6 @@ export default function Index({ kalender = [] }: PageProps) {
                                         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                                         const event = getEvent(dateStr);
 
-                                        // Cek Hari Ini
                                         const isToday =
                                             day === today.getDate() &&
                                             month === today.getMonth() &&
@@ -166,12 +165,12 @@ export default function Index({ kalender = [] }: PageProps) {
 
                                         if (event?.jenis_hari === 'libur') {
                                             bgClass =
-                                                'bg-[#6344ff] text-white shadow-md shadow-indigo-200';
+                                                'bg-red-600 text-white shadow-md shadow-red-200';
                                         } else if (
                                             event?.jenis_hari === 'event'
                                         ) {
                                             bgClass =
-                                                'bg-[#cc44ff] text-white shadow-md shadow-purple-200';
+                                                'bg-green-600 text-white shadow-md shadow-green-200';
                                         } else if (isToday) {
                                             bgClass =
                                                 'bg-white text-blue-600 border border-blue-600 font-bold';
@@ -211,8 +210,8 @@ export default function Index({ kalender = [] }: PageProps) {
                             <div className="w-full flex-1 space-y-4 pt-4 lg:w-64 lg:pt-16">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-8 w-8 rounded-full bg-[#6344ff]" />
-                                        <div className="flex-1 rounded-md bg-[#e9e4ff] px-4 py-2 text-[#6344ff]">
+                                        <div className="h-8 w-8 rounded-full bg-red-600" />
+                                        <div className="flex-1 rounded-md bg-red-100 px-4 py-2 text-red-600">
                                             <p className="text-center text-xs font-bold tracking-wide uppercase">
                                                 Libur Nasional
                                             </p>
@@ -242,8 +241,8 @@ export default function Index({ kalender = [] }: PageProps) {
 
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-8 w-8 rounded-full bg-[#cc44ff]" />
-                                        <div className="flex-1 rounded-md bg-[#f9e4ff] px-4 py-2 text-[#cc44ff]">
+                                        <div className="h-8 w-8 rounded-full bg-green-600" />
+                                        <div className="flex-1 rounded-md bg-green-100 px-4 py-2 text-green-600">
                                             <p className="text-center text-xs font-bold tracking-wide uppercase">
                                                 Event Kantor
                                             </p>
@@ -262,8 +261,7 @@ export default function Index({ kalender = [] }: PageProps) {
                                             className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
                                         >
                                             <p className="font-semibold">
-                                                {event.keterangan
-                                                }
+                                                {event.keterangan}
                                             </p>
                                             <p className="text-gray-400">
                                                 {event.tanggal}
