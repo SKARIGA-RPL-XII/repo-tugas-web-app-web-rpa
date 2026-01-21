@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
         foreach ($karyawans as $karyawan) {
             foreach (range(1, 30) as $hari) {
 
-                $status = collect(['hadir', 'hadir', 'hadir', 'alpha'])->random();
+                $status = collect(['hadir', 'cuti', 'sakit', 'alpha'])->random();
 
                 Absensi::create([
                     'karyawan_id' => $karyawan->id,

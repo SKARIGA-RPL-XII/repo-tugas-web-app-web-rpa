@@ -8,7 +8,13 @@ import {
     Plus,
     Search,
 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 export interface ColumnDef<T> {
     header: string;
@@ -27,6 +33,7 @@ interface DynamicTableProps<T> {
     searchKeys?: (keyof T)[];
     onAddClick?: () => void;
     addButtonLabel?: string;
+    headerSlot?: React.ReactNode;
 }
 
 function DynamicTable<T extends { id: string | number }>({
@@ -35,7 +42,8 @@ function DynamicTable<T extends { id: string | number }>({
     columns,
     searchKeys = [],
     onAddClick,
-    addButtonLabel = "Tambah Data",
+    addButtonLabel = 'Tambah Data',
+    headerSlot,
 }: DynamicTableProps<T>) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{
@@ -44,6 +52,9 @@ function DynamicTable<T extends { id: string | number }>({
     } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const filteredAndSortedData = useMemo(() => {
         let result = [...data];
@@ -83,67 +94,93 @@ function DynamicTable<T extends { id: string | number }>({
         startIndex + itemsPerPage,
     );
 
-    const handleSort = (key: keyof T) => {
-        let direction: 'asc' | 'desc' = 'asc';
+    const handleSort = useCallback((key: keyof T) => {
+        setSortConfig((prev) => {
+            let direction: 'asc' | 'desc' = 'asc';
+            if (prev && prev.key === key && prev.direction === 'asc') {
+                direction = 'desc';
+            }
+            return { key, direction };
+        });
+    }, []);
+
+    const handlePageChange = useCallback(
+        (page: number) => {
+            if (page >= 1 && page <= totalPages) {
+                setCurrentPage(page);
+            }
+        },
+        [totalPages],
+    );
+
+    const handleSearch = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setSearchTerm(value);
+            setCurrentPage(1);
+        },
+        [],
+    );
+    
+
+    // Maintain focus after state updates
+    useEffect(() => {
         if (
-            sortConfig &&
-            sortConfig.key === key &&
-            sortConfig.direction === 'asc'
+            isSearchFocused &&
+            searchInputRef.current &&
+            document.activeElement !== searchInputRef.current
         ) {
-            direction = 'desc';
+            searchInputRef.current.focus();
         }
-        setSortConfig({ key, direction });
-    };
+    }, [searchTerm, isSearchFocused]);
 
-    const handlePageChange = (page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
-        }
-    };
-
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
-
-    const handleItemsPerPageChange = (
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-    };
+    const handleItemsPerPageChange = useCallback(
+        (e: React.ChangeEvent<HTMLSelectElement>) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+        },
+        [],
+    );
 
     return (
-        <Card className="flex w-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border-none bg-white shadow-sm">
-            <CardHeader className="px-4 py-4 pb-3 sm:px-8 sm:py-6 sm:pb-4">
-                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
-                    <CardTitle className="text-lg font-semibold text-gray-800 sm:text-xl">
-                        {title}
-                    </CardTitle>
+        <Card className="flex w-full flex-col overflow-hidden rounded-3xl border-none bg-white shadow-sm">
+            <CardHeader className="px-4 pt-6 pb-4 sm:px-8">
+                {headerSlot ? (
+                    headerSlot
+                ) : (
+                    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                        <CardTitle className="text-xl font-semibold text-gray-800">
+                            {title}
+                        </CardTitle>
 
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <Input
-                                type="search"
-                                placeholder="Cari..."
-                                value={searchTerm}
-                                onChange={handleSearch}
-                                className="h-9 w-full rounded-lg border-gray-200 bg-white pl-10 text-sm focus:ring-1 focus:ring-emerald-500 sm:h-10"
-                            />
+                        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                            <div className="relative w-full sm:w-72">
+                                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                <Input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    placeholder="Search..."
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                    onFocus={() => setIsSearchFocused(true)}
+                                    onBlur={() => setIsSearchFocused(false)}
+                                    autoComplete="off"
+                                    className="h-10 w-full rounded-lg border-gray-200 bg-white pl-10 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                />
+                            </div>
+
+                            {onAddClick && (
+                                <Button
+                                    onClick={onAddClick}
+                                    className="h-10 w-full rounded-lg bg-[#114F38] px-6 text-white hover:bg-[#0d3f2d] sm:w-auto"
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    {addButtonLabel}
+                                </Button>
+                            )}
                         </div>
-                        {onAddClick && (
-                            <Button
-                                onClick={onAddClick}
-                                className="h-9 w-full rounded-lg bg-[#114F38] px-4 text-sm text-white hover:bg-[#0d3f2d] sm:h-10 sm:w-auto sm:px-6"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                <span className="hidden sm:inline">{addButtonLabel}</span>
-                                <span className="sm:hidden">Tambah</span>
-                            </Button>
-                        )}
                     </div>
-                </div>
+                )}
             </CardHeader>
 
             <CardContent className="flex-1 px-0 pb-0">
@@ -152,7 +189,8 @@ function DynamicTable<T extends { id: string | number }>({
                         <thead className="border-b border-gray-100 bg-white text-gray-500">
                             <tr>
                                 {columns.map((col, idx) => {
-                                    let colClasses = 'px-2 py-3 sm:px-4 sm:py-4 font-medium whitespace-nowrap text-xs sm:text-sm';
+                                    let colClasses =
+                                        'px-2 py-3 sm:px-4 sm:py-4 font-medium whitespace-nowrap text-xs sm:text-sm';
                                     if (col.hidden === 'mobile') {
                                         colClasses += ' hidden md:table-cell';
                                     } else if (col.hidden === 'tablet') {
@@ -167,7 +205,9 @@ function DynamicTable<T extends { id: string | number }>({
                                             {col.sortable && col.accessorKey ? (
                                                 <button
                                                     onClick={() =>
-                                                        handleSort(col.accessorKey!)
+                                                        handleSort(
+                                                            col.accessorKey!,
+                                                        )
                                                     }
                                                     className="group flex items-center gap-1 hover:text-gray-900 focus:outline-none"
                                                 >
@@ -190,32 +230,23 @@ function DynamicTable<T extends { id: string | number }>({
                                         key={item.id}
                                         className="group transition-colors hover:bg-gray-50/50"
                                     >
-                                        {columns.map((col, colIdx) => {
-                                            let cellClasses = 'px-2 py-3 sm:px-4 sm:py-5 align-top font-medium whitespace-nowrap text-gray-900 text-xs sm:text-sm';
-                                            if (col.hidden === 'mobile') {
-                                                cellClasses += ' hidden md:table-cell';
-                                            } else if (col.hidden === 'tablet') {
-                                                cellClasses += ' hidden lg:table-cell';
-                                            }
-
-                                            return (
-                                                <td
-                                                    key={colIdx}
-                                                    className={`${cellClasses} ${col.className || ''}`}
-                                                >
-                                                    {col.render
-                                                        ? col.render(
-                                                            item,
-                                                            startIndex + rowIdx,
-                                                        )
-                                                        : col.accessorKey
-                                                            ? (item[
-                                                                col.accessorKey
-                                                            ] as React.ReactNode)
-                                                            : null}
-                                                </td>
-                                            );
-                                        })}
+                                        {columns.map((col, colIdx) => (
+                                            <td
+                                                key={colIdx}
+                                                className={`px-4 py-5 align-top font-medium whitespace-nowrap text-gray-900 ${col.className || ''}`}
+                                            >
+                                                {col.render
+                                                    ? col.render(
+                                                          item,
+                                                          startIndex + rowIdx,
+                                                      )
+                                                    : col.accessorKey
+                                                      ? (item[
+                                                            col.accessorKey
+                                                        ] as React.ReactNode)
+                                                      : null}
+                                            </td>
+                                        ))}
                                     </tr>
                                 ))
                             ) : (
@@ -233,10 +264,9 @@ function DynamicTable<T extends { id: string | number }>({
                 </div>
             </CardContent>
 
-            <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-4 py-3 sm:flex-row sm:gap-4 sm:px-8 sm:py-6">
-
-                <div className="flex items-center justify-center gap-1 text-xs text-gray-600 sm:text-sm sm:justify-start">
-                    <span className="hidden sm:inline">Show</span>
+            <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-100 px-4 py-4 sm:flex-row sm:px-8 sm:py-6">
+                <div className="flex w-full items-center justify-center gap-2 text-sm text-gray-600 sm:w-auto sm:justify-start">
+                    <span>Show</span>
                     <select
                         value={itemsPerPage}
                         onChange={handleItemsPerPageChange}
@@ -283,10 +313,11 @@ function DynamicTable<T extends { id: string | number }>({
                                         onClick={() =>
                                             handlePageChange(pageNum)
                                         }
-                                        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors sm:h-8 sm:w-8 sm:text-sm ${currentPage === pageNum
-                                            ? 'bg-emerald-50 text-emerald-600'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                            }`}
+                                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                                            currentPage === pageNum
+                                                ? 'bg-emerald-50 text-emerald-600'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
                                     >
                                         {pageNum}
                                     </button>

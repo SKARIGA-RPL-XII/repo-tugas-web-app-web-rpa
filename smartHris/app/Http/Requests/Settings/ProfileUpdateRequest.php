@@ -3,22 +3,15 @@
 namespace App\Http\Requests\Settings;
 
 use App\Models\User;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-
             'email' => [
                 'required',
                 'string',
@@ -27,6 +20,13 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+
+            'nip'           => ['nullable', 'string', 'max:50'],
+            'jabatan'       => ['nullable', 'string', 'max:100'],
+            'departemen'    => ['nullable', 'string', 'max:100'],
+            'jenis_kelamin' => ['nullable', 'in:L,P'],
+            'tanggal_lahir' => ['nullable', 'date'],
+            'alamat'        => ['nullable', 'string', 'max:500'],
         ];
     }
 }

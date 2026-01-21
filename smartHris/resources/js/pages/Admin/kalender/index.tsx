@@ -1,17 +1,15 @@
+import { EventModal } from '@/components/event-modal';
 import SuccessModal from '@/components/success-modal';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import Holidays from 'date-holidays';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React, { useState } from 'react';
-import { EventModal } from './EventModal';
 
-/* ===============================
-    TYPE DEFINITIONS
-================================ */
 interface KalenderItem {
     tanggal: string;
-    nama: string;
+    keterangan?: string;
+    nama?: string;
     jenis_hari: 'libur' | 'event';
 }
 
@@ -19,26 +17,33 @@ interface PageProps {
     kalender: KalenderItem[];
 }
 
-/* ===============================
-    COMPONENT
-================================ */
 export default function Index({ kalender = [] }: PageProps) {
-    const [currentDate, setCurrentDate] = useState(new Date(2026, 11, 1));
+    const [currentDate, setCurrentDate] = useState(new Date());
     const [showEventModal, setShowEventModal] = useState(false);
     const [modal, setModal] = useState(false);
 
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
+    const today = new Date();
 
-    /* ===============================
-        LIBUR NASIONAL INDONESIA
-    ================================ */
     const hd = new Holidays('ID');
     const liburNasional: KalenderItem[] = hd.getHolidays(year).map((h) => ({
         tanggal: h.date.slice(0, 10),
         nama: h.name,
         jenis_hari: 'libur',
     }));
+    const liburNasionalBulanan = liburNasional.filter((l) => {
+        const date = new Date(l.tanggal);
+        return date.getMonth() === month && date.getFullYear() === year;
+    });
+    const eventBulanan = kalender.filter((e) => {
+        const date = new Date(e.tanggal);
+        return (
+            e.jenis_hari === 'event' &&
+            date.getMonth() === month &&
+            date.getFullYear() === year
+        );
+    });
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
@@ -58,9 +63,6 @@ export default function Index({ kalender = [] }: PageProps) {
         'Desember',
     ];
 
-    /* ===============================
-        HELPERS
-    ================================ */
     const getEvent = (dateStr: string): KalenderItem | undefined => {
         const companyEvent = kalender.find((e) => e.tanggal === dateStr);
         const nationalHoliday = liburNasional.find(
@@ -73,9 +75,6 @@ export default function Index({ kalender = [] }: PageProps) {
         setCurrentDate(new Date(year, month + offset, 1));
     };
 
-    /* ===============================
-        RENDER
-    ================================ */
     return (
         <ModifiedStyles>
             <AppLayout>
@@ -92,54 +91,50 @@ export default function Index({ kalender = [] }: PageProps) {
                                 Kalender
                             </h2>
 
-                            {/* 🔥 TOMBOL POPUP (TIDAK PINDAH HALAMAN) */}
                             <button
                                 onClick={() => setShowEventModal(true)}
-                                className="hover:bg-opacity-90 flex cursor-pointer items-center gap-2 rounded-lg bg-[#0d4436] px-4 py-2 text-sm font-medium text-white transition-all"
+                                className="hover:bg-opacity-90 flex cursor-pointer items-center gap-2 rounded-lg bg-[#0d4436] px-4 py-2 text-sm font-medium text-white shadow-sm transition-all"
                             >
                                 <Plus size={18} />
                                 Tambah Libur
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-9 lg:flex-row">
-                            {/* ===============================
-                               CALENDAR SECTION
-                            ================================ */}
-                            <div className="flex-3 rounded-xl border border-gray-200 bg-white p-6">
-                                <div className="mb-8 flex items-center justify-between px-2">
-                                    <div className="group flex cursor-pointer items-center gap-2">
-                                        <span className="text-base font-bold text-gray-700">
+                        <div className="flex flex-col gap-10 lg:flex-row">
+                            <div className="w-full flex-3 rounded-xl border border-gray-200 bg-white p-6 lg:max-w-3xl">
+                                <div className="mb-6 flex items-center justify-between px-2">
+                                    <div className="flex cursor-pointer items-center gap-2 text-gray-600 hover:text-gray-900">
+                                        <span className="text-base font-semibold">
                                             {bulanNama[month]} {year}
                                         </span>
-                                        <span className="text-[10px] text-gray-400 transition-colors group-hover:text-gray-600">
-                                            ▼
-                                        </span>
+                                        <ChevronDown
+                                            size={16}
+                                            className="text-gray-400"
+                                        />
                                     </div>
 
-                                    <div className="flex gap-6">
+                                    <div className="flex gap-4">
                                         <button
                                             onClick={() => changeMonth(-1)}
                                             className="text-gray-300 transition-colors hover:text-gray-600"
                                         >
-                                            <ChevronLeft size={22} />
+                                            <ChevronLeft size={20} />
                                         </button>
                                         <button
                                             onClick={() => changeMonth(1)}
                                             className="text-gray-300 transition-colors hover:text-gray-600"
                                         >
-                                            <ChevronRight size={22} />
+                                            <ChevronRight size={20} />
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* HEADER HARI */}
                                 <div className="mb-4 grid grid-cols-7 text-center">
                                     {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(
                                         (d, i) => (
                                             <div
                                                 key={i}
-                                                className="py-3 text-xs font-semibold text-gray-400"
+                                                className="py-2 text-xs font-semibold text-gray-400"
                                             >
                                                 {d}
                                             </div>
@@ -147,42 +142,54 @@ export default function Index({ kalender = [] }: PageProps) {
                                     )}
                                 </div>
 
-                                {/* TANGGAL GRID */}
-                                <div className="grid grid-cols-7 text-center">
+                                <div className="grid grid-cols-7 gap-y-2 text-center">
                                     {[...Array(firstDay)].map((_, i) => (
                                         <div
                                             key={`empty-${i}`}
-                                            className="h-12"
+                                            className="h-10"
                                         />
                                     ))}
 
                                     {[...Array(daysInMonth)].map((_, i) => {
                                         const day = i + 1;
                                         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
                                         const event = getEvent(dateStr);
 
-                                        let bgColor = '';
-                                        let textColor = 'text-gray-600';
+                                        const isToday =
+                                            day === today.getDate() &&
+                                            month === today.getMonth() &&
+                                            year === today.getFullYear();
+
+                                        let bgClass =
+                                            'bg-transparent text-gray-600 hover:bg-gray-50';
 
                                         if (event?.jenis_hari === 'libur') {
-                                            bgColor = 'bg-[#6344ff] text-white';
+                                            bgClass =
+                                                'bg-red-600 text-white shadow-md shadow-red-200';
                                         } else if (
                                             event?.jenis_hari === 'event'
                                         ) {
-                                            bgColor = 'bg-[#cc44ff] text-white';
+                                            bgClass =
+                                                'bg-green-600 text-white shadow-md shadow-green-200';
+                                        } else if (isToday) {
+                                            bgClass =
+                                                'bg-white text-blue-600 border border-blue-600 font-bold';
                                         }
 
                                         return (
                                             <div
                                                 key={day}
-                                                className="flex h-12 items-center justify-center"
+                                                className="group relative flex h-10 items-center justify-center"
                                             >
-                                                <div
-                                                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-all ${bgColor} ${textColor} ${!bgColor && 'cursor-pointer hover:bg-gray-100'}`}
+                                                <button
+                                                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-all ${bgClass} `}
+                                                    title={
+                                                        event?.nama ||
+                                                        event?.keterangan
+                                                    }
                                                 >
                                                     {day}
-                                                </div>
+                                                </button>
                                             </div>
                                         );
                                     })}
@@ -190,7 +197,7 @@ export default function Index({ kalender = [] }: PageProps) {
                                     {[1, 2, 3, 4].map((d) => (
                                         <div
                                             key={`next-${d}`}
-                                            className="flex h-12 items-center justify-center"
+                                            className="flex h-10 items-center justify-center"
                                         >
                                             <span className="text-sm text-gray-300">
                                                 {d}
@@ -200,28 +207,72 @@ export default function Index({ kalender = [] }: PageProps) {
                                 </div>
                             </div>
 
-                            {/* ===============================
-                                LEGEND
-                            ================================ */}
-                            <div className="w-full flex-1 space-y-5 pt-4 lg:w-72">
-                                <LegendItem
-                                    color="#6344ff"
-                                    label="Libur Nasional"
-                                    bg="#e9e4ff"
-                                />
-                                <LegendItem
-                                    color="#cc44ff"
-                                    label="Anniversary HR"
-                                    bg="#f9e4ff"
-                                />
+                            <div className="w-full flex-1 space-y-4 pt-4 lg:w-64 lg:pt-16">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-8 w-8 rounded-full bg-red-600" />
+                                        <div className="flex-1 rounded-md bg-red-100 px-4 py-2 text-red-600">
+                                            <p className="text-center text-xs font-bold tracking-wide uppercase">
+                                                Libur Nasional
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {liburNasionalBulanan.length === 0 && (
+                                        <p className="text-center text-xs text-gray-400">
+                                            Tidak ada libur nasional
+                                        </p>
+                                    )}
+
+                                    {liburNasionalBulanan.map((libur, i) => (
+                                        <div
+                                            key={i}
+                                            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
+                                        >
+                                            <p className="font-semibold">
+                                                {libur.nama}
+                                            </p>
+                                            <p className="text-gray-400">
+                                                {libur.tanggal}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-8 w-8 rounded-full bg-green-600" />
+                                        <div className="flex-1 rounded-md bg-green-100 px-4 py-2 text-green-600">
+                                            <p className="text-center text-xs font-bold tracking-wide uppercase">
+                                                Event Kantor
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {eventBulanan.length === 0 && (
+                                        <p className="text-center text-xs text-gray-400">
+                                            Tidak ada event
+                                        </p>
+                                    )}
+
+                                    {eventBulanan.map((event, i) => (
+                                        <div
+                                            key={i}
+                                            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
+                                        >
+                                            <p className="font-semibold">
+                                                {event.keterangan}
+                                            </p>
+                                            <p className="text-gray-400">
+                                                {event.tanggal}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* ===============================
-                    MODAL TAMBAH LIBUR
-                ================================ */}
 
                 <SuccessModal isOpen={modal} onClose={() => setModal(false)} />
 
@@ -235,39 +286,6 @@ export default function Index({ kalender = [] }: PageProps) {
     );
 }
 
-/* ===============================
-    LEGEND COMPONENT
-================================ */
-function LegendItem({
-    color,
-    label,
-    bg,
-}: {
-    color: string;
-    label: string;
-    bg: string;
-}) {
-    return (
-        <div className="flex items-center gap-4">
-            <div
-                className="h-10 w-10 rounded-full shadow-sm"
-                style={{ backgroundColor: color }}
-            />
-            <div
-                className="flex-1 rounded-full px-5 py-2.5"
-                style={{ backgroundColor: bg , color:color }}
-            >
-                <p className="text-md font-extrabold tracking-widest text-center">
-                    {label}
-                </p>
-            </div>
-        </div>
-    );
-}
-
-/* ===============================
-    WRAPPER STYLES
-================================ */
 const ModifiedStyles = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen bg-[#f4f7f6] font-sans antialiased">
         {children}

@@ -1,7 +1,9 @@
 import AppLayout from '@/layouts/app-layout'
 import { Head, router, useForm } from '@inertiajs/react'
-import { Search, Inbox, X, Plus, CheckCircle2 } from 'lucide-react'
+import { Search, Inbox, Plus } from 'lucide-react'
 import { useState } from 'react'
+import CutiModal from '@/components/cuti-modal'
+import SuccessModal from '@/components/success-modal'
 
 type AuthUser = {
     id: number
@@ -32,18 +34,22 @@ interface CutiProps {
         links: PaginationLink[]
     }
     filters: {
-        bulan?: string
         status?: string
         search?: string
     }
 }
 
+const STATUS_LABEL: Record<string, string> = {
+    pending: 'Menunggu',
+    disetujui: 'Disetujui',
+    ditolak: 'Ditolak',
+}
+
 export default function Cuti({ cuti, filters }: CutiProps) {
+    const [successOpen, setSuccessOpen] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [isSuccess, setIsSuccess] = useState(false)
 
     const [params, setParams] = useState({
-        bulan: filters.bulan ?? '',
         status: filters.status ?? '',
         search: filters.search ?? '',
     })
@@ -54,23 +60,26 @@ export default function Cuti({ cuti, filters }: CutiProps) {
         alasan: '',
     })
 
-    const handleFilter = () => {
+    const handleStatusChange = (value: string) => {
+        const newParams = { ...params, status: value }
+        setParams(newParams)
+        router.get('/cuti', newParams, { preserveState: true })
+    }
+
+    const handleSearch = () => {
         router.get('/cuti', params, { preserveState: true })
     }
 
     const submitCuti = (e: React.FormEvent) => {
         e.preventDefault()
+
         post('/cuti', {
             onSuccess: () => {
-                setIsSuccess(true)
+                setSuccessOpen(true)
+                setIsModalOpen(false)
                 reset()
             },
         })
-    }
-
-    const closeModal = () => {
-        setIsModalOpen(false)
-        setIsSuccess(false)
     }
 
     const getStatusStyle = (status: CutiData['status']) => {
@@ -92,41 +101,23 @@ export default function Cuti({ cuti, filters }: CutiProps) {
             <Head title="Data Cuti" />
 
             <main className="p-8 space-y-6 bg-gray-50 min-h-screen">
-                {/* ================= FILTER ================= */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <input
-                            type="month"
-                            value={params.bulan}
-                            onChange={(e) =>
-                                setParams({ ...params, bulan: e.target.value })
-                            }
-                            className="bg-[#0D4838] text-white px-4 py-2 rounded-lg text-sm"
-                        />
-
-                        <select
-                            value={params.status}
-                            onChange={(e) =>
-                                setParams({
-                                    ...params,
-                                    status: e.target.value,
-                                })
-                            }
-                            className="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="pending">Menunggu</option>
-                            <option value="disetujui">Disetujui</option>
-                            <option value="ditolak">Ditolak</option>
-                        </select>
-
-                        <button
-                            onClick={handleFilter}
-                            className="px-5 py-2 border border-[#0D4838] text-[#0D4838] rounded-lg text-sm font-semibold"
-                        >
-                            Terapkan
-                        </button>
-                    </div>
+                    <select
+                        value={params.status}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        className={`px-4 py-2 rounded-lg text-sm border transition
+              ${params.status
+                                ? 'bg-[#0D4838] text-white border-[#0D4838]'
+                                : 'bg-white border-gray-300 text-gray-600'
+                            }`}
+                    >
+                        <option value="">Semua Status</option>
+                        {Object.entries(STATUS_LABEL).map(([value, label]) => (
+                            <option key={value} value={value}>
+                                {label}
+                            </option>
+                        ))}
+                    </select>
 
                     <div className="flex items-center gap-4">
                         <div className="relative">
@@ -136,14 +127,9 @@ export default function Cuti({ cuti, filters }: CutiProps) {
                                 placeholder="Cari alasan..."
                                 value={params.search}
                                 onChange={(e) =>
-                                    setParams({
-                                        ...params,
-                                        search: e.target.value,
-                                    })
+                                    setParams({ ...params, search: e.target.value })
                                 }
-                                onKeyUp={(e) =>
-                                    e.key === 'Enter' && handleFilter()
-                                }
+                                onKeyUp={(e) => e.key === 'Enter' && handleSearch()}
                                 className="pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm"
                             />
                         </div>
@@ -162,15 +148,11 @@ export default function Cuti({ cuti, filters }: CutiProps) {
                     <table className="w-full text-sm">
                         <thead className="bg-[#0D4838] text-white">
                             <tr>
-                                <th className="px-6 py-4">
-                                    Tanggal Pengajuan
-                                </th>
+                                <th className="px-6 py-4">Tanggal Pengajuan</th>
                                 <th className="px-6 py-4">Tanggal Cuti</th>
                                 <th className="px-6 py-4">Jumlah Hari</th>
                                 <th className="px-6 py-4">Alasan</th>
-                                <th className="px-6 py-4 text-center">
-                                    Status
-                                </th>
+                                <th className="px-6 py-4 text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -178,33 +160,21 @@ export default function Cuti({ cuti, filters }: CutiProps) {
                                 cuti.data.map((item, i) => (
                                     <tr
                                         key={item.id}
-                                        className={
-                                            i % 2
-                                                ? 'bg-[#E8EFED]'
-                                                : 'bg-white'
-                                        }
+                                        className={i % 2 ? 'bg-[#E8EFED]' : 'bg-white'}
                                     >
-                                        <td className="px-6 py-5">
-                                            {item.tanggal_pengajuan}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            {item.tanggal_cuti}
-                                        </td>
+                                        <td className="px-6 py-5">{item.tanggal_pengajuan}</td>
+                                        <td className="px-6 py-5">{item.tanggal_cuti}</td>
                                         <td className="px-6 py-5">
                                             {item.jumlah_hari} hari
                                         </td>
-                                        <td className="px-6 py-5">
-                                            {item.alasan}
-                                        </td>
+                                        <td className="px-6 py-5">{item.alasan}</td>
                                         <td className="px-6 py-5 text-center">
                                             <span
                                                 className={`px-4 py-1.5 rounded-full text-[11px] font-bold ${getStatusStyle(
                                                     item.status
                                                 )}`}
                                             >
-                                                {item.status === 'pending'
-                                                    ? 'Menunggu'
-                                                    : item.status}
+                                                {STATUS_LABEL[item.status]}
                                             </span>
                                         </td>
                                     </tr>
@@ -223,116 +193,23 @@ export default function Cuti({ cuti, filters }: CutiProps) {
                         </tbody>
                     </table>
                 </div>
-
-                <div className="flex justify-center gap-2">
-                    {cuti.links.map((link, i) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            onClick={() =>
-                                link.url && router.get(link.url, params)
-                            }
-                            className={`px-4 py-2 rounded-lg text-xs font-bold ${
-                                link.active
-                                    ? 'bg-[#0D4838] text-white'
-                                    : 'bg-white text-gray-400 border'
-                            }`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
             </main>
 
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    {!isSuccess ? (
-                        <div className="bg-white rounded-3xl w-full max-w-2xl p-8">
-                            <div className="flex justify-between mb-6">
-                                <h2 className="text-2xl font-bold">
-                                    Pengajuan Cuti
-                                </h2>
-                                <button onClick={closeModal}>
-                                    <X />
-                                </button>
-                            </div>
+            <CutiModal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={submitCuti}
+                processing={processing}
+                data={data}
+                setData={setData}
+            />
 
-                            <form
-                                onSubmit={submitCuti}
-                                className="space-y-6"
-                            >
-                                <div className="grid grid-cols-2 gap-6">
-                                    <input
-                                        type="date"
-                                        value={data.tanggal_mulai}
-                                        onChange={(e) =>
-                                            setData(
-                                                'tanggal_mulai',
-                                                e.target.value
-                                            )
-                                        }
-                                        className="p-3 border rounded-xl"
-                                        required
-                                    />
-                                    <input
-                                        type="date"
-                                        value={data.tanggal_selesai}
-                                        onChange={(e) =>
-                                            setData(
-                                                'tanggal_selesai',
-                                                e.target.value
-                                            )
-                                        }
-                                        className="p-3 border rounded-xl"
-                                        required
-                                    />
-                                </div>
-
-                                <textarea
-                                    value={data.alasan}
-                                    onChange={(e) =>
-                                        setData('alasan', e.target.value)
-                                    }
-                                    className="w-full p-4 border rounded-xl"
-                                    rows={4}
-                                    required
-                                />
-
-                                <div className="flex gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={closeModal}
-                                        className="flex-1 py-3 border rounded-xl"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="flex-1 py-3 bg-[#0D4838] text-white rounded-xl"
-                                    >
-                                        {processing
-                                            ? 'Mengirim...'
-                                            : 'Kirim'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-3xl w-full max-w-sm p-8 text-center">
-                            <CheckCircle2 className="mx-auto text-green-500 w-16 h-16 mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">
-                                Berhasil
-                            </h2>
-                            <button
-                                onClick={closeModal}
-                                className="w-full py-3 bg-[#0D4838] text-white rounded-xl"
-                            >
-                                Selesai
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+            <SuccessModal
+                isOpen={successOpen}
+                onClose={() => setSuccessOpen(false)}
+                title="Berhasil"
+                message="Pengajuan cuti berhasil dikirim"
+            />
         </AppLayout>
     )
 }
