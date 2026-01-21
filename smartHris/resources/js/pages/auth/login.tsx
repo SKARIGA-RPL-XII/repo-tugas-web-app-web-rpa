@@ -86,14 +86,14 @@ export default function Login({ status }: LoginProps) {
             <form onSubmit={submit} className="w-full">
               <div className="mb-4">
                 <Label htmlFor="email">
-                  Username <span className="text-red-500">*</span>
+                  Email <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="email"
                   name="email"
                   value={data.email}
                   onChange={(e) => setData('email', e.target.value)}
-                  placeholder="Masukkan Username"
+                  placeholder="Masukkan Email"
                 />
                 <InputError message={errors.email} />
               </div>

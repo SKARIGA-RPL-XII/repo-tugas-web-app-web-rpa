@@ -5,7 +5,6 @@ type StatsInfoCardProps = {
   value: number | string
   valueLabel: string
   subtitle: string
-  month?: string
   icon: React.ReactNode
 }
 
@@ -14,9 +13,13 @@ export default function StatsInfoCard({
   value,
   valueLabel,
   subtitle,
-  month = 'Desember',
   icon,
 }: StatsInfoCardProps) {
+
+  const currentMonth = new Date().toLocaleString('id-ID', {
+    month: 'long',
+  })
+
   return (
     <div className="w-full rounded-xl bg-white p-5 shadow-sm border border-slate-100">
       <div className="flex items-center justify-between mb-6">
@@ -28,9 +31,9 @@ export default function StatsInfoCard({
             {title}
           </h3>
         </div>
-        
-        <div className="rounded-full bg-[#115E59] px-4 py-1 text-xs font-semibold text-white shadow-sm shadow-emerald-900/20">
-          {month}
+
+        <div className="rounded-full bg-[#115E59] px-4 py-1 text-xs font-semibold text-white shadow-sm shadow-emerald-900/20 capitalize">
+          {currentMonth}
         </div>
       </div>
 

@@ -39,26 +39,26 @@ export default function AttendanceChart({ data }: Props) {
               </linearGradient>
             </defs>
 
-            <CartesianGrid 
-                strokeDasharray="3 3" 
-                vertical={true} 
-                horizontal={true}
-                stroke="#E2E8F0" 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={true}
+              horizontal={true}
+              stroke="#E2E8F0"
             />
 
-            <XAxis 
-                dataKey="name" 
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 12, fill: '#64748b' }}
+            <XAxis
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 12, fill: '#64748b' }}
             />
 
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#64748b' }}
-              domain={[0, 100]}
-              ticks={[0, 25, 50, 75, 100]}
+              domain={[0, 31]}
+              ticks={[0, 10, 20, 31]}
             />
 
             <Tooltip
