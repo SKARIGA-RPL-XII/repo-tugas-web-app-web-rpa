@@ -156,6 +156,25 @@ export default function Sidebar() {
                                         <span> Data Cuti Karyawan</span>
                                     </Link>
                                 </Button>
+                                <Button
+                                    variant="ghost"
+                                    asChild
+                                    onClick={() => setIsOpen(false)}
+                                    className={`${sidebarConfig.navStyle} ${isActive('/app/kalender')
+                                        ? sidebarConfig.activeStyle
+                                        : ''
+                                        }`}
+                                >
+                                    <Link href="/app/kalender">
+                                        {' '}
+                                        <Icon
+                                            icon="streamline:office-worker-remix"
+                                            width="14"
+                                            height="14"
+                                        />
+                                        <span> Libur/Cuti Kalender</span>
+                                    </Link>
+                                </Button>
                             </>
                         ) : (
                             <>
