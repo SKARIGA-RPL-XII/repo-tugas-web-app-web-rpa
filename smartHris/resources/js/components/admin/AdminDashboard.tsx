@@ -41,6 +41,9 @@ export default function AdminDashboard({
   return (
     <div className="min-h-screen bg-[#EAF5F1] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl">
+        <h1 className="mb-6 text-2xl font-semibold text-slate-900">
+            Selamat Datang, Admin !
+          </h1>
         <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
           <AdminStats stats={safeStats} />
           <div className="mt-6 grid grid-cols-1 gap-6 sm:mt-8 lg:grid-cols-2">

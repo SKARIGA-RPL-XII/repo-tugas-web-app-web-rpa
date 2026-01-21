@@ -151,7 +151,6 @@ class UserController extends Controller
 
         return back()->with('success', 'Absen masuk berhasil');
     }
-
     public function pulangStore(Request $request)
     {
         $request->validate([

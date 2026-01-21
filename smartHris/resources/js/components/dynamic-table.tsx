@@ -1,8 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowUpDown, ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import {
+    ArrowUpDown,
+    ChevronLeft,
+    ChevronRight,
+    Plus,
+    Search,
+} from 'lucide-react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 export interface ColumnDef<T> {
     header: string;
@@ -40,7 +52,7 @@ function DynamicTable<T extends { id: string | number }>({
     } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    
+
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -83,7 +95,7 @@ function DynamicTable<T extends { id: string | number }>({
     );
 
     const handleSort = useCallback((key: keyof T) => {
-        setSortConfig(prev => {
+        setSortConfig((prev) => {
             let direction: 'asc' | 'desc' = 'asc';
             if (prev && prev.key === key && prev.direction === 'asc') {
                 direction = 'desc';
@@ -92,31 +104,43 @@ function DynamicTable<T extends { id: string | number }>({
         });
     }, []);
 
-    const handlePageChange = useCallback((page: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
-        }
-    }, [totalPages]);
+    const handlePageChange = useCallback(
+        (page: number) => {
+            if (page >= 1 && page <= totalPages) {
+                setCurrentPage(page);
+            }
+        },
+        [totalPages],
+    );
 
-    const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchTerm(value);
-        setCurrentPage(1);
-    }, []);
+    const handleSearch = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setSearchTerm(value);
+            setCurrentPage(1);
+        },
+        [],
+    );
     
+
     // Maintain focus after state updates
     useEffect(() => {
-        if (isSearchFocused && searchInputRef.current && document.activeElement !== searchInputRef.current) {
+        if (
+            isSearchFocused &&
+            searchInputRef.current &&
+            document.activeElement !== searchInputRef.current
+        ) {
             searchInputRef.current.focus();
         }
     }, [searchTerm, isSearchFocused]);
 
-    const handleItemsPerPageChange = useCallback((
-        e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-    }, []);
+    const handleItemsPerPageChange = useCallback(
+        (e: React.ChangeEvent<HTMLSelectElement>) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+        },
+        [],
+    );
 
     return (
         <Card className="flex w-full flex-col overflow-hidden rounded-3xl border-none bg-white shadow-sm">
@@ -131,7 +155,7 @@ function DynamicTable<T extends { id: string | number }>({
 
                         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
                             <div className="relative w-full sm:w-72">
-                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                 <Input
                                     ref={searchInputRef}
                                     type="text"
@@ -165,7 +189,8 @@ function DynamicTable<T extends { id: string | number }>({
                         <thead className="border-b border-gray-100 bg-white text-gray-500">
                             <tr>
                                 {columns.map((col, idx) => {
-                                    let colClasses = 'px-2 py-3 sm:px-4 sm:py-4 font-medium whitespace-nowrap text-xs sm:text-sm';
+                                    let colClasses =
+                                        'px-2 py-3 sm:px-4 sm:py-4 font-medium whitespace-nowrap text-xs sm:text-sm';
                                     if (col.hidden === 'mobile') {
                                         colClasses += ' hidden md:table-cell';
                                     } else if (col.hidden === 'tablet') {
@@ -180,7 +205,9 @@ function DynamicTable<T extends { id: string | number }>({
                                             {col.sortable && col.accessorKey ? (
                                                 <button
                                                     onClick={() =>
-                                                        handleSort(col.accessorKey!)
+                                                        handleSort(
+                                                            col.accessorKey!,
+                                                        )
                                                     }
                                                     className="group flex items-center gap-1 hover:text-gray-900 focus:outline-none"
                                                 >

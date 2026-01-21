@@ -1,381 +1,149 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import ReusableFormModal from '@/components/ui/reusable-form-modal';
-import WarningModal from '@/components/warning-modal';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { X, Clock, ChevronDown, ChevronRight } from 'lucide-react';
 
-interface KaryawanForm {
-    id?: string;
-    nama: string;
-    jenis_kelamin: string;
-    tanggal_lahir: string;
-    jabatan: string;
-    departemen: string;
-    alamat: string;
-    email: string;
-}
-
-export interface KaryawanData {
+export interface RiwayatSanksi {
     id: number;
-    nip: string;
-    nama: string;
-    jenis_kelamin: string;
-    tanggal_lahir: string;
-    jabatan: string;
-    departemen: string;
-    alamat: string;
-    email: string;
+    nama_pelanggaran: string;
+    tingkat: 'ringan' | 'sedang' | 'berat';
+    sp?: string | null;
+    catatan?: string | null;
+    tanggal: string;
+    pemberi: string;
 }
 
-export interface KaryawanFormModalProps {
+interface Props {
     isOpen: boolean;
     onClose: () => void;
-    mode: 'create' | 'edit';
-    initialData?: KaryawanData | null;
-    onSuccess: (message: string) => void;
+    data: RiwayatSanksi[];
 }
 
-const generateEmail = (nama: string) => {
-    if (!nama) return 'auto-generate@smarthris.com';
-
-    return (
-        nama
-            .toLowerCase()
-            .replace(/[^a-z\s]/g, '')
-            .trim()
-            .replace(/\s+/g, '.') +
-        '@smarthris.com'
-    );
-};
-
-export default function KaryawanFormModal({
+export default function HistorySanksiModal({
     isOpen,
     onClose,
-    mode,
-    initialData,
-    onSuccess,
-}: KaryawanFormModalProps) {
-    const [isSaveWarningOpen, setIsSaveWarningOpen] = useState(false);
-    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
+    data,
+}: Props) {
+    const [openId, setOpenId] = useState<number | null>(null);
 
-    const { data, setData, post, processing, errors, reset, clearErrors } =
-        useForm<KaryawanForm>({
-            id: '',
-            nama: '',
-            jenis_kelamin: '',
-            tanggal_lahir: '',
-            jabatan: '',
-            departemen: '',
-            alamat: '',
-            email: '',
-        });
-
-    useEffect(() => {
-        if (!isOpen) return;
-        clearErrors();
-
-        if (mode === 'edit' && initialData) {
-            setData({
-                id: initialData.id.toString(),
-                nama: initialData.nama,
-                jenis_kelamin: initialData.jenis_kelamin,
-                tanggal_lahir: initialData.tanggal_lahir,
-                jabatan: initialData.jabatan,
-                departemen: initialData.departemen,
-                alamat: initialData.alamat,
-                email: initialData.email || '',
-            });
-        } else {
-            reset();
-        }
-    }, [isOpen, mode, initialData, clearErrors, setData, reset]);
-
-    useEffect(() => {
-        if (mode === 'create') {
-            setData('email', generateEmail(data.nama));
-        }
-    }, [data.nama, mode, setData]);
-
-    const handleSaveClick = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (
-            !data.nama ||
-            !data.jenis_kelamin ||
-            !data.tanggal_lahir ||
-            !data.jabatan ||
-            !data.departemen ||
-            !data.alamat ||
-            !data.email
-        ) {
-            alert("Mohon lengkapi seluruh field bertanda bintang (*) sebelum menyimpan.");
-            return;
-        }
-
-        setIsSaveWarningOpen(true);
-    };
-
-    const handleCancelClick = () => {
-        setIsCancelWarningOpen(true);
-    };
-
-    const executeSubmit = () => {
-        post(
-            mode === 'edit'
-                ? `/app/karyawan/${data.id}`
-                : '/app/karyawan',
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onSuccess(
-                        mode === 'edit'
-                            ? 'Data karyawan berhasil diperbarui.'
-                            : 'Data karyawan berhasil disimpan.'
-                    );
-                    setIsSaveWarningOpen(false);
-                    onClose();
-                    reset();
-                },
-                onError: () => setIsSaveWarningOpen(false),
-            }
-        );
-    };
-
-
-    const executeCancel = () => {
-        setIsCancelWarningOpen(false);
-        reset();
-        onClose();
-    };
-
-    const labelClass =
-        'text-sm font-bold text-gray-700 mb-2 block tracking-tight';
+    if (!isOpen) return null;
 
     return (
-        <>
-            <ReusableFormModal
-                isOpen={isOpen}
-                onClose={handleCancelClick}
-                title={mode === 'edit' ? 'Edit Karyawan' : 'Tambah Karyawan'}
-                onSubmit={handleSaveClick}
-                isLoading={processing}
-                submitLabel={mode === 'edit' ? 'Update' : 'Simpan'}
-            >
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>
-                            NIP <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            readOnly
-                            value={
-                                mode === 'edit'
-                                    ? initialData?.nip ?? '-'
-                                    : 'Auto generate'
-                            }
-                            className="form-control form-readonly"
-                        />
-                        {mode === 'create' && (
-                            <p className="mt-1 text-xs text-gray-500">
-                                NIP akan dibuat otomatis oleh sistem
-                            </p>
-                        )}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="w-full max-w-2xl rounded-xl bg-white shadow-lg">
+                {/* HEADER */}
+                <div className="flex items-center justify-between border-b px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-gray-600" />
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            History
+                        </h2>
                     </div>
-
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>
-                            Nama Lengkap <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            value={data.nama}
-                            onChange={(e) => setData('nama', e.target.value)}
-                            placeholder="Masukkan Nama Lengkap"
-                            className="form-control"
-                            required
-                        />
-                        {errors.nama && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.nama}
-                            </p>
-                        )}
-                    </div>
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>
-                            Email <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="Masukkan Email"
-                            className="form-control"
-                            required
-                        />
-                        {errors.email && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.email}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-3">
-                        <Label className={labelClass}>
-                            Jenis Kelamin <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="form-select-wrapper">
-                            <select
-                                className="form-select"
-                                value={data.jenis_kelamin}
-                                required
-                                onChange={(e) =>
-                                    setData('jenis_kelamin', e.target.value)
-                                }
-                            >
-                                <option value="">--Pilih--</option>
-                                <option value="L">Laki-laki</option>
-                                <option value="P">Perempuan</option>
-                            </select>
-                        </div>
-                        {errors.jenis_kelamin && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.jenis_kelamin}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <Label className={labelClass}>
-                            Tanggal Lahir <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                required
-                                id="tanggal_lahir"
-                                type="date"
-                                value={data.tanggal_lahir}
-                                onChange={(e) =>
-                                    setData('tanggal_lahir', e.target.value)
-                                }
-                                className="form-control pr-12"
-                            />
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    (
-                                        document.getElementById(
-                                            'tanggal_lahir'
-                                        ) as HTMLInputElement
-                                    )?.showPicker()
-                                }
-                                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-md bg-emerald-700 text-white hover:bg-emerald-800"
-                            >
-                                <Calendar className="h-4 w-4" />
-                            </button>
-                        </div>
-                        {errors.tanggal_lahir && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.tanggal_lahir}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <Label className={labelClass}>
-                            Jabatan <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="form-select-wrapper">
-                            <select
-                                required
-                                className="form-select"
-                                value={data.jabatan}
-                                onChange={(e) =>
-                                    setData('jabatan', e.target.value)
-                                }
-                            >
-                                <option value="">--Pilih Jabatan--</option>
-                                <option value="Store Manager">Store Manager</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Kasir">Kasir</option>
-                                <option value="Staff">Staff</option>
-                            </select>
-                        </div>
-                        {errors.jabatan && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.jabatan}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <Label className={labelClass}>
-                            Departemen <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="form-select-wrapper">
-                            <select
-                                required
-                                className="form-select"
-                                value={data.departemen}
-                                onChange={(e) =>
-                                    setData('departemen', e.target.value)
-                                }
-                            >
-                                <option value="">--Pilih Departemen--</option>
-                                <option value="IT">IT</option>
-                                <option value="HRD">HRD</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Operasional">Operasional</option>
-                                <option value="Marketing">Marketing</option>
-                            </select>
-                        </div>
-                        {errors.departemen && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.departemen}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-6">
-                        <Label className={labelClass}>
-                            Alamat <span className="text-red-500">*</span>
-                        </Label>
-                        <Textarea
-                            required
-                            value={data.alamat}
-                            onChange={(e) => setData('alamat', e.target.value)}
-                            placeholder="Masukkan Alamat Lengkap"
-                            className="form-textarea"
-                        />
-                    </div>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
                 </div>
-            </ReusableFormModal>
 
-            <WarningModal
-                isOpen={isSaveWarningOpen}
-                onClose={() => setIsSaveWarningOpen(false)}
-                onConfirm={executeSubmit}
-                isLoading={processing}
-                title={
-                    mode === 'edit'
-                        ? 'Konfirmasi Perubahan Data'
-                        : 'Konfirmasi Simpan Data'
-                }
-                message="Pastikan seluruh data sudah benar."
-                confirmLabel="Konfirmasi"
-                cancelLabel="Batal"
-            />
+                {/* BODY */}
+                <div className="px-6 py-5 space-y-3 max-h-[70vh] overflow-y-auto">
+                    {data.length === 0 && (
+                        <div className="py-8 text-center">
+                            <Clock className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                            <p className="text-sm text-gray-500">
+                                Belum ada riwayat sanksi untuk karyawan ini.
+                            </p>
+                        </div>
+                    )}
 
-            <WarningModal
-                isOpen={isCancelWarningOpen}
-                onClose={() => setIsCancelWarningOpen(false)}
-                onConfirm={executeCancel}
-                title="Batalkan Perubahan?"
-                message="Data belum disimpan. Yakin ingin keluar?"
-                confirmLabel="Ya, Batalkan"
-                cancelLabel="Kembali"
-            />
-        </>
+                    {data.map((item) => {
+                        const isOpen = openId === item.id;
+
+                        return (
+                            <div
+                                key={item.id}
+                                className="rounded-lg border border-gray-200 bg-white overflow-hidden transition-shadow hover:shadow-sm"
+                            >
+                                {/* RINGKAS */}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setOpenId(isOpen ? null : item.id)
+                                    }
+                                    className="flex w-full items-center justify-between gap-4 p-4 hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-600 shrink-0">
+                                            ⚠️
+                                        </span>
+                                        <div className="text-left">
+                                            <p className="font-semibold text-gray-800">
+                                                Sanksi Diberikan
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                Pada {item.tanggal}, oleh {item.pemberi}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {isOpen ? (
+                                        <ChevronDown className="h-5 w-5 text-gray-400 shrink-0" />
+                                    ) : (
+                                        <ChevronRight className="h-5 w-5 text-gray-400 shrink-0" />
+                                    )}
+                                </button>
+
+                                {/* DETAIL */}
+                                {isOpen && (
+                                    <div className="border-t bg-gray-50 px-6 py-4 space-y-3">
+                                        <DetailRow
+                                            label="Pelanggaran"
+                                            value={item.nama_pelanggaran}
+                                        />
+                                        <DetailRow
+                                            label="Tingkat"
+                                            value={
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    item.tingkat === 'ringan'
+                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                        : item.tingkat === 'sedang'
+                                                        ? 'bg-orange-100 text-orange-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {capitalize(item.tingkat)}
+                                                </span>
+                                            }
+                                        />
+                                        <DetailRow
+                                            label="SP"
+                                            value={item.sp ?? '-'}
+                                        />
+                                        <DetailRow
+                                            label="Catatan"
+                                            value={item.catatan ?? '-'}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
     );
+}
+
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="flex gap-4">
+            <span className="text-sm text-gray-500 w-24 shrink-0">{label}</span>
+            <span className="text-sm text-gray-900 font-medium flex-1">
+                {typeof value === 'string' ? value : value}
+            </span>
+        </div>
+    );
+}
+
+function capitalize(text: string) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
 }

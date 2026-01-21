@@ -96,7 +96,6 @@ export default function ProfileMenu() {
                             }`}
                     />
                 </button>
-
                 {open && (
                     <div className="absolute right-0 mt-3 w-64 origin-top-right overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50/50 px-4 py-3">
