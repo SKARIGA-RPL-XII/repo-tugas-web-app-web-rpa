@@ -69,17 +69,19 @@ export default function UpdateProfileInformationForm({ user, karyawan }: UpdateP
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-gray-800">{user.name}</h3>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {data.departemen || 'departemen'}
-                            </span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                {data.jabatan || 'jabatan'}
-                            </span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                {data.nip || 'No NIP'}
-                            </span>
-                        </div>
+                        {user.role === 'user' && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {data.departemen || 'departemen'}
+                                </span>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                    {data.jabatan || 'jabatan'}
+                                </span>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    {data.nip || 'No NIP'}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -109,44 +111,48 @@ export default function UpdateProfileInformationForm({ user, karyawan }: UpdateP
                         <InputError message={errors.email} />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
-                        <Select
-                            value={data.jenis_kelamin}
-                            onValueChange={(val) => setData('jenis_kelamin', val as 'L' | 'P')}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="L">Laki-Laki</SelectItem>
-                                <SelectItem value="P">Perempuan</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError message={errors.jenis_kelamin} />
-                    </div>
+                    {user.role !== 'admin' && (
+                        <>
+                            <div className="space-y-2">
+                                <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
+                                <Select
+                                    value={data.jenis_kelamin}
+                                    onValueChange={(val) => setData('jenis_kelamin', val as 'L' | 'P')}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="L">Laki-Laki</SelectItem>
+                                        <SelectItem value="P">Perempuan</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.jenis_kelamin} />
+                            </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
-                        <Input
-                            id="tanggal_lahir"
-                            type="date"
-                            value={data.tanggal_lahir || ''}
-                            onChange={(e) => setData('tanggal_lahir', e.target.value)}
-                        />
-                        <InputError message={errors.tanggal_lahir} />
-                    </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
+                                <Input
+                                    id="tanggal_lahir"
+                                    type="date"
+                                    value={data.tanggal_lahir || ''}
+                                    onChange={(e) => setData('tanggal_lahir', e.target.value)}
+                                />
+                                <InputError message={errors.tanggal_lahir} />
+                            </div>
 
-                    <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="alamat">Alamat Lengkap</Label>
-                        <Textarea
-                            id="alamat"
-                            value={data.alamat || ''}
-                            onChange={(e) => setData('alamat', e.target.value)}
-                            className="resize-none h-24 focus:ring-emerald-500"
-                        />
-                        <InputError message={errors.alamat} />
-                    </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="alamat">Alamat Lengkap</Label>
+                                <Textarea
+                                    id="alamat"
+                                    value={data.alamat || ''}
+                                    onChange={(e) => setData('alamat', e.target.value)}
+                                    className="resize-none h-24 focus:ring-emerald-500"
+                                />
+                                <InputError message={errors.alamat} />
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-end gap-4 pt-4">
