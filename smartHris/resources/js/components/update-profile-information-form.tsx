@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import InputError from '@/components/input-error';
 import { Save, User as UserIcon } from 'lucide-react';
-import { Transition } from '@headlessui/react';
+import SuccessModal from '@/components/success-modal'
+import { useState } from 'react';
 
 export interface KaryawanData {
     nip: string | null;
@@ -26,7 +27,9 @@ interface UpdateProfileProps {
 }
 
 export default function UpdateProfileInformationForm({ user, karyawan }: UpdateProfileProps) {
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+    const [openSuccess, setOpenSuccess] = useState(false)
+
+    const { data, setData, patch, errors, processing } = useForm({
         name: user.name,
         email: user.email,
         nip: karyawan.nip || '',
@@ -35,12 +38,17 @@ export default function UpdateProfileInformationForm({ user, karyawan }: UpdateP
         jenis_kelamin: karyawan.jenis_kelamin || 'L',
         tanggal_lahir: karyawan.tanggal_lahir || '',
         alamat: karyawan.alamat || '',
-    });
+    })
 
     const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        patch('/settings/profile');
-    };
+        e.preventDefault()
+
+        patch('/settings/profile', {
+            onSuccess: () => {
+                setOpenSuccess(true)
+            },
+        })
+    }
 
     return (
         <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -155,28 +163,27 @@ export default function UpdateProfileInformationForm({ user, karyawan }: UpdateP
                     )}
                 </div>
 
-                <div className="flex items-center justify-end gap-4 pt-4">
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="transition ease-in-out"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                    >
-                        <p className="text-sm text-emerald-600 font-medium">Tersimpan!</p>
-                    </Transition>
-
+                <div className="flex justify-end">
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="bg-[#0d4436] hover:bg-[#0a352a] text-white min-w-30"
+                        className="bg-[#0d4436] hover:bg-[#0a352a]"
                     >
-                        {processing ? 'Menyimpan...' : <><Save size={16} className="mr-2" /> Simpan</>}
+                        {processing ? 'Menyimpan…' : (
+                            <>
+                                <Save size={16} className="mr-2" /> Simpan
+                            </>
+                        )}
                     </Button>
                 </div>
             </form>
+            <SuccessModal
+                isOpen={openSuccess}
+                onClose={() => setOpenSuccess(false)}
+                title="Berhasil"
+                message="Profil berhasil diperbarui"
+            />
+
         </section>
     );
 }
