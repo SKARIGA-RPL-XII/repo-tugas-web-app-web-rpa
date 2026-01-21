@@ -1,13 +1,16 @@
-import React from 'react';
-import { useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { useForm, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import { Lock } from 'lucide-react';
 import { Transition } from '@headlessui/react';
+import SuccessModal from '@/components/success-modal';
 
 export default function UpdatePasswordForm() {
+    const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+
     const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
@@ -18,7 +21,10 @@ export default function UpdatePasswordForm() {
         e.preventDefault();
         put('/settings/password', { 
             preserveScroll: true,
-            onSuccess: () => reset(),
+            onSuccess: () => {
+                reset();
+                setIsSuccessOpen(true);
+            },
             onError: (err) => {
                 if (err.password) {
                     reset('password', 'password_confirmation');
@@ -28,6 +34,11 @@ export default function UpdatePasswordForm() {
                 }
             },
         });
+    };
+
+    const handleCloseModal = () => {
+        setIsSuccessOpen(false);
+        router.post('/logout'); 
     };
 
     return (
@@ -81,7 +92,7 @@ export default function UpdatePasswordForm() {
 
                 <div className="flex items-center justify-between pt-2">
                     <Transition
-                        show={recentlySuccessful}
+                        show={recentlySuccessful && !isSuccessOpen}
                         enter="transition ease-in-out"
                         enterFrom="opacity-0"
                         enterTo="opacity-100"
@@ -102,6 +113,13 @@ export default function UpdatePasswordForm() {
                     </Button>
                 </div>
             </form>
+
+            <SuccessModal 
+                isOpen={isSuccessOpen}
+                onClose={handleCloseModal}
+                title="Berhasil Ganti Password"
+                message="Password Anda telah diperbarui. Silakan login kembali dengan password baru."
+            />
         </section>
     );
 }
