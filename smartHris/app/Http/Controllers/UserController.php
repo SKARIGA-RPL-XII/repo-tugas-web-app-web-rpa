@@ -17,6 +17,24 @@ class UserController extends Controller
     private string $jamMasukAkhir = '08:00:00';
     private string $jamPulangMulai = '17:00:00';
 
+    public function profile()
+    {
+        $user = auth()->user();
+
+        return Inertia::render('/settings/profile', [
+            'user' => [
+                'id'   => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'karyawan' => $user->karyawan ? [
+                'jenis_kelamin' => $user->karyawan->jenis_kelamin,
+                'tanggal_lahir' => $user->karyawan->tanggal_lahir,
+                'alamat'        => $user->karyawan->alamat,
+            ] : null,
+        ]);
+    }
     public function profileUpdate(Request $request)
     {
         $karyawan = Karyawan::where('user_id', auth()->id())->firstOrFail();
