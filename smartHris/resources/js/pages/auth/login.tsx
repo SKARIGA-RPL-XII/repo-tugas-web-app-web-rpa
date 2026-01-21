@@ -35,23 +35,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
       <Head title="Login" />
 
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[530px_1fr]">
-        {/* LEFT IMAGE */}
         <div className="hidden lg:block relative w-full h-[calc(100vh-3rem)] overflow-hidden rounded-3xl ml-6 mt-6 mb-6 bg-black">
           <img
             src="/images/img_bg.jpg"
             alt="Office"
             className="absolute inset-0 w-full h-full object-cover"
           />
-
-          {/* OVERLAY */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
-
-          {/* TEXT */}
+          <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/60" />
           <div className="absolute inset-0 flex flex-col justify-between p-8 text-white z-10">
             <p className="text-sm opacity-90">
               Human Resource © 2026 All rights reserved.
             </p>
-
             <div>
               <h2
                 className="text-4xl font-thin leading-tight mb-5"
@@ -65,17 +59,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
           </div>
         </div>
 
-        {/* RIGHT FORM */}
         <div className="flex items-center justify-center px-6 lg:px-12 bg-white">
           <div className="w-full max-w-md flex flex-col items-center">
-            {/* LOGO */}
             <img
               src="/images/logos/logo_kantor.png"
               alt="HRIS Logo"
               className="w-44 h-auto mb-6"
             />
-
-            {/* TITLE */}
             <h1
               className="text-2xl font-bold text-center text-gray-800"
               style={{ fontFamily: 'Montserrat, sans-serif' }}
@@ -94,7 +84,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             </p>
 
             <form onSubmit={submit} className="w-full">
-              {/* EMAIL */}
               <div className="mb-4">
                 <Label htmlFor="email">
                   Username <span className="text-red-500">*</span>
@@ -109,7 +98,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <InputError message={errors.email} />
               </div>
 
-              {/* PASSWORD */}
               <div className="mb-4">
                 <Label htmlFor="password">
                   Password <span className="text-red-500">*</span>
@@ -125,7 +113,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <InputError message={errors.password} />
               </div>
 
-              {/* REMEMBER */}
               <div className="flex items-center justify-between mb-6">
                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                   <Checkbox
@@ -147,8 +134,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                   </TextLink>
                 )}
               </div>
-
-              {/* SUBMIT */}
               <Button
                 type="submit"
                 disabled={processing}
