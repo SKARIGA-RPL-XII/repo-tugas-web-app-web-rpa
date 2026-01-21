@@ -302,9 +302,11 @@ class AdminController extends Controller
             'keterangan' => $request->keterangan,
             'jenis_hari' => $request->jenis_hari,
         ]);
+
         if ($create) {
-            return redirect()->route('admin.event')->with('success', 'Event berhasil ditambahkan');
+            return redirect()->route('admin.kalender')->with('success', 'Event berhasil ditambahkan');
         }
+        
         return back();
     }
     public function eventUpdate(Request $request, $id)
