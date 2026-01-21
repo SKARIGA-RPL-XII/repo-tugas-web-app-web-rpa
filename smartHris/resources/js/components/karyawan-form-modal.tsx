@@ -290,16 +290,13 @@ export default function KaryawanFormModal({
                                 required
                                 className="form-select"
                                 value={data.jabatan}
-                                onChange={(e) =>
-                                    setData('jabatan', e.target.value)
-                                }
+                                onChange={(e) => setData('jabatan', e.target.value)}
                             >
-                                <option value="">--Pilih Jabatan--</option>
-                                <option value="Store Manager">Store Manager</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Kasir">Kasir</option>
-                                <option value="Staff">Staff</option>
+                                <option value="">-- Pilih Jabatan --</option>
+                                <option value="Back End">Back End</option>
+                                <option value="Front End">Front End</option>
+                                <option value="UI/UX">UI/UX</option>
+                                <option value="Dokumentasi">Dokumentasi</option>
                             </select>
                         </div>
                         {errors.jabatan && (
@@ -318,16 +315,14 @@ export default function KaryawanFormModal({
                                 required
                                 className="form-select"
                                 value={data.departemen}
-                                onChange={(e) =>
-                                    setData('departemen', e.target.value)
-                                }
+                                onChange={(e) => setData('departemen', e.target.value)}
                             >
-                                <option value="">--Pilih Departemen--</option>
+                                <option value="">-- Pilih Departemen --</option>
                                 <option value="IT">IT</option>
                                 <option value="HRD">HRD</option>
                                 <option value="Finance">Finance</option>
-                                <option value="Operasional">Operasional</option>
                                 <option value="Marketing">Marketing</option>
+                                <option value="Operasional">Operasional</option>
                             </select>
                         </div>
                         {errors.departemen && (
@@ -336,6 +331,7 @@ export default function KaryawanFormModal({
                             </p>
                         )}
                     </div>
+
 
                     <div className="md:col-span-6">
                         <Label className={labelClass}>
