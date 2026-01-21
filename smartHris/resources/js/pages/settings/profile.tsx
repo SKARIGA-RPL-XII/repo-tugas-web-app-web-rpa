@@ -1,150 +1,170 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import { send } from '@/routes/verification';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
+import { CameraIcon, Edit2 } from 'lucide-react'; // Pastikan menginstall lucide-react
 
-import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
-import { edit } from '@/routes/profile';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Profile settings',
-        href: edit().url,
+        href: '#',
     },
 ];
 
-export default function Profile({
-    mustVerifyEmail,
-    status,
-}: {
-    mustVerifyEmail: boolean;
-    status?: string;
-}) {
+export default function Profile() {
     const { auth } = usePage<SharedData>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
 
-            <h1 className="sr-only">Profile Settings</h1>
-
-            <SettingsLayout>
-                <div className="space-y-6">
-                    <HeadingSmall
-                        title="Profile information"
-                        description="Update your name and email address"
-                    />
-
-                    <Form
-                        {...ProfileController.update.form()}
-                        options={{
-                            preserveScroll: true,
-                        }}
-                        className="space-y-6"
-                    >
-                        {({ processing, recentlySuccessful, errors }) => (
-                            <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
-
-                                    <Input
-                                        id="name"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.name}
-                                        name="name"
-                                        required
-                                        autoComplete="name"
-                                        placeholder="Full name"
-                                    />
-
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.name}
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
-
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.email}
-                                        name="email"
-                                        required
-                                        autoComplete="username"
-                                        placeholder="Email address"
-                                    />
-
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.email}
-                                    />
-                                </div>
-
-                                {mustVerifyEmail &&
-                                    auth.user.email_verified_at === null && (
-                                        <div>
-                                            <p className="-mt-4 text-sm text-muted-foreground">
-                                                Your email address is
-                                                unverified.{' '}
-                                                <Link
-                                                    href={send()}
-                                                    as="button"
-                                                    className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                                                >
-                                                    Click here to resend the
-                                                    verification email.
-                                                </Link>
-                                            </p>
-
-                                            {status ===
-                                                'verification-link-sent' && (
-                                                <div className="mt-2 text-sm font-medium text-green-600">
-                                                    A new verification link has
-                                                    been sent to your email
-                                                    address.
-                                                </div>
-                                            )}
+            {/* Container Utama dengan Background Abu-abu Muda sesuai Gambar */}
+            <div className="p-6">
+                <Form
+                    {...ProfileController.update.form()}
+                    options={{ preserveScroll: true }}
+                >
+                    {({ processing, errors }) => (
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            
+                            {/* Header Form: Nama & Tombol Simpan */}
+                            <div className="p-8 flex justify-between items-start">
+                                <div className="flex gap-6 items-center">
+                                    {/* Foto Profil */}
+                                    <div className="relative">
+                                        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-sm">
+                                            <img 
+                                                src={auth.user.avatar || '/profile.png'} 
+                                                alt="Profile" 
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
-                                    )}
-
-                                <div className="flex items-center gap-4">
-                                    <Button
-                                        disabled={processing}
-                                        data-test="update-profile-button"
-                                    >
-                                        Save
-                                    </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
-                                            Saved
-                                        </p>
-                                    </Transition>
+                                        <button type="button" className="absolute bottom-0 right-0 bg-gray-500 p-1.5 rounded-full border-2 border-white text-white">
+                                            <CameraIcon size={12} />
+                                        </button>
+                                    </div>
+                                    
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-800">{auth.user.name}</h2>
+                                    </div>
                                 </div>
-                            </>
-                        )}
-                    </Form>
-                </div>
 
-                <DeleteUser />
-            </SettingsLayout>
+                                <Button 
+                                    type='submit'
+                                    disabled={processing}
+                                    className="bg-[#0d4436] hover:bg-[#0a352a] cursor-pointer text-white px-8 py-2 rounded-lg transition-colors"
+                                >
+                                    Simpan
+                                </Button>
+                            </div>
+
+                            {/* Grid Form Input */}
+                            <div className="px-8 pb-12 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                                
+                                {/* Nama */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="font-bold text-gray-700">Nama</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="name"
+                                            defaultValue={auth.user.name}
+                                            name="name"
+                                            className="bg-gray-50 border-gray-200 pr-10 text-black focus:ring-emerald-800"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                    <InputError message={errors.name} />
+                                </div>
+
+                                {/* Jenis Kelamin */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">Jenis Kelamin</Label>
+                                    <div className="relative">
+                                        <Input
+                                            name='jenis_kelamin'
+                                            defaultValue="Laki-Laki" // Sesuaikan dengan field DB Anda
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                                {/* NIP */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">NIP</Label>
+                                    <div className="relative">
+                                        <Input
+                                            readOnly
+                                            defaultValue="19991210"
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                                {/* Tanggal Lahir */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">Tanggal Lahir</Label>
+                                    <div className="relative">
+                                        <Input
+                                            name='tanggal_lahir'
+                                            defaultValue="20 September 1999"
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                                {/* Jabatan */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">Jabatan</Label>
+                                    <div className="relative">
+                                        <Input
+                                            readOnly
+                                            defaultValue="Supervisor"
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                                {/* Alamat */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">Alamat</Label>
+                                    <div className="relative">
+                                        <Input
+                                            name='alamat'
+                                            defaultValue="Jawa Timur, Malang, Tlogomas"
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                                {/* Departemen */}
+                                <div className="space-y-2">
+                                    <Label className="font-bold text-gray-700">Departemen</Label>
+                                    <div className="relative">
+                                        <Input
+                                            name='departemen_id'
+                                            defaultValue="Supervisor"
+                                            className="bg-gray-50 text-black border-gray-200 pr-10"
+                                        />
+                                        <Edit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    )}
+                </Form>
+            </div>
         </AppLayout>
     );
 }

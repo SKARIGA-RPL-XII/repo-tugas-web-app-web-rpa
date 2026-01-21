@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pelanggaran', 'pelanggaran')->name('user.pelanggaran');
             Route::get('/cuti', 'cuti')->name('user.cuti');
             Route::post('/cuti', 'cutiStore')->name('user.cuti.store');
+            Route::post('/profilUpdate', 'profileUpdate')->name('user.profil.update');
         });
     });
 });
