@@ -345,32 +345,34 @@ class AdminController extends Controller
         // return $pelanggaran;
         return Inertia::render('Admin/pelanggaran/jenis-pelanggaran', ['jPelanggaran' => $pelanggaran]);
     }
-    public function jPelanggaranStore(Request $request)
-    {
-        $request->validate([
-            'nama_pelanggaran' => 'required|string',
-            'tingkat' => 'required|string',
-            'potongan' => 'required|numeric',
-            'keterangan' => 'nullable|string'
-        ]);
+// Update fungsi jPelanggaranStore dan jPelanggaranUpdate di AdminController
 
-        JenisPelanggaran::create($request->all());
+public function jPelanggaranStore(Request $request)
+{
+    $request->validate([
+        'nama_pelanggaran' => 'required|string',
+        'tingkat' => 'required|string',
+        'keterangan' => 'required|string'  // Ubah dari nullable menjadi required
+    ]);
 
-        return back()->with('success', 'Jenis pelanggaran berhasil ditambahkan');
-    }
-    public function jPelanggaranUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'nama_pelanggaran' => 'required|string',
-            'tingkat' => 'required|string',
-            'potongan' => 'required|numeric',
-            'keterangan' => 'nullable|string'
-        ]);
+    JenisPelanggaran::create($request->all());
 
-        JenisPelanggaran::findOrFail($id)->update($request->all());
+    return back()->with('success', 'Jenis pelanggaran berhasil ditambahkan');
+}
 
-        return back()->with('success', 'Data berhasil diupdate');
-    }
+public function jPelanggaranUpdate(Request $request, $id)
+{
+    $request->validate([
+        'nama_pelanggaran' => 'required|string',
+        'tingkat' => 'required|string',
+        'keterangan' => 'required|string'  // Ubah dari nullable menjadi required
+    ]);
+
+    JenisPelanggaran::findOrFail($id)->update($request->all());
+
+    return back()->with('success', 'Data berhasil diupdate');
+}
+
     public function jPelanggaranDestroy($id)
     {
         JenisPelanggaran::findOrFail($id)->delete();
@@ -380,39 +382,41 @@ class AdminController extends Controller
 
     /* ========= PELANGGARAN KARYAWAN ========= */
 
-    public function pKaryawan()
-    {
-        return Inertia::render('Admin/pelanggaran/index', [
-            'pelanggaran' => PelanggaranKaryawan::with([
-                'karyawan.user',
-                'jenisPelanggaran'
-            ])->latest()->get()->map(function ($p) {
-                return [
-                    'id' => $p->id,
-                    'karyawan_id' => $p->karyawan_id,
-                    'jenis_pelanggaran_id' => $p->jenis_pelanggaran_id,
-                    'tanggal' => $p->tanggal,
-                    'catatan' => $p->catatan,
-                    'karyawan' => [
-                        'nama' => $p->karyawan->user->name,
-                    ],
-                    'jenis_pelanggaran' => [
-                        'nama' => $p->jenisPelanggaran->nama_pelanggaran,
-                    ],
-                ];
-            }),
-
-            'karyawan' => Karyawan::with('user')->get()->map(fn($k) => [
+public function pKaryawan()
+{
+    return Inertia::render('Admin/pelanggaran/index', [
+        'pelanggaran' => PelanggaranKaryawan::with(['karyawan.user', 'jenisPelanggaran'])->get()->map(function ($p) {
+            return [
+                'id' => $p->id, 
+                'tanggal' => $p->tanggal,
+                'catatan' => $p->catatan,
+                'sp' => $p->sp,
+                'karyawan' => [
+                    'id' => $p->karyawan_id, 
+                    'nama' => $p->karyawan->user->name,
+                    'jabatan' => $p->karyawan->jabatan,
+                    'departemen' => $p->karyawan->departemen,
+                ],
+                'jenis_pelanggaran' => [
+                    'id' => $p->jenis_pelanggaran_id,
+                    'nama' => $p->jenisPelanggaran->nama_pelanggaran,
+                ],
+            ];
+        }),
+        'jenisPelanggaran' => JenisPelanggaran::all(),
+        // TAMBAHKAN INI:
+        'karyawanList' => Karyawan::with('user')->get()->map(function($k) {
+            return [
                 'id' => $k->id,
                 'nama' => $k->user->name,
-            ]),
+                'jabatan' => $k->jabatan,
+                'departemen' => $k->departemen
+            ];
+        }),
+    ]);
+}
 
-            'jenisPelanggaran' => JenisPelanggaran::get()->map(fn($j) => [
-                'id' => $j->id,
-                'nama' => $j->nama_pelanggaran,
-            ]),
-        ]);
-    }
+
     public function pKaryawanStore(Request $request)
     {
         $request->validate([
@@ -501,6 +505,29 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Data pelanggaran berhasil dihapus');
     }
+
+
+    public function pKaryawanHistory($karyawanId)
+{
+    $history = PelanggaranKaryawan::with(['jenisPelanggaran'])
+        ->where('karyawan_id', $karyawanId)
+        ->orderBy('tanggal', 'desc')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'tanggal' => $item->tanggal,
+                'catatan' => $item->catatan,
+                'sp' => $item->sp,
+                'jenis_pelanggaran' => [
+                    'nama' => $item->jenisPelanggaran->nama_pelanggaran ?? 'Tidak ada data',
+                    'tingkat' => $item->jenisPelanggaran->tingkat ?? 'ringan'
+                ],
+            ];
+        });
+
+    return response()->json($history);
+}
 
     /* ========= SP ========= */
 

@@ -27,19 +27,19 @@ export default function Sidebar() {
     const isAdmin = auth.user?.role === 'admin';
     const sidebarConfig = isAdmin
         ? {
-            bg: 'bg-[#0D4838]',
-            logo: '/asset/fullputih.png',
-            navStyle:
-                'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
-            activeStyle: 'bg-[#0A3D2FB8] text-white',
-        }
+              bg: 'bg-[#0D4838]',
+              logo: '/asset/fullputih.png',
+              navStyle:
+                  'w-full justify-start text-white/80 hover:bg-[#0A3D2FB8] hover:text-white transition-colors',
+              activeStyle: 'bg-[#0A3D2FB8] text-white',
+          }
         : {
-            bg: 'bg-[#FFFFFF]',
-            logo: '/asset/logo_hijau.png',
-            navStyle:
-                'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
-            activeStyle: 'bg-[#0D48381A] text-[#0D4838]',
-        };
+              bg: 'bg-[#FFFFFF]',
+              logo: '/asset/logo_hijau.png',
+              navStyle:
+                  'w-full justify-start text-[#666666]/80 hover:bg-[#0D48381A] hover:text-[#0D4838] transition-colors',
+              activeStyle: 'bg-[#0D48381A] text-[#0D4838]',
+          };
 
     return (
         <>

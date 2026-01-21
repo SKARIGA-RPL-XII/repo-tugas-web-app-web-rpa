@@ -1,15 +1,33 @@
 import { useForm, router } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function JenisPelanggaran({ jPelanggaran }) {
-    const [showModal, setShowModal] = useState(false);
+/* ======================
+   TYPE
+====================== */
+type JenisPelanggaranItem = {
+    id: number;
+    nama_pelanggaran: string;
+    tingkat: string;
+    potongan: number | string;
+    keterangan: string;
+};
 
-    const { data, setData, post, put, reset } = useForm({
-        id: null,
+type Props = {
+    jPelanggaran: JenisPelanggaranItem[];
+};
+
+/* ======================
+   COMPONENT
+====================== */
+export default function JenisPelanggaran({ jPelanggaran }: Props) {
+    const [showModal, setShowModal] = useState<boolean>(false);
+
+    const { data, setData, post, put, reset } = useForm<JenisPelanggaranItem>({
+        id: 0,
         nama_pelanggaran: "",
         tingkat: "",
         potongan: "",
-        keterangan: ""
+        keterangan: "",
     });
 
     /* ======================
@@ -20,7 +38,7 @@ export default function JenisPelanggaran({ jPelanggaran }) {
         setShowModal(true);
     };
 
-    const openEdit = (item) => {
+    const openEdit = (item: JenisPelanggaranItem) => {
         setData(item);
         setShowModal(true);
     };
@@ -34,7 +52,7 @@ export default function JenisPelanggaran({ jPelanggaran }) {
         setShowModal(false);
     };
 
-    const destroy = (id) => {
+    const destroy = (id: number) => {
         if (confirm("Yakin hapus data? Semua relasi akan ikut terhapus!")) {
             router.delete(`/jenis-pelanggaran/${id}`);
         }
@@ -67,29 +85,17 @@ export default function JenisPelanggaran({ jPelanggaran }) {
                     <tbody>
                         {jPelanggaran.length === 0 && (
                             <tr>
-                                <td
-                                    colSpan={4}
-                                    className="px-4 py-6 text-center text-gray-500"
-                                >
+                                <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
                                     Data belum ada
                                 </td>
                             </tr>
                         )}
 
                         {jPelanggaran.map((item) => (
-                            <tr
-                                key={item.id}
-                                className="border-t hover:bg-gray-50"
-                            >
-                                <td className="px-4 py-2">
-                                    {item.nama_pelanggaran}
-                                </td>
-                                <td className="px-4 py-2">
-                                    {item.tingkat}
-                                </td>
-                                <td className="px-4 py-2">
-                                    {item.potongan}
-                                </td>
+                            <tr key={item.id} className="border-t hover:bg-gray-50">
+                                <td className="px-4 py-2">{item.nama_pelanggaran}</td>
+                                <td className="px-4 py-2">{item.tingkat}</td>
+                                <td className="px-4 py-2">{item.potongan}</td>
                                 <td className="px-4 py-2 text-center space-x-2">
                                     <button
                                         onClick={() => openEdit(item)}
@@ -116,9 +122,7 @@ export default function JenisPelanggaran({ jPelanggaran }) {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
                         <h3 className="text-lg font-bold mb-4">
-                            {data.id
-                                ? "Edit Jenis Pelanggaran"
-                                : "Tambah Jenis Pelanggaran"}
+                            {data.id ? "Edit Jenis Pelanggaran" : "Tambah Jenis Pelanggaran"}
                         </h3>
 
                         <div className="space-y-4">
@@ -127,12 +131,7 @@ export default function JenisPelanggaran({ jPelanggaran }) {
                                 placeholder="Nama Pelanggaran"
                                 className="border rounded px-3 py-2 w-full"
                                 value={data.nama_pelanggaran}
-                                onChange={(e) =>
-                                    setData(
-                                        "nama_pelanggaran",
-                                        e.target.value
-                                    )
-                                }
+                                onChange={(e) => setData("nama_pelanggaran", e.target.value)}
                             />
 
                             <select
@@ -146,24 +145,19 @@ export default function JenisPelanggaran({ jPelanggaran }) {
                                 <option value="berat">Berat</option>
                             </select>
 
-
                             <input
                                 type="number"
                                 placeholder="Potongan"
                                 className="border rounded px-3 py-2 w-full"
                                 value={data.potongan}
-                                onChange={(e) =>
-                                    setData("potongan", e.target.value)
-                                }
+                                onChange={(e) => setData("potongan", e.target.value)}
                             />
 
                             <textarea
                                 placeholder="Keterangan"
                                 className="border rounded px-3 py-2 w-full"
                                 value={data.keterangan}
-                                onChange={(e) =>
-                                    setData("keterangan", e.target.value)
-                                }
+                                onChange={(e) => setData("keterangan", e.target.value)}
                             />
                         </div>
 

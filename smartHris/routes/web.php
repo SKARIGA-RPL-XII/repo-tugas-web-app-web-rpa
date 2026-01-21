@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/app/pelanggaran', 'pKaryawanStore')->name('admin.pelanggaran.store');
             Route::put('/app/pelanggaran/{id}', 'pKaryawanUpdate')->name('admin.pelanggaran.update');
             Route::delete('/app/pelanggaran/{id}', 'pKaryawanDestroy')->name('admin.pelanggaran.destroy');
+            Route::get('/app/pelanggaran/history/{karyawanId}', 'pKaryawanHistory')->name('admin.pelanggaran.history');
 
             // SURAT PERINGATAN (SP)
             Route::get('/sp', 'sp')->name('admin.sp');

@@ -1,221 +1,391 @@
-import React, { useState } from "react";
-import { router, Head } from "@inertiajs/react";
+import { Head, router } from '@inertiajs/react'
+import { useState, useMemo } from 'react'
+import { MoreHorizontal, Trash2, Pencil, Plus, Search, Eye } from 'lucide-react'
 
-export default function Pelanggaran({
-    pelanggaran = [],
-    karyawan = [],
-    jenisPelanggaran = [],
-}: any) {
-    const [showModal, setShowModal] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
+// Layout & UI
+import AppLayout from '@/layouts/app-layout'
+import DynamicTable, { ColumnDef } from '@/components/dynamic-table'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu'
 
-    const [form, setForm] = useState({
-        id: null as number | null,
-        karyawan_id: "",
-        jenis_pelanggaran_id: "",
-        tanggal: "",
-        catatan: "",
-    });
+import PelanggaranFormModal from '@/components/pelanggaran-form-modal'
+import JenisPelanggaranFormModal from '@/components/jenis-pelanggaran-modal'
 
-    const resetForm = () => {
-        setForm({
-            id: null,
-            karyawan_id: "",
-            jenis_pelanggaran_id: "",
-            tanggal: "",
-            catatan: "",
-        });
-        setIsEdit(false);
-    };
+// Catatan: JenisPelanggaranFormModal sudah diupdate untuk hanya menampilkan:
+// - Nama Pelanggaran
+// - Tingkat Pelanggaran
+// - Keterangan
+import SuccessModal from '@/components/success-modal'
+import WarningModal from '@/components/warning-modal'
+import HistorySanksiModal, { RiwayatSanksi } from '@/components/history-pelanggaran-modal'
 
-    const handleSubmit = () => {
-        if (!form.karyawan_id || !form.jenis_pelanggaran_id || !form.tanggal) {
-            alert("Mohon lengkapi data wajib");
-            return;
+type Pelanggaran = {
+  id: number
+  tanggal: string
+  catatan: string
+  sp?: string
+  karyawan: {
+    id: number
+    nama: string
+    jabatan: string
+    departemen: string
+  }
+  jenis_pelanggaran: {
+    id: number
+    nama: string
+  }
+}
+
+type JenisPelanggaran = {
+  id: number
+  nama_pelanggaran: string
+  tingkat: string
+  keterangan?: string
+}
+
+type Props = {
+  pelanggaran: Pelanggaran[]
+  jenisPelanggaran: JenisPelanggaran[]
+  karyawanList: any[]
+}
+
+export default function PelanggaranPage({
+  pelanggaran,
+  jenisPelanggaran,
+  karyawanList
+}: Props) {
+  const [activeTab, setActiveTab] = useState<'sanksi' | 'jenis'>('sanksi')
+  const [search, setSearch] = useState('')
+  
+  // State Modals untuk Sanksi
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [selectedKaryawanId, setSelectedKaryawanId] = useState<number | null>(null)
+  const [selectedDeleteId, setSelectedDeleteId] = useState<number | null>(null)
+  
+  // State Modals untuk Jenis Pelanggaran
+  const [isJenisFormOpen, setIsJenisFormOpen] = useState(false)
+  const [isDeleteJenisOpen, setIsDeleteJenisOpen] = useState(false)
+  const [editJenisData, setEditJenisData] = useState<JenisPelanggaran | null>(null)
+  const [selectedDeleteJenisId, setSelectedDeleteJenisId] = useState<number | null>(null)
+  
+  // State Global
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  
+  // State untuk History Modal
+  const [showHistory, setShowHistory] = useState(false)
+  const [historyData, setHistoryData] = useState<RiwayatSanksi[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
+
+  // Handlers untuk Sanksi
+  const openEditSanksi = (item: Pelanggaran) => {
+    setSelectedKaryawanId(item.karyawan.id)
+    setIsFormOpen(true)
+  }
+
+  const openDeleteConfirm = (id: number) => {
+    setSelectedDeleteId(id)
+    setIsDeleteOpen(true)
+  }
+
+  const handleDelete = () => {
+    if (selectedDeleteId) {
+      router.delete(`/app/pelanggaran/${selectedDeleteId}`, {
+        onSuccess: () => {
+          setIsDeleteOpen(false)
+          handleActionSuccess("Data sanksi berhasil dihapus")
+        },
+        onError: (errors) => {
+          console.error('Error deleting:', errors)
+          setIsDeleteOpen(false)
         }
+      })
+    }
+  }
 
-        if (isEdit && form.id) {
-            router.put(`/app/pelanggaran/${form.id}`, form);
-        } else {
-            router.post("/app/pelanggaran", form);
+  // Handlers untuk Jenis Pelanggaran
+  const openTambahJenisPelanggaran = () => {
+    setEditJenisData(null)
+    setIsJenisFormOpen(true)
+  }
+
+  const openEditJenisPelanggaran = (item: JenisPelanggaran) => {
+    setEditJenisData(item)
+    setIsJenisFormOpen(true)
+  }
+
+  const openDeleteJenisConfirm = (id: number) => {
+    setSelectedDeleteJenisId(id)
+    setIsDeleteJenisOpen(true)
+  }
+
+  const handleDeleteJenis = () => {
+    if (selectedDeleteJenisId) {
+      router.delete(`/jenis-pelanggaran/${selectedDeleteJenisId}`, {
+        onSuccess: () => {
+          setIsDeleteJenisOpen(false)
+          handleActionSuccess("Jenis pelanggaran berhasil dihapus")
+        },
+        onError: (errors) => {
+          console.error('Error deleting:', errors)
+          setIsDeleteJenisOpen(false)
         }
+      })
+    }
+  }
 
-        setShowModal(false);
-        resetForm();
-    };
+  // Handler Global
+  const handleActionSuccess = (message: string) => {
+    setSuccessMessage(message)
+    setIsSuccessOpen(true)
+  }
 
-    const handleEdit = (data: any) => {
-        setIsEdit(true);
-        setForm({
-            id: data.id,
-            karyawan_id: data.karyawan_id,
-            jenis_pelanggaran_id: data.jenis_pelanggaran_id,
-            tanggal: data.tanggal,
-            catatan: data.catatan ?? "",
-        });
-        setShowModal(true);
-    };
+  const openHistorySanksi = (item: Pelanggaran) => {
+    setLoadingHistory(true)
+    setShowHistory(true)
+    
+    fetch(`/app/pelanggaran/history/${item.karyawan.id}`)
+      .then(res => res.json())
+      .then(data => {
+        const history: RiwayatSanksi[] = data.map((record: any) => ({
+          id: record.id,
+          nama_pelanggaran: record.jenis_pelanggaran?.nama || 'Tidak ada data',
+          tingkat: record.jenis_pelanggaran?.tingkat || 'ringan',
+          sp: record.sp || null,
+          catatan: record.catatan || null,
+          tanggal: record.tanggal,
+          pemberi: 'Manager'
+        }))
+        
+        setHistoryData(history)
+        setLoadingHistory(false)
+      })
+      .catch(error => {
+        console.error('Error fetching history:', error)
+        setHistoryData([])
+        setLoadingHistory(false)
+      })
+  }
 
-    const handleDelete = (id: number) => {
-        if (confirm("Yakin hapus data ini?")) {
-            router.delete(`/app/pelanggaran/${id}`);
-        }
-    };
+  // Column Definitions
+  const COLUMNS_SANKSI: ColumnDef<Pelanggaran>[] = [
+    { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
+    { header: 'Karyawan', render: i => i.karyawan.nama },
+    { header: 'Jabatan', render: i => i.karyawan.jabatan },
+    { header: 'Departemen', render: i => i.karyawan.departemen },
+    { header: 'Pelanggaran', render: i => i.jenis_pelanggaran.nama },
+    { header: 'Tanggal', render: i => i.tanggal },
+    {
+      header: '',
+      className: 'w-12',
+      render: (item) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
 
-    return (
-        <>
-            <Head title="Pelanggaran Karyawan" />
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => openEditSanksi(item)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
 
-            <div className="p-6 bg-gray-100 min-h-screen">
-                <div className="bg-white p-6 rounded shadow">
-                    <div className="flex justify-between mb-4">
-                        <h1 className="text-xl font-bold">🚫 Pelanggaran Karyawan</h1>
-                        <button
-                            onClick={() => {
-                                resetForm();
-                                setShowModal(true);
-                            }}
-                            className="bg-blue-600 text-white px-4 py-2 rounded"
-                        >
-                            + Tambah
-                        </button>
-                    </div>
+            <DropdownMenuItem onClick={() => openHistorySanksi(item)}>
+              <Eye className="mr-2 h-4 w-4" />
+              History
+            </DropdownMenuItem>
 
-                    <table className="w-full border">
-                        <thead className="bg-gray-200">
-                            <tr>
-                                <th className="border p-2">Karyawan</th>
-                                <th className="border p-2">Pelanggaran</th>
-                                <th className="border p-2">Tanggal</th>
-                                <th className="border p-2">Catatan</th>
-                                <th className="border p-2">Aksi</th>
-                            </tr>
-                        </thead>
+            <DropdownMenuItem
+              className="text-red-600"
+              onClick={() => openDeleteConfirm(item.id)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ]
 
-                        <tbody>
-                            {pelanggaran.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="text-center p-4 text-gray-500 italic"
-                                    >
-                                        Belum ada data pelanggaran karyawan.
-                                    </td>
-                                </tr>
-                            )}
+  const COLUMNS_JENIS: ColumnDef<JenisPelanggaran>[] = [
+    { header: 'No', className: 'w-16 text-center', render: (_, i) => i + 1 },
+    { header: 'Nama Pelanggaran', render: i => i.nama_pelanggaran },
+    { header: 'Tingkat', render: i => i.tingkat },
+    { header: 'Keterangan', render: i => i.keterangan ?? '-' },
+    {
+      header: '',
+      className: 'w-12',
+      render: (item) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => openEditJenisPelanggaran(item)}>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-red-600"
+              onClick={() => openDeleteJenisConfirm(item.id)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ]
 
-                            {pelanggaran.map((p: any) => (
-                                <tr key={p.id} className="hover:bg-gray-50">
-                                    <td className="border p-2">
-                                        {p.karyawan?.nama}
-                                    </td>
-                                    <td className="border p-2">
-                                        {p.jenis_pelanggaran?.nama}
-                                    </td>
-                                    <td className="border p-2">{p.tanggal}</td>
-                                    <td className="border p-2">
-                                        {p.catatan || "-"}
-                                    </td>
-                                    <td className="border p-2 flex gap-2">
-                                        <button
-                                            onClick={() => handleEdit(p)}
-                                            className="bg-yellow-500 text-white px-2 py-1 rounded"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(p.id)}
-                                            className="bg-red-600 text-white px-2 py-1 rounded"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  const filteredSanksi = useMemo(() => {
+    return pelanggaran.filter(item =>
+      item.karyawan.nama.toLowerCase().includes(search.toLowerCase()) ||
+      item.jenis_pelanggaran.nama.toLowerCase().includes(search.toLowerCase())
+    )
+  }, [pelanggaran, search])
 
-            {/* MODAL */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 w-96 rounded shadow">
-                        <h2 className="font-bold mb-4">
-                            {isEdit ? "✏️ Edit Pelanggaran" : "➕ Tambah Pelanggaran"}
-                        </h2>
+  const filteredJenis = useMemo(() => {
+    return jenisPelanggaran.filter(item =>
+      item.nama_pelanggaran.toLowerCase().includes(search.toLowerCase()) ||
+      item.tingkat.toLowerCase().includes(search.toLowerCase())
+    )
+  }, [jenisPelanggaran, search])
 
-                        <select
-                            className="w-full border p-2 mb-2"
-                            value={form.karyawan_id}
-                            onChange={(e) =>
-                                setForm({ ...form, karyawan_id: e.target.value })
-                            }
-                        >
-                            <option value="">-- Pilih Karyawan --</option>
-                            {karyawan.map((k: any) => (
-                                <option key={k.id} value={k.id}>
-                                    {k.nama}
-                                </option>
-                            ))}
-                        </select>
+  const headerSlotSanksi = useMemo(
+    () => (
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-6">
+          <button
+            onClick={() => setActiveTab('sanksi')}
+            className={`border-b-2 pb-2 text-sm font-semibold transition-colors ${
+              activeTab === 'sanksi'
+                ? 'border-[#114F38] text-[#114F38]'
+                : 'border-transparent text-gray-400'
+            }`}
+          >
+            Sanksi Karyawan
+          </button>
+          <button
+            onClick={() => setActiveTab('jenis')}
+            className={`border-b-2 pb-2 text-sm font-semibold transition-colors ${
+              activeTab === 'jenis'
+                ? 'border-[#114F38] text-[#114F38]'
+                : 'border-transparent text-gray-400'
+            }`}
+          >
+            Jenis Pelanggaran
+          </button>
+        </div>
 
-                        <select
-                            className="w-full border p-2 mb-2"
-                            value={form.jenis_pelanggaran_id}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    jenis_pelanggaran_id: e.target.value,
-                                })
-                            }
-                        >
-                            <option value="">-- Jenis Pelanggaran --</option>
-                            {jenisPelanggaran.map((j: any) => (
-                                <option key={j.id} value={j.id}>
-                                    {j.nama}
-                                </option>
-                            ))}
-                        </select>
+        <div className="flex gap-3">
+          <div className="relative w-72">
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search..."
+              className="pl-10"
+            />
+          </div>
+          {activeTab === 'jenis' && (
+            <Button
+              onClick={openTambahJenisPelanggaran}
+              className="bg-[#114F38] hover:bg-[#0d3f2d]"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Jenis Pelanggaran
+            </Button>
+          )}
+        </div>
+      </div>
+    ),
+    [search, activeTab],
+  )
 
-                        <input
-                            type="date"
-                            className="w-full border p-2 mb-2"
-                            value={form.tanggal}
-                            onChange={(e) =>
-                                setForm({ ...form, tanggal: e.target.value })
-                            }
-                        />
+  return (
+    <AppLayout>
+      <Head title="Pelanggaran Karyawan" />
 
-                        <textarea
-                            className="w-full border p-2 mb-4"
-                            placeholder="Catatan (opsional)"
-                            value={form.catatan}
-                            onChange={(e) =>
-                                setForm({ ...form, catatan: e.target.value })
-                            }
-                        />
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Pelanggaran Karyawan</h1>
+      </div>
 
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => {
-                                    setShowModal(false);
-                                    resetForm();
-                                }}
-                                className="px-3 py-1 bg-gray-300 rounded"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={handleSubmit}
-                                className="bg-blue-600 text-white px-3 py-1 rounded"
-                            >
-                                Simpan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+      {activeTab === 'sanksi' ? (
+        <DynamicTable<Pelanggaran>
+          title=""
+          data={filteredSanksi}
+          columns={COLUMNS_SANKSI}
+          headerSlot={headerSlotSanksi}
+        />
+      ) : (
+        <DynamicTable<JenisPelanggaran>
+          title=""
+          data={filteredJenis}
+          columns={COLUMNS_JENIS}
+          headerSlot={headerSlotSanksi}
+        />
+      )}
+
+      {/* SANKSI MODALS */}
+      <PelanggaranFormModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        karyawanList={karyawanList}
+        jenisPelanggaranList={jenisPelanggaran.map(j => ({ id: j.id, nama_pelanggaran: j.nama_pelanggaran }))}
+        defaultKaryawanId={selectedKaryawanId}
+        onSuccess={handleActionSuccess}
+      />
+
+      <WarningModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDelete}
+        title="Hapus Sanksi"
+        message="Apakah Anda yakin ingin menghapus data sanksi ini? Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Ya, Hapus"
+      />
+
+      {/* JENIS PELANGGARAN MODALS */}
+      <JenisPelanggaranFormModal
+        isOpen={isJenisFormOpen}
+        onClose={() => setIsJenisFormOpen(false)}
+        onSuccess={handleActionSuccess}
+        editData={editJenisData}
+      />
+
+      <WarningModal
+        isOpen={isDeleteJenisOpen}
+        onClose={() => setIsDeleteJenisOpen(false)}
+        onConfirm={handleDeleteJenis}
+        title="Hapus Jenis Pelanggaran"
+        message="Apakah Anda yakin ingin menghapus jenis pelanggaran ini? Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Ya, Hapus"
+      />
+
+      {/* GLOBAL MODALS */}
+      <SuccessModal
+        isOpen={isSuccessOpen}
+        onClose={() => setIsSuccessOpen(false)}
+        message={successMessage}
+      />
+
+      <HistorySanksiModal
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        data={historyData}
+        loading={loadingHistory}
+      />
+    </AppLayout>
+  )
 }
