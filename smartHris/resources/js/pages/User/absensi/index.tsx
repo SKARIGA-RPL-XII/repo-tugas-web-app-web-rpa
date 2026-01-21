@@ -270,7 +270,7 @@ export default function Index({
                         onClick={() =>
                             canAbsenMasuk && setModalType('masuk')
                         }
-                        className={`h-16 flex-1 rounded-full text-xl font-semibold transition-all ${
+                        className={`h-16 flex-1 cursor-pointer rounded-full text-xl font-semibold transition-all ${
                             canAbsenMasuk
                                 ? 'bg-[#0D4838] text-white hover:bg-[#09362a]'
                                 : 'cursor-not-allowed bg-gray-100 text-gray-400'
