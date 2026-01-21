@@ -61,7 +61,6 @@ class AdminController extends Controller
             'jenisPelanggaranList' => JenisPelanggaran::select('id', 'nama_pelanggaran')->get(),
         ]);
     }
-
     public function storeKaryawan(Request $request)
     {
         $request->validate([
@@ -139,7 +138,6 @@ class AdminController extends Controller
 
         return back()->with('success', 'Karyawan diperbarui');
     }
-
     public function destroyKaryawan($id)
     {
         $karyawan = Karyawan::findOrFail($id);
@@ -151,7 +149,6 @@ class AdminController extends Controller
 
         return redirect()->route('admin.karyawan')->with('success', 'Data karyawan berhasil dihapus');
     }
-
     public function resetPassword($id)
     {
         $karyawan = Karyawan::findOrFail($id);
