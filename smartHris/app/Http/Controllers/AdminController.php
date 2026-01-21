@@ -343,32 +343,34 @@ class AdminController extends Controller
         // return $pelanggaran;
         return Inertia::render('Admin/pelanggaran/jenis-pelanggaran', ['jPelanggaran' => $pelanggaran]);
     }
-    public function jPelanggaranStore(Request $request)
-    {
-        $request->validate([
-            'nama_pelanggaran' => 'required|string',
-            'tingkat' => 'required|string',
-            'potongan' => 'required|numeric',
-            'keterangan' => 'nullable|string'
-        ]);
+// Update fungsi jPelanggaranStore dan jPelanggaranUpdate di AdminController
 
-        JenisPelanggaran::create($request->all());
+public function jPelanggaranStore(Request $request)
+{
+    $request->validate([
+        'nama_pelanggaran' => 'required|string',
+        'tingkat' => 'required|string',
+        'keterangan' => 'required|string'  // Ubah dari nullable menjadi required
+    ]);
 
-        return back()->with('success', 'Jenis pelanggaran berhasil ditambahkan');
-    }
-    public function jPelanggaranUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'nama_pelanggaran' => 'required|string',
-            'tingkat' => 'required|string',
-            'potongan' => 'required|numeric',
-            'keterangan' => 'nullable|string'
-        ]);
+    JenisPelanggaran::create($request->all());
 
-        JenisPelanggaran::findOrFail($id)->update($request->all());
+    return back()->with('success', 'Jenis pelanggaran berhasil ditambahkan');
+}
 
-        return back()->with('success', 'Data berhasil diupdate');
-    }
+public function jPelanggaranUpdate(Request $request, $id)
+{
+    $request->validate([
+        'nama_pelanggaran' => 'required|string',
+        'tingkat' => 'required|string',
+        'keterangan' => 'required|string'  // Ubah dari nullable menjadi required
+    ]);
+
+    JenisPelanggaran::findOrFail($id)->update($request->all());
+
+    return back()->with('success', 'Data berhasil diupdate');
+}
+
     public function jPelanggaranDestroy($id)
     {
         JenisPelanggaran::findOrFail($id)->delete();
