@@ -256,6 +256,7 @@ const headerSlotSanksi = useMemo(
                     </div>
                     {activeTab === 'jenis' && (
                         <Button
+                            onClick={openTambahJenisPelanggaran}
                             className="bg-[#114F38] hover:bg-[#0d3f2d]"
                         >
                             <Plus className="mr-2 h-4 w-4" />
