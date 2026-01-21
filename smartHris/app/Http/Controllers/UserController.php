@@ -205,93 +205,85 @@ class UserController extends Controller
             ]);
         }
     }
- public function riwayat(Request $request)
-{
-    $karyawan = auth()->user()->karyawan;
+    public function riwayat(Request $request)
+    {
+        $karyawan = auth()->user()->karyawan;
 
-    // 1. Ambil data dasar
-    $query = Absensi::where('karyawan_id', $karyawan->id)
-        ->orderBy('tanggal', 'desc');
+        $query = Absensi::where('karyawan_id', $karyawan->id)
+            ->orderBy('tanggal', 'desc');
 
-    // 2. Logika Filter (Mengikuti pola fungsi pelanggaran)
-    if ($request->filled('bulan')) {
-        // Memecah string "2026-01" menjadi [2026, 01]
-        [$year, $month] = explode('-', $request->bulan);
-        $query->whereYear('tanggal', $year)->whereMonth('tanggal', $month);
+        if ($request->filled('bulan')) {
+            [$year, $month] = explode('-', $request->bulan);
+            $query->whereYear('tanggal', $year)
+                ->whereMonth('tanggal', $month);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('keterangan')) {
+            $query->where('keterangan', 'like', "%{$request->keterangan}%");
+        }
+
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
+
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(status) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(keterangan) LIKE ?', ["%{$search}%"])
+                    ->orWhere('tanggal', 'like', "%{$search}%");
+            });
+        }
+
+        $absensi = $query->paginate(10)->withQueryString();
+
+        return Inertia::render('User/absensi/riwayat', [
+            'absensi' => $absensi->through(fn($item) => [
+                'id' => $item->id,
+                'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                'jam_masuk' => $item->jam_masuk ? Carbon::parse($item->jam_masuk)->format('H:i') : '-',
+                'jam_pulang' => $item->jam_pulang ? Carbon::parse($item->jam_pulang)->format('H:i') : '-',
+                'status' => strtoupper($item->status),
+                'keterangan' => $item->keterangan ?? 'Tanpa Keterangan',
+            ]),
+            'filters' => $request->only(['bulan', 'status', 'search', 'keterangan']),
+        ]);
     }
+    public function pelanggaran(Request $request)
+    {
+        $karyawan = auth()->user()->karyawan;
 
-    if ($request->filled('status')) {
-    // Paksa menjadi huruf kecil sesuai definisi ENUM di migration
-    $query->where('status', strtolower($request->status));
-}
+        // Ambil data dasar
+        $query = PelanggaranKaryawan::with('jenisPelanggaran')
+            ->where('karyawan_id', $karyawan->id)
+            ->orderBy('tanggal', 'desc');
 
-    if ($request->filled('keterangan')) {
-        $query->where('keterangan', 'like', "%{$request->keterangan}%");
+        // Filter sederhana agar data tidak hilang saat halaman di-load
+        if ($request->filled('bulan')) {
+            [$year, $month] = explode('-', $request->bulan);
+            $query->whereYear('tanggal', $year)->whereMonth('tanggal', $month);
+        }
+
+        $pelanggaran = $query->paginate(5)->withQueryString();
+        // dd($pelanggaran);
+        return Inertia::render('User/pelanggaran/index', [
+            'summary' => [
+                'total' => $query->count(),
+                'ringan' => 0,
+                'berat' => 0,
+                'label_bulan' => 'Januari'
+            ],
+            'pelanggaran' => $pelanggaran->through(fn($item) => [
+                'id' => $item->id,
+                'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
+                'status' => $item->catatan ?? 'Tidak ada catatan',
+                'tingkat_pelanggaran' => $item->jenisPelanggaran->tingkat ?? 'ringan',
+                'sanksi' => '-',
+            ]),
+            'filters' => $request->only(['bulan', 'tingkat_pelanggaran', 'search']),
+        ]);
     }
-
-    if ($request->filled('search')) {
-        $searchTerm = $request->search;
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('status', 'like', "%{$searchTerm}%")
-              ->orWhere('keterangan', 'like', "%{$searchTerm}%")
-              ->orWhere('tanggal', 'like', "%{$searchTerm}%");
-        });
-    }
-
-    // 3. Eksekusi Pagination
-    $absensi = $query->paginate(10)->withQueryString();
-
-    // 4. Return ke View dengan mapping data
-    return Inertia::render('User/absensi/riwayat', [
-        'absensi' => $absensi->through(fn($item) => [
-            'id' => $item->id,
-            'tanggal' => $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-',
-            'jam_masuk' => $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-',
-            'jam_pulang' => $item->jam_pulang ? \Carbon\Carbon::parse($item->jam_pulang)->format('H:i') : '-',
-            'status' => strtoupper($item->status),
-            'keterangan' => $item->keterangan ?? 'Tanpa Keterangan',
-        ]),
-        'filters' => $request->only(['bulan', 'status', 'search', 'keterangan']),
-    ]);
-}
- public function pelanggaran(Request $request)
-{
-    $karyawan = auth()->user()->karyawan;
-
-    // Ambil data dasar
-    $query = PelanggaranKaryawan::with('jenisPelanggaran')
-        ->where('karyawan_id', $karyawan->id)
-        ->orderBy('tanggal', 'desc');
-
-    // Filter sederhana agar data tidak hilang saat halaman di-load
-    if ($request->filled('bulan')) {
-        [$year, $month] = explode('-', $request->bulan);
-        $query->whereYear('tanggal', $year)->whereMonth('tanggal', $month);
-    }
-
-    $pelanggaran = $query->paginate(5)->withQueryString();
-
-    return Inertia::render('User/pelanggaran/index', [
-        'summary' => [
-            'total' => $query->count(),
-            'ringan' => 0, // Sementara set 0 dulu agar tidak error
-            'berat' => 0,
-            'label_bulan' => 'Januari'
-        ],
-        'pelanggaran' => $pelanggaran->through(fn($item) => [
-            'id' => $item->id,
-            'tanggal' => \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y'),
-            
-            // PENTING: Sesuai gambar DB anda, kolomnya adalah 'catatan'
-            // Kita petakan ke property 'status' agar sesuai dengan Interface di React Anda
-            'status' => $item->catatan ?? 'Tidak ada catatan', 
-            
-            'tingkat_pelanggaran' => $item->jenisPelanggaran->tingkat ?? 'ringan',
-            'sanksi' => '-', 
-        ]),
-        'filters' => $request->only(['bulan', 'tingkat_pelanggaran', 'search']),
-    ]);
-}
     public function cuti(Request $request)
     {
         $query = Cuti::query()

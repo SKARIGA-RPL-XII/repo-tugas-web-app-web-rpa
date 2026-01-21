@@ -67,7 +67,6 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
     };
 
     const handleFilter = () => {
-        // Membersihkan params dari nilai kosong agar URL bersih
         const filteredParams = Object.fromEntries(
             Object.entries(params).filter(([_, value]) => value !== "")
         );
@@ -82,7 +81,7 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
     const removeFilter = (key: keyof typeof params) => {
         const newParams = { ...params, [key]: '' };
         setParams(newParams);
-        
+
         const filteredParams = Object.fromEntries(
             Object.entries(newParams).filter(([_, value]) => value !== "")
         );
@@ -124,7 +123,7 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
                             <p className="text-xs text-gray-400 mt-1 italic">Pada Bulan Ini</p>
                         </div>
                         <span className="bg-[#0D4838] text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase">
-                             {summary.label_bulan || 'Bulan Ini'}
+                            {summary.label_bulan || 'Bulan Ini'}
                         </span>
                     </div>
 
@@ -140,7 +139,7 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
                             <p className="text-xs text-gray-400 mt-1 italic">Pada Bulan Ini</p>
                         </div>
                         <span className="bg-[#0D4838] text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase">
-                             {summary.label_bulan || 'Bulan Ini'}
+                            {summary.label_bulan || 'Bulan Ini'}
                         </span>
                     </div>
                 </div>
@@ -170,6 +169,7 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
                             >
                                 <option value="">Tingkat Pelanggaran</option>
                                 <option value="ringan">Ringan</option>
+                                <option value="sedang">Sedang</option>
                                 <option value="berat">Berat</option>
                             </select>
                             <ChevronDown className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -245,9 +245,8 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
                                         <td className="px-6 py-5 font-medium">{item.tanggal}</td>
                                         <td className="px-6 py-5">{item.status}</td>
                                         <td className="px-6 py-5">
-                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                                                item.tingkat_pelanggaran === 'berat' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${item.tingkat_pelanggaran === 'berat' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'
+                                                }`}>
                                                 {item.tingkat_pelanggaran}
                                             </span>
                                         </td>
@@ -273,8 +272,8 @@ export default function Pelanggaran({ summary, pelanggaran, filters }: Pelanggar
                             disabled={!link.url || link.active}
                             onClick={() => link.url && router.get(link.url, params, { preserveState: true })}
                             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all
-                                ${link.active 
-                                    ? 'bg-[#0D4838] text-white shadow-md' 
+                                ${link.active
+                                    ? 'bg-[#0D4838] text-white shadow-md'
                                     : 'bg-white text-gray-500 border border-gray-200 hover:border-[#0D4838] hover:text-[#0D4838]'
                                 }
                                 ${!link.url ? 'opacity-30 cursor-not-allowed' : ''}

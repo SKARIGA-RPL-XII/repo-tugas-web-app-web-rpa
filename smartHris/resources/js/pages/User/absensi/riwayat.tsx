@@ -47,9 +47,8 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
         keterangan: filters.keterangan || '',
     });
 
-    const baseUrl = '/riwayat-absensi';
+    const baseUrl = '/absensi/riwayat';
 
-    // Daftar bulan lengkap untuk dropdown
     const daftarBulan = [
         { val: '01', label: 'Januari' },
         { val: '02', label: 'Februari' },
@@ -64,7 +63,7 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
         { val: '11', label: 'November' },
         { val: '12', label: 'Desember' },
     ];
-
+    const currentYear = new Date().getFullYear();
     const handleFilter = () => {
         // Membersihkan parameter kosong sebelum dikirim
         const filteredParams = Object.fromEntries(
@@ -120,14 +119,12 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                     }
                                     className="appearance-none rounded-lg border-none bg-[#0D4838] py-2 pr-10 pl-4 text-sm font-medium text-white focus:ring-2 focus:ring-[#0D4838]/50"
                                 >
-                                    <option value="">Bulan (2026)</option>
+                                    <option value="">Bulan</option>
                                     {daftarBulan.map((b) => (
-                                        <option
-                                            key={b.val}
-                                            value={`2026-${b.val}`}
-                                        >
+                                        <option value={`${currentYear}-${b.val}`}>
                                             {b.label}
                                         </option>
+
                                     ))}
                                 </select>
                                 <ChevronDown className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-white" />
@@ -139,8 +136,7 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                     value={params.status}
                                     onChange={(e) =>
                                         setParams({
-                                            ...params,
-                                            status: e.target.value,
+                                            ...params, status: e.target.value,
                                         })
                                     }
                                     className="appearance-none rounded-lg border border-gray-200 bg-white py-2 pr-10 pl-4 text-sm text-gray-600 focus:ring-2 focus:ring-[#0D4838]/20"
@@ -287,14 +283,13 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span
-                                                    className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase ${
-                                                        item.status === 'HADIR'
-                                                            ? 'bg-green-100 text-green-700'
-                                                            : item.status ===
-                                                                'ALPHA'
-                                                              ? 'bg-red-100 text-red-700'
-                                                              : 'bg-orange-100 text-orange-700'
-                                                    }`}
+                                                    className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase ${item.status === 'HADIR'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : item.status ===
+                                                            'ALPHA'
+                                                            ? 'bg-red-100 text-red-700'
+                                                            : 'bg-orange-100 text-orange-700'
+                                                        }`}
                                                 >
                                                     {item.status}
                                                 </span>
@@ -329,11 +324,10 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                                     link.url && router.get(link.url, params, { preserveState: true })
 
                                 }
-                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                                    link.active
-                                        ? 'bg-[#0D4838] text-white shadow-md'
-                                        : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50'
-                                } `}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${link.active
+                                    ? 'bg-[#0D4838] text-white shadow-md'
+                                    : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50'
+                                    } `}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}
