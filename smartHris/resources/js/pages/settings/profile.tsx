@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/components/input-error';
-import { Edit2, Save, Lock, User as UserIcon } from 'lucide-react';
+import { Save, Lock, User as UserIcon } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 
 interface KaryawanData {
@@ -93,16 +93,13 @@ function UpdateProfileInformationForm({ user, karyawan }: UpdateProfileProps) {
 
             <form onSubmit={submit} className="p-6 space-y-6">
                 <div className="flex items-center gap-6 mb-4">
-                    <div className="relative group cursor-pointer">
+                    <div className="relative group">
                         <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-md">
                             <img 
                                 src={user.avatar || '/profile.png'} 
                                 alt={user.name} 
                                 className="w-full h-full object-cover"
                             />
-                        </div>
-                        <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Edit2 className="text-white w-5 h-5" />
                         </div>
                     </div>
                     <div>
@@ -121,15 +118,6 @@ function UpdateProfileInformationForm({ user, karyawan }: UpdateProfileProps) {
                 <Separator />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label>NIP</Label>
-                        <Input value={data.nip} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed border-transparent" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Departemen</Label>
-                        <Input value={data.departemen} disabled className="bg-gray-100 text-gray-500 cursor-not-allowed border-transparent" />
-                    </div>
-
                     <div className="space-y-2">
                         <Label htmlFor="name">Nama Lengkap</Label>
                         <Input 
