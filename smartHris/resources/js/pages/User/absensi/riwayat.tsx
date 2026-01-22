@@ -151,26 +151,7 @@ export default function RiwayatAbsensi({ absensi, filters }: AbsensiProps) {
                             </div>
 
                             {/* Dropdown Keterangan */}
-                            <div className="relative">
-                                <select
-                                    value={params.keterangan}
-                                    onChange={(e) =>
-                                        setParams({
-                                            ...params,
-                                            keterangan: e.target.value,
-                                        })
-                                    }
-                                    className="appearance-none rounded-lg border border-gray-200 bg-white py-2 pr-10 pl-4 text-sm text-gray-600 focus:ring-2 focus:ring-[#0D4838]/20"
-                                >
-                                    <option value="">Keterangan</option>
-                                    <option value="Tanpa Keterangan">
-                                        Tanpa Keterangan
-                                    </option>
-                                    <option value="Terlambat">Terlambat</option>
-                                    <option value="Sakit">Sakit</option>
-                                </select>
-                                <ChevronDown className="pointer-events-none absolute top-2.5 right-3 h-4 w-4 text-gray-400" />
-                            </div>
+                           
 
                             <button
                                 onClick={handleFilter}
