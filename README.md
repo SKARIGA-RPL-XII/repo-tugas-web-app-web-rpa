@@ -59,6 +59,69 @@ cuti, pelanggaran, dan surat peringatan secara terintegrasi.
 
 ---
 
+## 📂 Struktur Folder Project
+
+```
+smartHris/
+│
+├── 📂 app
+│   ├── 📂 Http
+│   │   ├── 📂 Controllers      # Controller (Admin & Karyawan)
+│   │   ├── 📂 Middleware       # Middleware auth & role
+│   │   └── 📂 Requests         # Validasi form request
+│   │
+│   ├── 📂 Models               # Model Eloquent
+│   └── 📂 Providers
+│
+├── 📂 database
+│   ├── 📂 migrations           # Struktur tabel database
+│   ├── 📂 seeders              # Seeder user, role, data awal
+│   └── 📂 factories
+│
+├── 📂 public
+│   ├── 📂 assets
+│   │   ├── 📂 images           # Gambar & icon
+│   │   ├── 📂 logo             # Logo HRIS
+│   │   └── 📂 screenshots      # Screenshot aplikasi
+│   └── index.php
+│
+├── 📂 resources
+│   ├── 📂 js
+│   │   ├── 📂 Pages
+│   │   │   ├── 📂 Admin        # Halaman Admin
+│   │   │   └── 📂 Karyawan     # Halaman Karyawan
+│   │   │
+│   │   ├── 📂 Components       # Komponen UI reusable
+│   │   ├── 📂 Layouts          # Layout aplikasi
+│   │   ├── 📂 Hooks            # Custom hooks
+│   │   ├── 📂 lib              # Helper & utils
+│   │   └── app.tsx             # Entry Inertia
+│   │
+│   ├── 📂 css
+│   │   └── app.css             # Tailwind CSS
+│   │
+│   └── 📂 views
+│       └── app.blade.php       # Root Inertia
+│
+├── 📂 routes
+│   ├── web.php                 # Routing utama
+│   └── auth.php                # Routing autentikasi
+│
+├── 📂 storage
+│   ├── 📂 app                  # File upload
+│   └── 📂 logs                 # Log sistem
+│
+├── 📂 tests                    # Testing
+│
+├── .env
+├── .env.example
+├── artisan
+├── composer.json
+├── package.json
+├── tailwind.config.js
+└── vite.config.ts
+```
+
 ## ⚙️ Cara Instalasi
 
 ```bash
@@ -71,3 +134,7 @@ php artisan key:generate
 php artisan migrate --seed
 php artisan serve
 npm run dev
+```
+
+
+
