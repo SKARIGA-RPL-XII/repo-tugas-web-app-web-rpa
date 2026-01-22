@@ -245,7 +245,6 @@ export default function Index({
                                     : {absensiHariIni?.keterangan || '-'}
                                 </span>
                             </div>
-
                             <div className="h-px w-full bg-gray-100 sm:hidden"></div>
                         </div>
 
