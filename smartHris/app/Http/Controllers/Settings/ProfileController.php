@@ -18,8 +18,10 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user()->load('karyawan');
+
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -29,20 +31,36 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        $user->karyawan()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'nip'           => $validated['nip'] ?? null,
+                'jabatan'       => $validated['jabatan'] ?? null,
+                'departemen'    => $validated['departemen'] ?? null,
+                'jenis_kelamin' => $validated['jenis_kelamin'] ?? null,
+                'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
+                'alamat'        => $validated['alamat'] ?? null,
+            ]
+        );
 
         return to_route('profile.edit');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validate([

@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('jenis_pelanggaran', function (Blueprint $table) {
             $table->id();
             $table->string('nama_pelanggaran');
-            $table->string('tingkat');
-            $table->decimal('potongan', 15, 2);
+            $table->enum('tingkat', ['ringan', 'sedang', 'berat']);
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });
